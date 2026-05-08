@@ -4,7 +4,7 @@
   "description": "3D Driving Simulator using Mapbox",
   "scripts": {
     "start": "npx serve .",
-    "build": "sed -i \"s/%%MAPBOX_TOKEN%%/$MAPBOX_TOKEN/g\" app.js"
+    "build": "node build.js"
   },
   "devDependencies": {
     "serve": "^14.2.1"

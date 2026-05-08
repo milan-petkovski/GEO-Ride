@@ -225,7 +225,14 @@ function update(time) {
             if (state.velocity > 0) {
                 for (const p of checkPoints) {
                     const bbox = [[p.x - 14, p.y - 14], [p.x + 14, p.y + 14]];
-                    const collisions = map.queryRenderedFeatures(bbox, { layers: ['3d-buildings', 'building'] });
+                    let collisions = [];
+                    try {
+                        if (map.getLayer('3d-buildings') || map.getLayer('building')) {
+                            collisions = map.queryRenderedFeatures(bbox, { layers: ['3d-buildings', 'building'].filter(l => map.getLayer(l)) });
+                        }
+                    } catch (e) {
+                        console.warn("Collision query failed:", e);
+                    }
                     if (collisions.length > 0) {
                         collisionFound = true;
                         break;
@@ -471,7 +478,14 @@ window.addEventListener('mousemove', (e) => {
     // Robust Building Detection (10px buffer)
     const point = map.project(map.unproject([e.clientX, e.clientY])); // Sync with map point
     const bbox = [[e.clientX - 10, e.clientY - 10], [e.clientX + 10, e.clientY + 10]];
-    const features = map.queryRenderedFeatures(bbox, { layers: ['3d-buildings', 'building'] });
+    let features = [];
+    try {
+        if (map.getLayer('3d-buildings') || map.getLayer('building')) {
+            features = map.queryRenderedFeatures(bbox, { layers: ['3d-buildings', 'building'].filter(l => map.getLayer(l)) });
+        }
+    } catch (e) {
+        // Silently fail for mouse hover features
+    }
     
     if (cursorState.type !== 'ui' && cursorState.type !== 'typing') {
         cursorState.type = features.length > 0 ? 'building' : 'default';
