@@ -1,0 +1,12 @@
+{
+  "name": "geo-ride",
+  "version": "1.0.0",
+  "description": "3D Driving Simulator using Mapbox",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "sed -i \"s/%%MAPBOX_TOKEN%%/$MAPBOX_TOKEN/g\" app.js"
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}
