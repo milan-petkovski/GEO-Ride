@@ -28,7 +28,17 @@ let state = {
 };
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
-const map = new mapboxgl.Map({ container: 'map', style: 'mapbox://styles/mapbox/streets-v12', center: INITIAL_CENTER, zoom: 18, pitch: 60, bearing: 0, antialias: true, optimizeForTerrain: true });
+const map = new mapboxgl.Map({ 
+    container: 'map', 
+    style: 'mapbox://styles/mapbox/streets-v12', 
+    center: INITIAL_CENTER, 
+    zoom: 18, 
+    pitch: 60, 
+    bearing: 0, 
+    antialias: true, 
+    optimizeForTerrain: true,
+    interactive: false // Disable pan, zoom, rotate via mouse/touch
+});
 
 window.addEventListener('keydown', (e) => { 
     if (state.isInputFocused) return; 
@@ -288,44 +298,34 @@ function update(time) {
         }
     }
     
-    if (Math.abs(state.velocity) > 0.0001 || state.isCharging || state.chargeLevel > 0 || state.crashShake > 0.1) {
-        // Smooth target pitch calculation
-        const chargingLean = state.chargeLevel * 15;
-        const velocityPitch = (Math.abs(state.velocity) * 25 / (state.activeVehicle === 'god' ? 5 : 1));
-        const targetPitch = 60 + chargingLean + velocityPitch;
-        
-        // Lerp the pitch for ultimate smoothness (reduced speed for lingering effect)
-        state.currentPitch += (targetPitch - state.currentPitch) * 0.03 * dtFinal;
-        
-        // Impact Shake Logic
-        const shakeX = (Math.random() - 0.5) * state.crashShake;
-        const shakeY = (Math.random() - 0.5) * state.crashShake;
-        
-        map.jumpTo({ 
-            center: [state.lng, state.lat], 
-            bearing: state.camBearing + shakeX,
-            pitch: state.currentPitch + shakeY
-        });
-        
-        // Ultra-smooth slow decay for charge level
-        if (!state.isCharging && state.chargeLevel > 0) {
-            state.chargeLevel *= 0.98; 
-            if (state.chargeLevel < 0.001) state.chargeLevel = 0;
-        }
+    // Smooth target pitch calculation
+    const chargingLean = state.chargeLevel * 15;
+    const velocityPitch = (Math.abs(state.velocity) * 25 / (state.activeVehicle === 'god' ? 5 : 1));
+    const targetPitch = 60 + chargingLean + velocityPitch;
+    
+    // Lerp the pitch for ultimate smoothness
+    state.currentPitch += (targetPitch - state.currentPitch) * 0.03 * dtFinal;
+    
+    // Impact Shake Logic
+    const shakeX = (Math.random() - 0.5) * state.crashShake;
+    const shakeY = (Math.random() - 0.5) * state.crashShake;
+    
+    map.jumpTo({ 
+        center: [state.lng, state.lat], 
+        bearing: state.camBearing + shakeX,
+        pitch: state.currentPitch + shakeY
+    });
+    
+    // Ultra-smooth slow decay for charge level
+    if (!state.isCharging && state.chargeLevel > 0) {
+        state.chargeLevel *= 0.98; 
+        if (state.chargeLevel < 0.001) state.chargeLevel = 0;
+    }
 
-        // Rapid decay for crash shake
-        if (state.crashShake > 0) {
-            state.crashShake *= 0.85;
-            if (state.crashShake < 0.1) state.crashShake = 0;
-        }
-    } else if (Math.abs(state.currentPitch - 60) > 0.1) {
-        // Only jump if we are still settling back to 60
-        state.currentPitch += (60 - state.currentPitch) * 0.03 * dtFinal;
-        map.jumpTo({ 
-            center: [state.lng, state.lat], 
-            bearing: state.camBearing,
-            pitch: state.currentPitch
-        });
+    // Rapid decay for crash shake
+    if (state.crashShake > 0) {
+        state.crashShake *= 0.85;
+        if (state.crashShake < 0.1) state.crashShake = 0;
     }
     
     let speedVal = Math.abs(state.velocity) * 600;
@@ -469,10 +469,6 @@ function initCursor() {
 
         requestAnimationFrame(loop);
     }
-    
-    // Set initial target opacity to show cursor as soon as we have a position
-    cursorState.targetOpacity = 1;
-    
     loop();
 }
 

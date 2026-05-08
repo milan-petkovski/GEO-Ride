@@ -503,7 +503,6 @@ kbd.pressed {
     justify-content: center;
     align-items: center;
     transition: 1.2s;
-    cursor: none !important;
 }
 
 .loading-content {
