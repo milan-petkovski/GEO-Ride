@@ -44,7 +44,16 @@ html, body {
     transform: translate(-50%, -50%) scale(1);
     backdrop-filter: blur(2px);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    will-change: transform, opacity, border-color, background-color; /* Performance */
+    will-change: transform, opacity, border-color, background-color;
+}
+
+.vehicle-marker {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.vehicle-marker.visible {
+    opacity: 1;
 }
 
 /* Crash Debris Particles */
@@ -494,6 +503,7 @@ kbd.pressed {
     justify-content: center;
     align-items: center;
     transition: 1.2s;
+    cursor: none !important;
 }
 
 .loading-content {

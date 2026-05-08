@@ -96,6 +96,9 @@ function setupVehicleMarker() {
     
     vehicleMarker = new mapboxgl.Marker({ element: el, rotationAlignment: 'map', pitchAlignment: 'map' })
         .setLngLat([state.lng, state.lat]).setRotation(state.bearing).addTo(map);
+    
+    // Force immediate position sync
+    setTimeout(() => el.classList.add('visible'), 100);
 }
 
 map.on('load', () => {
@@ -466,6 +469,10 @@ function initCursor() {
 
         requestAnimationFrame(loop);
     }
+    
+    // Set initial target opacity to show cursor as soon as we have a position
+    cursorState.targetOpacity = 1;
+    
     loop();
 }
 
