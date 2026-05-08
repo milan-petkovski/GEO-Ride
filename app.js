@@ -24,7 +24,8 @@ let state = {
     lastTime: performance.now(),
     stopTime: 0, sKeyReleasedSinceStop: true, wKeyReleasedSinceStop: true,
     chargeLevel: 0, isCharging: false, currentPitch: 60,
-    crashShake: 0, collisionsEnabled: true
+    crashShake: 0, collisionsEnabled: true,
+    currentHome: [...INITIAL_CENTER] // Dynamic spawn point
 };
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -131,14 +132,14 @@ function update(time) {
     
     if (!state.isInputFocused) {
         if (state.keys['r']) { 
-            state.lng = INITIAL_CENTER[0];
-            state.lat = INITIAL_CENTER[1];
+            state.lng = state.currentHome[0];
+            state.lat = state.currentHome[1];
             state.velocity = 0; 
             state.steeringAngle = 0; 
             state.bearing = 0; 
             state.travelBearing = 0; 
             state.camBearing = 0; 
-            map.jumpTo({ center: INITIAL_CENTER, zoom: 18, pitch: 60, bearing: 0 }); 
+            map.jumpTo({ center: state.currentHome, zoom: 18, pitch: 60, bearing: 0 }); 
         }
         
         const isSDown = state.keys['s'] || state.keys['arrowdown'];
@@ -402,7 +403,9 @@ async function performSearch() {
         const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}`);
         const data = await response.json();
         if (data.features && data.features.length > 0) {
-            const [lng, lat] = data.features[0].center; state.lng = lng; state.lat = lat; state.velocity = 0;
+            const [lng, lat] = data.features[0].center; 
+            state.lng = lng; state.lat = lat; state.velocity = 0;
+            state.currentHome = [lng, lat]; // Update spawn point to new location
             map.flyTo({ center: [lng, lat], zoom: 18, pitch: 60, essential: true });
             searchInput.value = ''; searchInput.blur(); searchBox.classList.remove('expanded');
         }
@@ -413,6 +416,7 @@ searchBox.onmouseenter = () => searchBox.classList.add('expanded');
 searchBox.onmouseleave = () => { if (!state.isInputFocused) searchBox.classList.remove('expanded'); };
 searchInput.onfocus = () => { state.isInputFocused = true; state.keys = {}; searchBox.classList.add('expanded'); };
 searchInput.onblur = () => { state.isInputFocused = false; if (!searchInput.value) searchBox.classList.remove('expanded'); };
+searchInput.onkeypress = (e) => { if (e.key === 'Enter') performSearch(); };
 // Ultimate Physics Cursor Engine
 const customCursor = document.getElementById('custom-cursor');
 let cursorState = {
