@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = "."
+  publish = "dist"
 
 [build.environment]
   SECRETS_SCAN_OMIT_PATHS = "app.js"
