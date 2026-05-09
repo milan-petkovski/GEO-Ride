@@ -139,6 +139,9 @@ const map = new mapboxgl.Map({
 window.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
 
+    // Ignore if Ctrl or Meta (Command) is held to allow browser shortcuts (like Ctrl+R for refresh)
+    if (e.ctrlKey || e.metaKey) return;
+
     // ESC to Close All Popups (Always active)
     if (key === 'escape') {
         closeAllPanels();
