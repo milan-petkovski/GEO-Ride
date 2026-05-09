@@ -9,6 +9,10 @@
     -ms-user-select: none;
 }
 
+.hide-cursor, .hide-cursor * {
+    cursor: none !important;
+}
+
 input, textarea, .id-badge {
     user-select: text !important;
     -webkit-user-select: text !important;
@@ -72,10 +76,6 @@ a[href*="milanwebportal"]:hover,
     cursor: pointer !important;
 }
 
-.geo-hide-cursor,
-.geo-hide-cursor * {
-    cursor: none !important;
-}
 
 #loading-overlay {
     position: fixed !important;
@@ -214,41 +214,7 @@ body {
     cursor: auto;
 }
 
-/* Crash Debris Particles */
-.debris {
-    width: 8px;
-    height: 8px;
-    background: #666;
-    border: 1px solid #999;
-    position: absolute;
-    pointer-events: none;
-    z-index: 5;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
 
-@keyframes debris-spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(720deg);
-    }
-}
-
-#custom-cursor.active {
-    opacity: 1;
-}
-
-/* Typing Mode - Neon Pill */
-#custom-cursor.typing {
-    width: 8px;
-    height: 30px;
-    border-radius: 4px;
-    border: 2px solid var(--primary);
-    background: rgba(0, 242, 255, 0.2);
-    box-shadow: 0 0 15px var(--primary);
-}
 
 input,
 kbd,
@@ -1328,4 +1294,79 @@ html.geo-reduced-motion kbd {
     letter-spacing: 1px;
     font-weight: 900;
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+/* Mobile Notice Overlay */
+#mobile-notice {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #111, #000);
+    z-index: 20000;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    font-family: 'Outfit', sans-serif;
+}
+
+.mobile-notice-content {
+    animation: fadeInScale 0.8s ease-out;
+}
+
+.mobile-logo {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.mobile-logo span {
+    color: #00F2FF;
+    text-shadow: 0 0 20px rgba(0, 242, 255, 0.8);
+}
+
+#mobile-notice h2 {
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+#mobile-notice p {
+    font-size: 16px;
+    color: #00F2FF;
+    opacity: 0.8;
+    margin-bottom: 30px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.mobile-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+    color: #00F2FF;
+    filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.5));
+    animation: mobileFloat 3s ease-in-out infinite;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes mobileFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@media screen and (max-width: 575px), screen and (max-height: 500px) and (orientation: landscape) {
+    #mobile-notice {
+        display: flex;
+    }
+    #loading-overlay, .ui-container, #map {
+        display: none !important;
+    }
 }
