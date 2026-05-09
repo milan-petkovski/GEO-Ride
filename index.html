@@ -9,12 +9,26 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
     
+    <!-- Three.js for 3D Vehicle -->
+    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+    <!-- Universal Multiplayer (MQTT Engine) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Premium Loading Screen -->
+    <div id="loading-overlay" style="position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1; transition: opacity 1.2s ease;">
+        <div class="loading-content">
+            <div class="loading-logo">GEO <span>RIDE</span></div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="map"></div>
-    <div id="custom-cursor"></div>
 
     <!-- UI Overlay -->
     <div class="ui-container">
@@ -32,6 +46,40 @@
                     </button>
                     <input type="text" id="location-search" placeholder="Search location...">
                 </div>
+
+                <div class="multiplayer-wrapper">
+                    <button id="mp-btn" class="mp-main-btn" title="Multiplayer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span class="beta-badge">BETA</span>
+                    </button>
+                    
+                    <div id="mp-dropdown" class="mp-dropdown">
+                        <div class="mp-dropdown-header">
+                            <span>MULTIPLAYER</span>
+                            <div id="mp-status-dot" class="status-dot"></div>
+                        </div>
+                        
+                        <div class="mp-section">
+                            <div class="id-row">
+                                <div class="id-badge" id="my-peer-id" title="Your personal code">...</div>
+                                <button id="copy-id-btn">COPY</button>
+                            </div>
+                        </div>
+
+                        <div class="mp-section">
+                            <input type="text" id="join-peer-id" placeholder="ENTER CODE TO JOIN">
+                            <button id="join-mp-btn" type="button" class="primary-btn">CONNECT</button>
+                        </div>
+
+                        <div id="mp-players-list" class="mp-players-list"></div>
+                    </div>
+                </div>
+
                 <a href="https://paypal.me/milanpetkovski1" target="_blank" class="coffee-btn" title="Buy me a coffee">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
@@ -45,6 +93,9 @@
         </header>
 
         <div class="bottom-ui">
+            <div class="copyright-notice">
+                Copyright © 2026 <a href="https://milanwebportal.com" target="_blank">milanwebportal.com</a> Sva prava zadržana.
+            </div>
             <div class="speed-container">
                 <div id="speed">0</div>
                 <span id="unit-label">KM/H</span>
@@ -105,6 +156,13 @@
                         </div>
                     </div>
                     <div class="settings-section">
+                        <label>3D EXPERIENCE</label>
+                        <div class="toggle-group d3-toggle">
+                            <button class="active" data-d3="on">ON</button>
+                            <button data-d3="off">OFF</button>
+                        </div>
+                    </div>
+                    <div class="settings-section">
                         <label style="color: #FF00E5; text-shadow: 0 0 10px #FF00E5;">GOD MODE</label>
                         <div class="toggle-group god-toggle">
                             <button class="active" data-god="off">OFF</button>
@@ -119,16 +177,6 @@
                     </svg>
                     SETTINGS
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Premium Loading Screen -->
-    <div id="loading-overlay">
-        <div class="loading-content">
-            <div class="loading-logo">GEO <span>RIDE</span></div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="progress-bar"></div>
             </div>
         </div>
     </div>
