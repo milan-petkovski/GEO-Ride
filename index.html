@@ -1,25 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GEO Ride - Map Driving Experience</title>
-    
+
+    <!-- Preconnect for Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@600;700&display=block"
+        rel="stylesheet">
     <!-- Mapbox GL JS -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
-    
+
     <!-- Three.js for 3D Vehicle -->
     <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
     <!-- Universal Multiplayer (MQTT Engine) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-    
+
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- Premium Loading Screen -->
-    <div id="loading-overlay" style="position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1; transition: opacity 1.2s ease;">
+    <div id="loading-overlay"
+        style="position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1;">
         <div class="loading-content">
             <div class="loading-logo">GEO <span>RIDE</span></div>
             <div class="progress-bar-container">
@@ -40,7 +49,8 @@
             <div class="header-right">
                 <div class="search-box">
                     <button id="search-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </button>
@@ -49,7 +59,8 @@
 
                 <div class="multiplayer-wrapper">
                     <button id="mp-btn" class="mp-main-btn" title="Multiplayer">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                             <circle cx="9" cy="7" r="4"></circle>
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -57,13 +68,13 @@
                         </svg>
                         <span class="beta-badge">BETA</span>
                     </button>
-                    
+
                     <div id="mp-dropdown" class="mp-dropdown">
                         <div class="mp-dropdown-header">
                             <span>MULTIPLAYER</span>
                             <div id="mp-status-dot" class="status-dot"></div>
                         </div>
-                        
+
                         <div class="mp-section">
                             <div class="id-row">
                                 <div class="id-badge" id="my-peer-id" title="Your personal code">...</div>
@@ -74,6 +85,7 @@
                         <div class="mp-section">
                             <input type="text" id="join-peer-id" placeholder="ENTER CODE TO JOIN">
                             <button id="join-mp-btn" type="button" class="primary-btn">CONNECT</button>
+                            <button id="disconnect-mp-btn" class="danger-btn">DISCONNECT</button>
                         </div>
 
                         <div id="mp-players-list" class="mp-players-list"></div>
@@ -81,7 +93,8 @@
                 </div>
 
                 <a href="https://paypal.me/milanpetkovski1" target="_blank" class="coffee-btn" title="Buy me a coffee">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
                         <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
                         <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
                         <line x1="6" y1="1" x2="6" y2="4"></line>
@@ -94,7 +107,8 @@
 
         <div class="bottom-ui">
             <div class="copyright-notice">
-                Copyright © 2026 <a href="https://milanwebportal.com" target="_blank">milanwebportal.com</a> Sva prava zadržana.
+                Copyright © 2026 <a href="https://milanwebportal.com" target="_blank">milanwebportal.com</a> Sva prava
+                zadržana.
             </div>
             <div class="speed-container">
                 <div id="speed">0</div>
@@ -114,7 +128,10 @@
                 <div class="divider"></div>
                 <div class="control-item">
                     <kbd>R</kbd>
-                    <span>RESET</span>
+                    <div style="display: flex; flex-direction: column; line-height: 1.1;">
+                        <span style="font-size: 0.9rem;">RESET</span>
+                        <span style="font-size: 0.5rem; opacity: 0.3; letter-spacing: 1px;">+SHIFT GLOBAL</span>
+                    </div>
                 </div>
                 <div class="divider"></div>
                 <div class="control-item">
@@ -155,11 +172,20 @@
                             <button data-collision="off">OFF</button>
                         </div>
                     </div>
-                    <div class="settings-section">
-                        <label>3D EXPERIENCE</label>
-                        <div class="toggle-group d3-toggle">
-                            <button class="active" data-d3="on">ON</button>
-                            <button data-d3="off">OFF</button>
+                    <div class="settings-row">
+                        <div class="settings-section">
+                            <label>3D VEHICLES</label>
+                            <div class="toggle-group d3v-toggle">
+                                <button class="active" data-d3v="on">ON</button>
+                                <button data-d3v="off">OFF</button>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <label>3D BUILDINGS</label>
+                            <div class="toggle-group d3b-toggle">
+                                <button class="active" data-d3b="on">ON</button>
+                                <button data-d3b="off">OFF</button>
+                            </div>
                         </div>
                     </div>
                     <div class="settings-section">
@@ -171,11 +197,16 @@
                     </div>
                 </div>
                 <button id="settings-btn" class="settings-main-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z">
+                        </path>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
                     </svg>
-                    SETTINGS
+                    <span>SETTINGS</span>
                 </button>
             </div>
         </div>
@@ -183,4 +214,5 @@
 
     <script type="module" src="app.js"></script>
 </body>
+
 </html>
