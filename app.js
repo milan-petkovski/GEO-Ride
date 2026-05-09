@@ -1,5 +1,5 @@
 // Configuration
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+const MAPBOX_TOKEN = '%%MAPBOX_TOKEN%%';
 const INITIAL_CENTER = [20.251391, 44.831868]; // Belgrade
 const INITIAL_ZOOM = 18;
 
