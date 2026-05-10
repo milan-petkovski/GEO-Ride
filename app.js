@@ -144,8 +144,10 @@ function update(time) {
 // Initialize components
 initUI(map);
 initControls();
-// Multiplayer is initialized on button click in UI (actually mpBtn click handler in app.js previously)
-// Moving mpBtn handler here or into multiplayer.js
+
+// Disable Right-Click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
 document.getElementById('mp-btn').onclick = (e) => {
     e.stopPropagation();
     if (!window.mpInitialized) {
