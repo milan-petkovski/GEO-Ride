@@ -2,8 +2,6 @@ const CACHE_NAME = 'georide-v2';
 const ASSETS = [
   '/',
   '/index.html',
-  '/style.css',
-  '/app.js',
   '/favicon.png',
   '/manifest.json'
 ];
@@ -15,7 +13,7 @@ self.addEventListener('install', (e) => {
       return Promise.allSettled(
         ASSETS.map(asset => {
           return cache.add(asset).catch(err => {
-            console.error(`[SW] Failed to cache asset: ${asset}`, err);
+            console.warn(`[SW] Initial cache skipped for: ${asset}`);
           });
         })
       );
@@ -32,10 +30,21 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Network-First Strategy
+  // Dinamičko keširanje: Network-First sa automatskim dodavanjem u keš
   e.respondWith(
-    fetch(e.request).catch(() => {
-      return caches.match(e.request);
-    })
+    fetch(e.request)
+      .then((response) => {
+        // Keširaj samo validne odgovore sa našeg domena
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(e.request);
+      })
   );
 });
