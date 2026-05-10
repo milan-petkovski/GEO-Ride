@@ -11,7 +11,15 @@ const ASSETS = [
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return Promise.allSettled(
+        ASSETS.map(asset => {
+          return cache.add(asset).catch(err => {
+            console.error(`[SW] Failed to cache asset: ${asset}`, err);
+          });
+        })
+      );
+    })
   );
 });
 
