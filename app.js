@@ -21,7 +21,7 @@ import { cleanMap, setProgress, addSkidMarksLayer } from './js/utils.js';
 // Load initial state
 loadState();
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.MAPBOX_TOKEN;
 const map = new mapboxgl.Map({
     container: 'map',
     style: `mapbox://styles/mapbox/${state.mapStyle}`,

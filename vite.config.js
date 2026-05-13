@@ -22,8 +22,6 @@ export default defineConfig(({ mode }) => {
         }
       }
     },
-    define: {
-       'import.meta.env.VITE_MAPBOX_TOKEN': JSON.stringify(env.VITE_MAPBOX_TOKEN || env.MAPBOX_TOKEN || process.env.VITE_MAPBOX_TOKEN || process.env.MAPBOX_TOKEN)
-    }
+    envPrefix: ['VITE_', 'MAPBOX_']
   };
 });
