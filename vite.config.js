@@ -16,9 +16,9 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 2000,
       rollupOptions: {
         output: {
-          manualChunks: {
-            'mapbox-vendor': ['mapbox-gl'],
-            'three-vendor': ['three']
+          manualChunks(id) {
+            if (id.includes('mapbox-gl')) return 'mapbox-vendor';
+            if (id.includes('three')) return 'three-vendor';
           }
         }
       }
