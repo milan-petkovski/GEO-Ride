@@ -10,14 +10,15 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'dist',
-      minify: true,
-      chunkSizeWarningLimit: 1600,
+      minify: 'terser',
+      cssMinify: true,
+      reportCompressedSize: false,
+      chunkSizeWarningLimit: 2000,
       rollupOptions: {
         output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              return 'vendor';
-            }
+          manualChunks: {
+            'mapbox-vendor': ['mapbox-gl'],
+            'three-vendor': ['three']
           }
         }
       }
