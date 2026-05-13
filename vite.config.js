@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'dist',
-      minify: 'terser',
+      minify: true,
       cssMinify: true,
       reportCompressedSize: false,
       chunkSizeWarningLimit: 2000,
