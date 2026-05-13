@@ -30,11 +30,15 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Dinamičko keširanje: Network-First sa automatskim dodavanjem u keš
+  // 1. Ignoriši sve što nije GET (Mapbox eventi su POST)
+  // 2. Ignoriši Mapbox events API direktno
+  if (e.request.method !== 'GET' || e.request.url.includes('events.mapbox.com')) {
+    return;
+  }
+
   e.respondWith(
     fetch(e.request)
       .then((response) => {
-        // Keširaj samo validne odgovore sa našeg domena
         if (response && response.status === 200 && response.type === 'basic') {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -44,7 +48,7 @@ self.addEventListener('fetch', (e) => {
         return response;
       })
       .catch(() => {
-        return caches.match(e.request);
+        return caches.match(e.request).then(match => match || fetch(e.request));
       })
   );
 });
