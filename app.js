@@ -17,6 +17,8 @@ import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMa
 import { initMultiplayer, updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
 import { cleanMap, setProgress, addSkidMarksLayer } from './js/utils.js';
+import { trackEvent } from './js/analytics.js';
+
 
 // Load initial state
 loadState();
@@ -153,7 +155,9 @@ document.getElementById('mp-btn').onclick = (e) => {
     if (!window.mpInitialized) {
         initMultiplayer();
         document.getElementById('mp-dropdown').classList.add('active');
+        trackEvent('multiplayer_init');
     } else {
-        document.getElementById('mp-dropdown').classList.toggle('active');
+        const isActive = document.getElementById('mp-dropdown').classList.toggle('active');
+        trackEvent('multiplayer_toggle', { active: isActive });
     }
 };

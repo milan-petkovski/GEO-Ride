@@ -1,6 +1,8 @@
 import { state, saveState } from './state.js';
 import { VEHICLE_CONFIG, INITIAL_CENTER } from './config.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
+import { trackEvent } from './analytics.js';
+
 
 export function initUI(map) {
     const settingsBtn = document.getElementById('settings-btn');
@@ -33,6 +35,7 @@ export function initUI(map) {
             map.setStyle(`mapbox://styles/mapbox/${state.mapStyle}`);
             updateToggleStates();
             saveState();
+            trackEvent('change_map_style', { style: state.mapStyle });
         };
     });
 
@@ -41,6 +44,7 @@ export function initUI(map) {
             state.unit = btn.dataset.unit;
             updateToggleStates();
             saveState();
+            trackEvent('change_units', { unit: state.unit });
         };
     });
 
@@ -56,6 +60,7 @@ export function initUI(map) {
             setupVehicleMarker(map);
             updateToggleStates();
             saveState();
+            trackEvent('select_vehicle', { vehicle: state.activeVehicle });
         };
     });
 
@@ -107,6 +112,7 @@ export function initUI(map) {
             setupVehicleMarker(map);
             updateToggleStates();
             saveState();
+            trackEvent('toggle_god_mode', { enabled: state.godMode });
         };
     });
 
@@ -132,8 +138,8 @@ export function initUI(map) {
                 // Give it a moment to animate the shrinking/ball expansion at the start
                 setTimeout(() => {
                     state.currentHome = [lng, lat];
-
                     const targetZoom = Math.max(map.getZoom(), 17);
+
                     map.flyTo({
                         center: [lng, lat],
                         zoom: targetZoom,
@@ -147,8 +153,10 @@ export function initUI(map) {
                         state.isTeleporting = false;
                         setup3DVehicleLayer(map);
                         saveState();
+                        trackEvent('teleport_complete', { location: query });
                     });
                 }, 600); // 600ms delay to see the vehicle shrink and ball grow
+                trackEvent('search_location', { query: query });
                 searchInput.value = ''; searchInput.blur(); searchBox.classList.remove('expanded');
             }
         } catch (err) { console.error("Search error:", err); }
@@ -196,7 +204,21 @@ export function initUI(map) {
             document.querySelector('.loading-content')?.classList.add('fonts-ready');
         }, 500);
     }
+    // Add tracking to external links
+    document.querySelector('.coffee-btn')?.addEventListener('click', () => {
+        trackEvent('click_coffee_btn');
+    });
+
+    document.querySelector('.author-link')?.addEventListener('click', () => {
+        trackEvent('click_author_link');
+    });
+
+    document.getElementById('join-mp-btn')?.addEventListener('click', () => {
+        const peerId = document.getElementById('join-peer-id')?.value;
+        trackEvent('multiplayer_join_attempt', { peer_id_length: peerId?.length });
+    });
 }
+
 
 export function closeAllPanels() {
     document.getElementById('settings-panel')?.classList.remove('active');

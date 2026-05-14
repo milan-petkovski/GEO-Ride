@@ -15,14 +15,18 @@
   <img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js">
   <img src="https://img.shields.io/badge/Mapbox-4264fb?style=for-the-badge&logo=mapbox&logoColor=white" alt="Mapbox">
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
-  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Vite-8.0.13-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8">
+  <img src="https://img.shields.io/badge/Oxc-Optimized-000000?style=for-the-badge&logo=rust&logoColor=white" alt="Oxc Optimized">
 
   <p><b>Supported Browsers:</b></p>
   <img src="https://allinone.milanwebportal.com/Browser/1.png" width="30" alt="Chrome"> &nbsp;
   <img src="https://allinone.milanwebportal.com/Browser/2.png" width="30" alt="Edge"> &nbsp;
   <img src="https://allinone.milanwebportal.com/Browser/3.png" width="30" alt="Brave"> &nbsp;
   <img src="https://allinone.milanwebportal.com/Browser/4.png" width="30" alt="Opera"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/7.png" width="30" alt="Arc">
+  <img src="https://allinone.milanwebportal.com/Browser/5.png" width="30" alt="Opera GX"> &nbsp;
+  <img src="https://allinone.milanwebportal.com/Browser/6.png" width="30" alt="Vivaldi"> &nbsp;
+  <img src="https://allinone.milanwebportal.com/Browser/7.png" width="30" alt="Arc"> &nbsp;
+  <img src="https://allinone.milanwebportal.com/Browser/8.png" width="30" alt="Firefox"> &nbsp;
   
   <p>Experience realistic driving physics and world-scale mapping directly in your browser.</p>
 </div>
