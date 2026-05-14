@@ -1,6 +1,9 @@
 import { state, saveState } from './state.js';
 import { VEHICLE_CONFIG, INITIAL_CENTER } from './config.js';
 import { setup3DVehicleLayer } from './three-manager.js';
+import { trackEvent } from './analytics.js';
+
+let lastCollisionTrackTime = 0;
 
 export function updatePhysics(dtFinal, map) {
     const config = VEHICLE_CONFIG[state.activeVehicle];
@@ -26,6 +29,12 @@ export function updatePhysics(dtFinal, map) {
                     pitch: 65,
                     bearing: 0,
                     duration: state.teleportDuration
+                });
+
+                trackEvent('vehicle_reset', { 
+                    is_global: isShiftReset,
+                    location_lat: lat.toFixed(4),
+                    location_lng: lng.toFixed(4)
                 });
 
                 map.once('moveend', () => {
@@ -176,6 +185,15 @@ export function updatePhysics(dtFinal, map) {
                 });
 
                 if (collisionOccurred && !isAlreadyInside) {
+                    const now = Date.now();
+                    if (now - lastCollisionTrackTime > 5000) {
+                        trackEvent('vehicle_collision', { 
+                            vehicle: state.activeVehicle,
+                            velocity: Math.abs(state.velocity).toFixed(2)
+                        });
+                        lastCollisionTrackTime = now;
+                    }
+
                     const bounceDirection = state.velocity > 0 ? -1 : 1;
                     state.velocity = -state.velocity * 0.4;
                     const rad = (state.bearing) * (Math.PI / 180);

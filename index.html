@@ -2,15 +2,27 @@
 <html lang="en">
 
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C33HV1QV3S"></script>
+    <!-- Google Tag & Consent Mode (2026 Modern Edition) -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      
+      // Default Consent Mode v2
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'granted',
+        'wait_for_update': 500
+      });
 
-      gtag('config', 'G-C33HV1QV3S');
+      gtag('js', new Date());
+      gtag('config', 'G-C33HV1QV3S', {
+        'anonymize_ip': true,
+        'cookie_flags': 'SameSite=None;Secure'
+      });
     </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C33HV1QV3S"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">

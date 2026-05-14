@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { VEHICLE_CONFIG } from './config.js';
 import { updateToggleStates } from './ui.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
+import { trackEvent } from './analytics.js';
 
 let client;
 let currentTopic = "georide/global/pro";
@@ -197,6 +198,8 @@ export function initMultiplayer() {
                     client.subscribe(currentTopic);
                     startSyncTimers();
                     renderActivePlayers();
+
+                    trackEvent('multiplayer_room_connect', { room: targetCode });
                 };
 
                 const onConnectFailure = (err) => {
@@ -235,6 +238,8 @@ export function initMultiplayer() {
             if (broadcastTimer) { clearInterval(broadcastTimer); broadcastTimer = null; }
             if (cleanupTimer) { clearInterval(cleanupTimer); cleanupTimer = null; }
             
+            trackEvent('multiplayer_room_disconnect', { room: currentTopic.replace('georide/room/', '') });
+
             disconnectBtn.style.display = 'none';
             if (statusLabel) {
                 statusLabel.textContent = 'NOT CONNECTED';

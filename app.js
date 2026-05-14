@@ -17,7 +17,15 @@ import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMa
 import { initMultiplayer, updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
 import { cleanMap, setProgress, addSkidMarksLayer } from './js/utils.js';
-import { trackEvent } from './js/analytics.js';
+import { trackEvent, trackWebVitals } from './js/analytics.js';
+
+// Initialize Analytics & Performance Monitoring
+trackWebVitals();
+trackEvent('session_start', { 
+    platform: 'web',
+    version: '2026.1.0',
+    resolution: `${window.innerWidth}x${window.innerHeight}`
+});
 
 
 // Load initial state
