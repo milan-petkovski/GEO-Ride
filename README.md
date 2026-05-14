@@ -11,12 +11,18 @@
 
   <p><b>🚀 Performance Tier:</b> Ultra Optimized | 60+ FPS | Low Memory Footprint</p>
 
-  <p><b>Supported Devices:</b></p>
-  <img src="https://allinone.milanwebportal.com/Browser/1.png" width="35" alt="Chrome"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/2.png" width="35" alt="Edge"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/3.png" width="35" alt="Brave"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/4.png" width="35" alt="Opera"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/7.png" width="35" alt="Arc">
+  <p><b>Tech Stack:</b></p>
+  <img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js">
+  <img src="https://img.shields.io/badge/Mapbox-4264fb?style=for-the-badge&logo=mapbox&logoColor=white" alt="Mapbox">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+
+  <p><b>Supported Browsers:</b></p>
+  <img src="https://allinone.milanwebportal.com/Browser/1.png" width="30" alt="Chrome"> &nbsp;
+  <img src="https://allinone.milanwebportal.com/Browser/2.png" width="30" alt="Edge"> &nbsp;
+  <img src="https://allinone.milanwebportal.com/Browser/3.png" width="30" alt="Brave"> &nbsp;
+  <img src="https://allinone.milanwebportal.com/Browser/4.png" width="30" alt="Opera"> &nbsp;
+  <img src="https://allinone.milanwebportal.com/Browser/7.png" width="30" alt="Arc">
   
   <p>Experience realistic driving physics and world-scale mapping directly in your browser.</p>
 </div>
@@ -35,23 +41,13 @@ I am committed to keeping my projects 100% free and open-source. If you enjoy dr
 # 🚀 Key Features
 
 * 🗺️ **World-Scale Driving**: Explore any location on Earth using Mapbox high-resolution satellite and terrain data.
-* 🏎️ **Advanced Physics**: Realistic car handling, acceleration, and drift mechanics.
+* 🏎️ **Advanced Physics**: Realistic car handling, acceleration, and drift mechanics powered by a custom Three.js engine.
 * 🎥 **Cinematic Camera**: Dynamic gimbal camera system that follows the vehicle with smooth interpolation.
 * 💥 **Collision System**: Interactive physics engine with visual debris and impact effects.
 * 🛠️ **God Mode**: Special developer controls for collision-free exploration and teleportation.
 * ⚡ **Performance Optimized**: Custom memory management to prevent leaks during long sessions.
 * 📱 **Mobile Ready**: Intuitive touch controls for driving on the go.
 * ⏳ **Smart Loading**: Optimized initialization with progress tracking to ensure a smooth start.
-
-<br>
-
-# 🛠️ Tech Stack
-
-- **Three.js**: Core 3D engine for rendering the vehicle and physics.
-- **Mapbox GL JS**: Real-world maps and terrain data provider.
-- **Vanilla JavaScript**: High-performance logic without heavy frameworks.
-- **CSS3 Animations**: Premium UI micro-interactions.
-- **PWA Ready**: Offline support and home screen installation.
 
 <br>
 
@@ -64,6 +60,27 @@ I am committed to keeping my projects 100% free and open-source. If you enjoy dr
 
 <br>
 
+# 🛠️ Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/milan-petkovski/GEO-Ride.git
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file with your Mapbox token:
+   ```env
+   VITE_MAPBOX_TOKEN=your_token_here
+   ```
+4. Start the dev server:
+   ```bash
+   npm run dev
+   ```
+
+<br>
+
 # 📸 Gallery
 
 <table align="center" width="100%">
@@ -71,7 +88,7 @@ I am committed to keeping my projects 100% free and open-source. If you enjoy dr
       <td align="center" colspan="2" width="100%">
         <img src="https://milanwebportal.com/images/Projects/website23.jpg" alt="GEO Ride Main Gameplay" />
         <br />
-        <b>High-Resolution 3D Environment</b>
+        <b>High-Resolution 3D Environment with Real-World Mapping</b>
       </td>
     </tr>
 </table>
