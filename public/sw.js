@@ -30,15 +30,23 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // 1. Ignoriši sve što nije GET (Mapbox eventi su POST)
-  // 2. Ignoriši Mapbox events API direktno
-  if (e.request.method !== 'GET' || e.request.url.includes('events.mapbox.com')) {
+  const url = e.request.url;
+  
+  // Skip non-GET requests and external tracking/mapping services
+  if (e.request.method !== 'GET' || 
+      url.includes('google-analytics.com') || 
+      url.includes('googletagmanager.com') ||
+      url.includes('events.mapbox.com') ||
+      url.includes('broker.hivemq.com')) {
     return;
   }
 
   e.respondWith(
-    fetch(e.request)
-      .then((response) => {
+    caches.match(e.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(e.request).then((response) => {
+        // Only cache successful basic responses (same-origin)
         if (response && response.status === 200 && response.type === 'basic') {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -46,9 +54,10 @@ self.addEventListener('fetch', (e) => {
           });
         }
         return response;
-      })
-      .catch(() => {
-        return caches.match(e.request).then(match => match || fetch(e.request));
-      })
+      }).catch(() => {
+        // Silent fail for network errors
+        return new Response('Network error occurred', { status: 408, headers: { 'Content-Type': 'text/plain' } });
+      });
+    })
   );
 });
