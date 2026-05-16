@@ -59,19 +59,27 @@ export function saveState() {
 export function loadState() {
     try {
         const saved = localStorage.getItem('geo_ride_state');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            state.lng = parsed.lng ?? INITIAL_CENTER[0];
-            state.lat = parsed.lat ?? INITIAL_CENTER[1];
-            state.activeVehicle = parsed.activeVehicle ?? 'car';
-            state.unit = parsed.unit ?? 'km';
-            state.collisionsEnabled = parsed.collisionsEnabled ?? true;
-            state.is3D = parsed.is3D ?? true;
-            state.is3DBuildings = parsed.is3DBuildings ?? true;
-            state.mapStyle = parsed.mapStyle ?? 'streets-v12';
-            state.currentHome = [state.lng, state.lat];
-        }
+        if (!saved) return;
+        
+        const parsed = JSON.parse(saved);
+        if (!parsed || typeof parsed !== 'object') return;
+
+        // Strict Type & Range Validation
+        const validateNum = (val, def) => (typeof val === 'number' && !isNaN(val)) ? val : def;
+        const validateStr = (val, allowed, def) => (typeof val === 'string' && allowed.includes(val)) ? val : def;
+        const validateBool = (val, def) => (typeof val === 'boolean') ? val : def;
+
+        state.lng = validateNum(parsed.lng, INITIAL_CENTER[0]);
+        state.lat = validateNum(parsed.lat, INITIAL_CENTER[1]);
+        state.activeVehicle = validateStr(parsed.activeVehicle, ['car', 'truck', 'bus', 'god'], 'car');
+        state.unit = validateStr(parsed.unit, ['km', 'mi'], 'km');
+        state.collisionsEnabled = validateBool(parsed.collisionsEnabled, true);
+        state.is3D = validateBool(parsed.is3D, true);
+        state.is3DBuildings = validateBool(parsed.is3DBuildings, true);
+        state.mapStyle = validateStr(parsed.mapStyle, ['streets-v12', 'satellite-v9', 'satellite-streets-v12'], 'streets-v12');
+        
+        state.currentHome = [state.lng, state.lat];
     } catch (e) {
-        console.warn('Could not load state', e);
+        console.warn('Security Alert: State corruption detected or load failure', e);
     }
 }

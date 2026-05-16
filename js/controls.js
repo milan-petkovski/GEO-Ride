@@ -9,17 +9,17 @@ export function initControls() {
         const key = e.key.toLowerCase();
         if (e.ctrlKey || e.metaKey) return;
 
+        const drivingKeys = ['w', 'a', 's', 'd', ' ', 'r', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'shift', 'escape'];
+        if (!drivingKeys.includes(key)) return;
+
         if (key === 'escape') { closeAllPanels(); return; }
         if (key === 'shift') state.keys['shift'] = true;
         if (key === 'tab') { e.preventDefault(); return; }
 
         if (state.isInputFocused) return;
 
-        const drivingKeys = ['w', 'a', 's', 'd', ' ', 'r', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
-        if (drivingKeys.includes(key)) {
-            closeAllPanels();
-            document.body.classList.add('hide-cursor');
-        }
+        closeAllPanels();
+        document.body.classList.add('hide-cursor');
 
         state.keys[key] = true;
         updateKbdHUD(key, true);

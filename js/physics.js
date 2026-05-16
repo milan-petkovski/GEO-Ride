@@ -33,8 +33,7 @@ export function updatePhysics(dtFinal, map) {
 
                 trackEvent('vehicle_reset', { 
                     is_global: isShiftReset,
-                    location_lat: lat.toFixed(4),
-                    location_lng: lng.toFixed(4)
+                    generalized_location: "REDACTED" // Prevent PII leakage
                 });
 
                 map.once('moveend', () => {

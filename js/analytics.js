@@ -49,18 +49,29 @@ export const trackWebVitals = () => {
 
 // Enhanced Event Tracking
 export const trackEvent = (eventName, params = {}) => {
+    // Sanitize URL to prevent token leakage
+    let sanitizedLocation = window.location.href;
+    try {
+        const u = new URL(window.location.href);
+        sanitizedLocation = u.origin + u.pathname;
+    } catch (e) {}
+
+    const eventParams = {
+        ...params,
+        page_location: sanitizedLocation,
+        page_path: window.location.pathname
+    };
+
     if (typeof window.gtag === 'function') {
         window.gtag('event', eventName, {
-            ...params,
-            page_location: window.location.href,
-            page_path: window.location.pathname,
+            ...eventParams,
             send_to: 'G-C33HV1QV3S'
         });
     } else {
         // Fallback to pushing directly to dataLayer
         window.dataLayer.push({
             event: eventName,
-            ...params
+            ...eventParams
         });
     }
 };

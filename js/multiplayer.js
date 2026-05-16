@@ -280,13 +280,38 @@ export function renderActivePlayers() {
     const mpPlayersList = document.getElementById('mp-players-list');
     if (!mpPlayersList) return;
 
-    const activePlayers = [{ id: myId, vehicle: state.activeVehicle, isSelf: true }, 
-        ...Object.keys(state.otherPlayers).map(id => ({ id, vehicle: state.otherPlayers[id].vehicle, isSelf: false }))];
+    // Build the list of player data
+    const activePlayers = [
+        { id: myId, vehicle: state.activeVehicle, isSelf: true }, 
+        ...Object.keys(state.otherPlayers).map(id => ({ 
+            id, 
+            vehicle: state.otherPlayers[id].vehicle, 
+            isSelf: false 
+        }))
+    ];
 
-    mpPlayersList.innerHTML = activePlayers.map(p => {
-        const label = p.isSelf ? 'YOU' : p.vehicle.toUpperCase();
-        return `<div class="mp-player-entry ${p.isSelf ? 'mp-player-self' : ''}"><span class="mp-player-id">${p.id.toUpperCase()}</span><span class="mp-player-vehicle">${label}</span></div>`;
-    }).join('');
+    // Optimize: Only update DOM if the player count or IDs changed
+    const currentIdList = activePlayers.map(p => p.id).sort().join(',');
+    if (window.lastPlayerIdList === currentIdList) return;
+    window.lastPlayerIdList = currentIdList;
+
+    mpPlayersList.textContent = ''; // Clear existing
+    
+    activePlayers.forEach(p => {
+        const entry = document.createElement('div');
+        entry.className = `mp-player-entry ${p.isSelf ? 'mp-player-self' : ''}`;
+        
+        const idSpan = document.createElement('span');
+        idSpan.className = 'mp-player-id';
+        idSpan.textContent = p.id.toUpperCase();
+        
+        const vehicleSpan = document.createElement('span');
+        vehicleSpan.className = 'mp-player-vehicle';
+        vehicleSpan.textContent = p.isSelf ? 'YOU' : p.vehicle.toUpperCase();
+        
+        entry.append(idSpan, vehicleSpan);
+        mpPlayersList.appendChild(entry);
+    });
 }
 
 export function updateOtherPlayers(dtFinal, map) {
