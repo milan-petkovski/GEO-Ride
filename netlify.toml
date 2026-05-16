@@ -8,12 +8,9 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+    Referrer-Policy = "no-referrer-when-downgrade"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Cross-Origin-Opener-Policy = "same-origin"
-    Cross-Origin-Resource-Policy = "same-origin"
-    Permissions-Policy = "geolocation=(self), microphone=(), camera=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' blob: https://api.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdnjs.cloudflare.com 'unsafe-inline'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com; img-src 'self' data: blob: https://*.mapbox.com https://api.mapbox.com https://www.google-analytics.com; connect-src 'self' https://*.mapbox.com https://api.mapbox.com https://events.mapbox.com https://www.google-analytics.com https://region1.google-analytics.com wss://broker.hivemq.com:8884; font-src 'self' https://fonts.gstatic.com; object-src 'none'; upgrade-insecure-requests;"
+    Content-Security-Policy = "default-src 'self' *; script-src 'self' 'unsafe-inline' 'unsafe-eval' * blob:; style-src 'self' 'unsafe-inline' *; img-src 'self' data: blob: *; connect-src 'self' * wss:; font-src 'self' *; worker-src 'self' blob:; object-src 'none';"

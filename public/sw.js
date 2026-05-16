@@ -1,4 +1,4 @@
-const CACHE_NAME = 'georide-v3';
+const CACHE_NAME = 'georide-v4';
 const ASSETS = [
   '/',
   '/index.html',
@@ -31,13 +31,10 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = e.request.url;
+  const isLocal = url.startsWith(self.location.origin);
   
-  // Skip non-GET requests and external tracking/mapping services
-  if (e.request.method !== 'GET' || 
-      url.includes('google-analytics.com') || 
-      url.includes('googletagmanager.com') ||
-      url.includes('events.mapbox.com') ||
-      url.includes('broker.hivemq.com')) {
+  // ONLY cache local GET requests
+  if (e.request.method !== 'GET' || !isLocal) {
     return;
   }
 
@@ -46,7 +43,6 @@ self.addEventListener('fetch', (e) => {
       if (cachedResponse) return cachedResponse;
 
       return fetch(e.request).then((response) => {
-        // Only cache successful basic responses (same-origin)
         if (response && response.status === 200 && response.type === 'basic') {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -55,8 +51,7 @@ self.addEventListener('fetch', (e) => {
         }
         return response;
       }).catch(() => {
-        // Just let it fail normally for the browser to handle
-        return undefined; 
+        return undefined;
       });
     })
   );
