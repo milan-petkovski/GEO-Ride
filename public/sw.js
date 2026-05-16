@@ -1,4 +1,4 @@
-const CACHE_NAME = 'georide-v2';
+const CACHE_NAME = 'georide-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -55,8 +55,8 @@ self.addEventListener('fetch', (e) => {
         }
         return response;
       }).catch(() => {
-        // Silent fail for network errors
-        return new Response('Network error occurred', { status: 408, headers: { 'Content-Type': 'text/plain' } });
+        // Just let it fail normally for the browser to handle
+        return undefined; 
       });
     })
   );

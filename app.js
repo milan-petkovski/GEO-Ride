@@ -31,6 +31,14 @@ trackEvent('session_start', {
 // Load initial state
 loadState();
 
+// Defensive dependency check
+if (typeof mapboxgl === 'undefined' || typeof THREE === 'undefined') {
+    const errorMsg = 'Critical dependencies (Mapbox or Three.js) failed to load. Please check your internet connection or disable AdBlockers.';
+    console.error(errorMsg);
+    alert(errorMsg);
+    throw new Error(errorMsg);
+}
+
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.MAPBOX_TOKEN;
 const map = new mapboxgl.Map({
     container: 'map',
@@ -44,8 +52,9 @@ const map = new mapboxgl.Map({
     antialias: !state.performance.lowEnd
 });
 
-// Expose map globally for some modules
+// Expose globally
 window.map = map;
+window.THREE = THREE;
 
 let currentProgress = 0;
 let targetProgress = 0;
