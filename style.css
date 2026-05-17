@@ -2691,3 +2691,28 @@ html.geo-reduced-motion kbd {
         position: static !important;
     }
 }
+
+/* Fiksiranje panela za vrh ekrana na mobilnom kako ih tastatura ne bi gurala van vidokruga */
+@media (max-width: 1024px) {
+    .settings-panel, .mp-dropdown {
+        position: fixed !important;
+        top: 15px !important;       /* Zakucavamo panel za vrh */
+        bottom: auto !important;    /* Skidamo vezu sa dnom */
+        right: 0 !important;
+        left: 0 !important;
+        margin: 0 auto !important;
+        width: 92vw !important;
+        max-height: calc(100dvh - 30px) !important; /* Panel se pametno smanjuje kada izađe tastatura */
+        overflow-y: auto !important;
+        z-index: 99999 !important;
+        /* Animacija sada ide odozgo na dole */
+        transform: scale(0.9) translateY(-20px) !important;
+        transform-origin: top center !important;
+    }
+
+    .settings-panel.active, .mp-dropdown.active {
+        transform: scale(1) translateY(0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}

@@ -170,13 +170,16 @@ initControls();
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 document.getElementById('mp-btn').onclick = (e) => {
+    const mpDropdown = document.getElementById('mp-dropdown');
+    if (mpDropdown && mpDropdown.contains(e.target)) return;
+
     e.stopPropagation();
     if (!window.mpInitialized) {
         initMultiplayer();
-        document.getElementById('mp-dropdown').classList.add('active');
+        if (mpDropdown) mpDropdown.classList.add('active');
         trackEvent('multiplayer_init');
     } else {
-        const isActive = document.getElementById('mp-dropdown').classList.toggle('active');
+        const isActive = mpDropdown.classList.toggle('active');
         trackEvent('multiplayer_toggle', { active: isActive });
     }
 };

@@ -37,19 +37,18 @@ export function initUI(map) {
     const searchInput = document.getElementById('location-search');
     const searchBtn = document.getElementById('search-btn');
 
-    // Prevent all map interactions while settings is open
-    // Prevent touch, wheel, mouse, and pointer events from propagating to Mapbox to isolate panel scrolling
-    const stopPropagationEvents = [
-        'touchstart', 'touchmove', 'touchend',
-        'wheel', 'pointerdown', 'pointerup', 'pointermove',
-        'mousedown', 'mousemove', 'mouseup'
-    ];
-    stopPropagationEvents.forEach(evtType => {
-        settingsPanel?.addEventListener(evtType, (e) => e.stopPropagation(), { passive: true });
-        mpDropdown?.addEventListener(evtType, (e) => e.stopPropagation(), { passive: true });
+    // Prevent map interactions while panels are open, BUT let inputs work normally
+    const mapPanels = [settingsPanel, mpDropdown];
+    mapPanels.forEach(panel => {
+        if (!panel) return;
+        ['wheel', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'dblclick'].forEach(evtType => {
+            panel.addEventListener(evtType, (e) => e.stopPropagation(), { passive: false });
+        });
     });
 
     settingsBtn.onclick = (e) => {
+        if (settingsPanel && settingsPanel.contains(e.target)) return;
+        
         e.preventDefault();
         e.stopPropagation();
         if (mpDropdown) mpDropdown.classList.remove('active');
@@ -294,14 +293,6 @@ export function initUI(map) {
                 haptics.success();
             }
         };
-        // Prevent mobile search input from triggering panel close
-        const preventPropagationEvents = ['click', 'keydown', 'keyup', 'keypress', 'focus', 'mousedown'];
-        preventPropagationEvents.forEach(evt => {
-            mobileSearchInput.addEventListener(evt, (e) => {
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-            }, true);
-        });
     }
 
     window.addEventListener('click', (e) => {

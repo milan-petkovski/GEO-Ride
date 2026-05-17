@@ -350,8 +350,10 @@ function updateOrientationLayout() {
             }
         }
 
-        // Close any open panels on orientation change
-        closeAllPanels();
+        // Close any open panels on orientation change if not typing
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            closeAllPanels();
+        }
     }
 
     // Trigger layout recalculation
