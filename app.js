@@ -107,6 +107,15 @@ map.on('load', () => {
     addSkidMarksLayer(map);
     updateToggleStates();
     startLoading();
+
+    // Apply standard preset if active on load
+    if (state.mapStyle === 'standard') {
+        try {
+            map.setConfigProperty('basemap', 'lightPreset', state.lightPreset || 'day');
+        } catch (e) {
+            console.warn("Could not set standard preset on load:", e);
+        }
+    }
 });
 
 map.on('style.load', () => {
@@ -115,6 +124,15 @@ map.on('style.load', () => {
     setup3DVehicleLayer(map);
     setupVehicleMarker(map);
     addSkidMarksLayer(map);
+
+    // Apply standard preset if active on style load
+    if (state.mapStyle === 'standard') {
+        try {
+            map.setConfigProperty('basemap', 'lightPreset', state.lightPreset || 'day');
+        } catch (e) {
+            console.warn("Could not set standard preset on style load:", e);
+        }
+    }
 });
 
 function update(time) {

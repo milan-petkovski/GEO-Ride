@@ -107,6 +107,23 @@ export function initUI(map) {
         };
     });
 
+    document.querySelectorAll('.light-toggle button').forEach(btn => {
+        btn.onclick = () => {
+            state.lightPreset = btn.dataset.preset;
+            if (state.mapStyle === 'standard') {
+                try {
+                    map.setConfigProperty('basemap', 'lightPreset', state.lightPreset);
+                } catch (e) {
+                    console.warn("Could not set lightPreset:", e);
+                }
+            }
+            updateToggleStates();
+            saveState();
+            trackEvent('change_light_preset', { preset: state.lightPreset });
+            haptics.select();
+        };
+    });
+
     document.querySelectorAll('.unit-toggle button').forEach(btn => {
         btn.onclick = () => {
             state.unit = btn.dataset.unit;
@@ -369,10 +386,17 @@ export function updateToggleStates() {
     if (unitLabel) unitLabel.textContent = state.unit === 'km' ? 'KM/H' : 'MPH';
     document.querySelectorAll('.style-toggle button').forEach(b => b.classList.toggle('active', b.dataset.style === state.mapStyle));
     document.querySelectorAll('.controls-toggle button').forEach(b => b.classList.toggle('active', b.dataset.controls === state.controlsMode));
+
+    // Dynamic display of standard lighting preset section
+    const lightPresetSection = document.getElementById('light-preset-section');
+    if (lightPresetSection) {
+        lightPresetSection.style.display = state.mapStyle === 'standard' ? 'flex' : 'none';
+    }
+    document.querySelectorAll('.light-toggle button').forEach(b => b.classList.toggle('active', b.dataset.preset === state.lightPreset));
 }
 
 export function add3DBuildings(map) {
-    if (!state.is3DBuildings) {
+    if (!state.is3DBuildings || state.mapStyle === 'standard') {
         if (map.getLayer('3d-buildings')) map.removeLayer('3d-buildings');
         return;
     }

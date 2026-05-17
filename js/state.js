@@ -8,6 +8,7 @@ export const state = {
     keys: {}, activeVehicle: 'car',
     unit: 'km',
     mapStyle: 'satellite-streets-v12',
+    lightPreset: 'day',
     controlsMode: 'tilt',
     isInputFocused: false, godMode: false,
     lastTime: performance.now(),
@@ -50,6 +51,7 @@ export function saveState() {
             is3D: state.is3D,
             is3DBuildings: state.is3DBuildings,
             mapStyle: state.mapStyle,
+            lightPreset: state.lightPreset,
             controlsMode: state.controlsMode
         };
         localStorage.setItem('geo_ride_state', JSON.stringify(dataToSave));
@@ -78,7 +80,8 @@ export function loadState() {
         state.collisionsEnabled = validateBool(parsed.collisionsEnabled, true);
         state.is3D = validateBool(parsed.is3D, true);
         state.is3DBuildings = validateBool(parsed.is3DBuildings, true);
-        state.mapStyle = validateStr(parsed.mapStyle, ['streets-v12', 'satellite-v9', 'satellite-streets-v12'], 'streets-v12');
+        state.mapStyle = validateStr(parsed.mapStyle, ['streets-v12', 'satellite-v9', 'satellite-streets-v12', 'standard'], 'streets-v12');
+        state.lightPreset = validateStr(parsed.lightPreset, ['day', 'night', 'dusk', 'dawn'], 'day');
         state.controlsMode = validateStr(parsed.controlsMode, ['tilt', 'off'], 'tilt');
         
         state.currentHome = [state.lng, state.lat];
