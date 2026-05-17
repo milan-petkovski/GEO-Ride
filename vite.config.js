@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       strictPort: false,
       hmr: {
-        host: '192.168.0.50',
+        host: env.VITE_HMR_HOST || undefined,
         port: 3000,
         protocol: 'ws'
       },
