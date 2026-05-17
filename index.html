@@ -4,23 +4,23 @@
 <head>
     <!-- Google Tag & Consent Mode (2026 Modern Edition) -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      
-      // Default Consent Mode v2
-      gtag('consent', 'default', {
-        'ad_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied',
-        'analytics_storage': 'granted',
-        'wait_for_update': 500
-      });
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
 
-      gtag('js', new Date());
-      gtag('config', 'G-C33HV1QV3S', {
-        'anonymize_ip': true,
-        'cookie_flags': 'SameSite=None;Secure'
-      });
+        // Default Consent Mode v2
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'granted',
+            'wait_for_update': 500
+        });
+
+        gtag('js', new Date());
+        gtag('config', 'G-C33HV1QV3S', {
+            'anonymize_ip': true,
+            'cookie_flags': 'SameSite=None;Secure'
+        });
     </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-C33HV1QV3S"></script>
 
@@ -28,10 +28,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="apple-touch-icon" href="/favicon.png">
     <title>GEO Ride | Ultimate 3D Driving Simulator & World Explorer</title>
-    
+
     <meta name="title" content="GEO Ride | Ultimate 3D Driving Simulator & World Explorer">
-    <meta name="description" content="Experience the world in high-fidelity 3D. Drive cars, trucks, and buses anywhere on Earth with real-world physics, multiplayer racing, and global exploration. Built with Mapbox & Three.js.">
-    <meta name="keywords" content="GEO Ride, 3D World Simulator, Satellite Map Driving, Real World GPS Game, Mapbox 3D Explorer, Interactive Street Simulator, Global Driving Experience, WebGL Car Physics, Google Maps Driving Alternative, OpenStreetMap Simulator, Drive on Real Map, Virtual Tourism Game">
+    <meta name="description"
+        content="Experience the world in high-fidelity 3D. Drive cars, trucks, and buses anywhere on Earth with real-world physics, multiplayer racing, and global exploration. Built with Mapbox & Three.js.">
+    <meta name="keywords"
+        content="GEO Ride, 3D World Simulator, Satellite Map Driving, Real World GPS Game, Mapbox 3D Explorer, Interactive Street Simulator, Global Driving Experience, WebGL Car Physics, Google Maps Driving Alternative, OpenStreetMap Simulator, Drive on Real Map, Virtual Tourism Game">
     <meta name="author" content="Milan Petkovski">
     <link rel="canonical" href="https://georide.milanwebportal.com/">
 
@@ -46,7 +48,8 @@
     <meta property="og:url" content="https://georide.milanwebportal.com/">
     <meta property="og:site_name" content="GEO Ride: The Global 3D Simulator">
     <meta property="og:title" content="GEO Ride | Drive Anywhere on the Planet in 3D">
-    <meta property="og:description" content="The next generation of world exploration. Drive realistic vehicles across a high-fidelity 3D replica of the Earth. Real physics, real maps, real adventure.">
+    <meta property="og:description"
+        content="The next generation of world exploration. Drive realistic vehicles across a high-fidelity 3D replica of the Earth. Real physics, real maps, real adventure.">
     <meta property="og:image" content="https://georide.milanwebportal.com/favicon.png">
     <meta property="og:locale" content="en_US">
 
@@ -55,7 +58,8 @@
     <meta property="twitter:site" content="@milanwebportal">
     <meta property="twitter:url" content="https://georide.milanwebportal.com/">
     <meta property="twitter:title" content="GEO Ride | The Ultimate World Driving Simulator">
-    <meta property="twitter:description" content="Experience the Earth in 3D. Realistic driving physics on real-world satellite maps. Free to play on your browser.">
+    <meta property="twitter:description"
+        content="Experience the Earth in 3D. Realistic driving physics on real-world satellite maps. Free to play on your browser.">
     <meta property="twitter:image" content="https://georide.milanwebportal.com/favicon.png">
 
     <meta name="theme-color" content="#020202">
@@ -65,14 +69,18 @@
     <!-- Resource Hints (Elite Performance) -->
     <link rel="preload" href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" as="script">
     <link rel="preload" href="https://unpkg.com/three@0.147.0/build/three.min.js" as="script">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@600;700&display=swap" as="style">
-    
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@600;700&display=swap"
+        as="style">
+
     <link rel="dns-prefetch" href="https://api.mapbox.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://api.mapbox.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@600;700&display=swap"
+        rel="stylesheet">
 
     <!-- Mapbox GL JS (Deferred) -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" defer></script>
@@ -165,7 +173,9 @@
 
     <!-- UI Overlay -->
     <div class="ui-container">
-        <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;">GEO Ride - World Explorer & 3D Simulator</h1>
+        <h1
+            style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;">
+            GEO Ride - World Explorer & 3D Simulator</h1>
         <header>
             <div class="header-left">
                 <div class="logo" aria-label="GEO Ride Logo">GEO <span>Ride</span></div>
@@ -208,7 +218,9 @@
                         </div>
 
                         <div class="mp-section">
-                            <div id="mp-connection-status" style="font-size: 0.7rem; color: #ff4b4b; text-align: center; margin-bottom: 10px; font-weight: 800; letter-spacing: 1px;">NOT CONNECTED</div>
+                            <div id="mp-connection-status"
+                                style="font-size: 0.7rem; color: #ff4b4b; text-align: center; margin-bottom: 10px; font-weight: 800; letter-spacing: 1px;">
+                                NOT CONNECTED</div>
                             <input type="text" id="join-peer-id" placeholder="ENTER PRIVATE CODE">
                             <button id="join-mp-btn" type="button" class="primary-btn">JOIN ROOM</button>
                             <button id="disconnect-mp-btn" class="danger-btn" style="display: none;">DISCONNECT</button>
@@ -228,12 +240,169 @@
                         <line x1="14" y1="1" x2="14" y2="4"></line>
                     </svg>
                 </a>
+
+                <button id="header-reset-btn" class="header-reset-btn touch-btn" title="Reset Vehicle"
+                    aria-label="Reset Vehicle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 20px; height: 20px; display: block; margin: 0;">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                </button>
+
+                <div class="settings-wrapper">
+
+
+                    <div id="settings-panel" class="settings-panel">
+                        <div class="settings-mobile-header">
+                            <span>SETTINGS</span>
+                            <button id="settings-close-btn" class="settings-close-btn" title="Close Settings" aria-label="Close Settings">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Dedicated Mobile Search Section (Mobile Only) -->
+                        <div class="settings-section mobile-only-section" id="mobile-search-section">
+                            <label>SEARCH LOCATION</label>
+                            <div class="mobile-search-row">
+                                <input type="text" id="mobile-location-search"
+                                    placeholder="Search city, address, country...">
+                                <button id="mobile-search-btn" class="primary-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round"
+                                        style="width: 16px; height: 16px; margin: 0; display: inline-block; vertical-align: middle;">
+                                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Multiplayer Section -->
+                        <div class="settings-section" id="mobile-mp-section">
+                            <label>MULTIPLAYER <span class="beta-pill">BETA</span></label>
+                            <div class="mp-section" style="margin-top: 6px;">
+                                <div class="id-row">
+                                    <div class="id-badge" id="mobile-my-peer-id" title="Your personal code">...</div>
+                                    <button id="mobile-copy-id-btn" class="util-btn"
+                                        style="height: 32px; font-size: 11px; padding: 0 10px;">COPY</button>
+                                </div>
+                            </div>
+                            <div class="mp-section"
+                                style="margin-top: 6px; display: flex; flex-direction: column; gap: 8px;">
+                                <div id="mobile-mp-connection-status"
+                                    style="font-size: 0.7rem; color: #ff4b4b; text-align: center; font-weight: 800; letter-spacing: 1px;">
+                                    NOT CONNECTED</div>
+                                <input type="text" id="mobile-join-peer-id" placeholder="ENTER PRIVATE CODE"
+                                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 10px; color: #fff; text-align: center; font-size: 12px; outline: none; width: 100%; box-sizing: border-box;">
+                                <button id="mobile-join-mp-btn" type="button" class="primary-btn"
+                                    style="width: 100%; padding: 10px; font-size: 12px;">JOIN ROOM</button>
+                                <button id="mobile-disconnect-mp-btn" class="danger-btn"
+                                    style="display: none; width: 100%; padding: 10px; font-size: 12px;">DISCONNECT</button>
+                            </div>
+                            <div id="mobile-mp-players-list" class="mp-players-list"
+                                style="display: none; margin-top: 6px;"></div>
+                        </div>
+
+                        <div class="settings-section">
+                            <label>VEHICLE</label>
+                            <div class="toggle-group vehicle-toggle">
+                                <button class="active" data-vehicle="car">CAR</button>
+                                <button data-vehicle="bus">BUS</button>
+                                <button data-vehicle="truck">TRUCK</button>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <label>MAP STYLE</label>
+                            <div class="toggle-group style-toggle">
+                                <button class="active" data-style="streets-v12">STREETS</button>
+                                <button data-style="satellite-v9">SATELLITE</button>
+                                <button data-style="satellite-streets-v12">HYBRID</button>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <label>UNITS</label>
+                            <div class="toggle-group unit-toggle">
+                                <button class="active" data-unit="km">KM/H</button>
+                                <button data-unit="mi">MPH</button>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <label>COLLISIONS</label>
+                            <div class="toggle-group collision-toggle">
+                                <button class="active" data-collision="on">ON</button>
+                                <button data-collision="off">OFF</button>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="settings-section">
+                                <label>3D VEHICLES</label>
+                                <div class="toggle-group d3v-toggle">
+                                    <button class="active" data-d3v="on">ON</button>
+                                    <button data-d3v="off">OFF</button>
+                                </div>
+                            </div>
+                            <div class="settings-section">
+                                <label>3D BUILDINGS</label>
+                                <div class="toggle-group d3b-toggle">
+                                    <button class="active" data-d3b="on">ON</button>
+                                    <button data-d3b="off">OFF</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <label style="color: #FF00E5; text-shadow: 0 0 10px #FF00E5;">GOD MODE</label>
+                            <div class="toggle-group god-toggle">
+                                <button class="active" data-god="off">OFF</button>
+                                <button data-god="on" style="--glow: #FF00E5;">ON</button>
+                            </div>
+                        </div>
+                        <div class="settings-section" id="mobile-controls-toggle-section">
+                            <label>MOBILE CONTROLS</label>
+                            <div class="toggle-group controls-toggle">
+                                <button class="active" data-controls="tilt">TILT STEER</button>
+                                <button data-controls="off">OFF</button>
+                            </div>
+                        </div>
+
+                        <!-- Dedicated Mobile Coffee Section (Mobile Only) -->
+                        <div class="settings-section mobile-only-section" id="mobile-coffee-section"
+                            style="margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 15px;">
+                            <a href="https://paypal.me/milanpetkovski1" target="_blank" class="mobile-coffee-link"
+                                style="display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 12px; padding: 12px; color: #00F2FF; text-decoration: none; font-weight: 800; font-size: 13px; letter-spacing: 1px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    style="width: 18px; height: 18px; margin: 0;">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                                </svg>
+                                <span>BUY ME A COFFEE</span>
+                            </a>
+                        </div>
+                    </div>
+                    <button id="settings-btn" class="settings-main-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z">
+                            </path>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                        <span>SETTINGS</span>
+                    </button>
+                </div>
             </div>
         </header>
 
         <div class="bottom-ui">
             <div class="copyright-notice">
-                Copyright © 2026 <a href="https://milanwebportal.com" target="_blank">milanwebportal.com</a>. All rights reserved.
+                Copyright © 2026 <a href="https://milanwebportal.com" target="_blank">milanwebportal.com</a>. All rights
+                reserved.
             </div>
             <div class="speed-container">
                 <div id="speed">0</div>
@@ -264,74 +433,31 @@
                     <span>DRIFT</span>
                 </div>
             </div>
+        </div>
 
-            <div class="settings-wrapper">
-                <div id="settings-panel" class="settings-panel">
-                    <div class="settings-section">
-                        <label>VEHICLE</label>
-                        <div class="toggle-group vehicle-toggle">
-                            <button class="active" data-vehicle="car">CAR</button>
-                            <button data-vehicle="bus">BUS</button>
-                            <button data-vehicle="truck">TRUCK</button>
-                        </div>
-                    </div>
-                    <div class="settings-section">
-                        <label>MAP STYLE</label>
-                        <div class="toggle-group style-toggle">
-                            <button class="active" data-style="streets-v12">STREETS</button>
-                            <button data-style="satellite-v9">SATELLITE</button>
-                            <button data-style="satellite-streets-v12">HYBRID</button>
-                        </div>
-                    </div>
-                    <div class="settings-section">
-                        <label>UNITS</label>
-                        <div class="toggle-group unit-toggle">
-                            <button class="active" data-unit="km">KM/H</button>
-                            <button data-unit="mi">MPH</button>
-                        </div>
-                    </div>
-                    <div class="settings-section">
-                        <label>COLLISIONS</label>
-                        <div class="toggle-group collision-toggle">
-                            <button class="active" data-collision="on">ON</button>
-                            <button data-collision="off">OFF</button>
-                        </div>
-                    </div>
-                    <div class="settings-row">
-                        <div class="settings-section">
-                            <label>3D VEHICLES</label>
-                            <div class="toggle-group d3v-toggle">
-                                <button class="active" data-d3v="on">ON</button>
-                                <button data-d3v="off">OFF</button>
-                            </div>
-                        </div>
-                        <div class="settings-section">
-                            <label>3D BUILDINGS</label>
-                            <div class="toggle-group d3b-toggle">
-                                <button class="active" data-d3b="on">ON</button>
-                                <button data-d3b="off">OFF</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="settings-section">
-                        <label style="color: #FF00E5; text-shadow: 0 0 10px #FF00E5;">GOD MODE</label>
-                        <div class="toggle-group god-toggle">
-                            <button class="active" data-god="off">OFF</button>
-                            <button data-god="on" style="--glow: #FF00E5;">ON</button>
-                        </div>
-                    </div>
-                </div>
-                <button id="settings-btn" class="settings-main-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z">
-                        </path>
-                        <path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                        </path>
-                    </svg>
-                    <span>SETTINGS</span>
+        <!-- Premium Interactive Touch Controls for Mobile/Tablet Devices -->
+        <div id="touch-controls" class="touch-controls-container">
+
+            <!-- Utility Reset and Drift Buttons -->
+            <div class="touch-utilities">
+                <button id="touch-reset" class="touch-btn util-btn" aria-label="Reset Vehicle">
+                    <span>RESET</span>
+                </button>
+                <button id="touch-drift" class="touch-btn pedal-btn drift" aria-label="Drift/Handbrake">
+                    <div class="pedal-label">DRIFT</div>
+                    <div class="pedal-pedal"></div>
+                </button>
+            </div>
+
+            <!-- Pedals (Accelerate / Reverse-Brake) -->
+            <div class="touch-pedals">
+                <button id="touch-brake" class="touch-btn pedal-btn brake" aria-label="Brake or Reverse">
+                    <div class="pedal-label">BRAKE</div>
+                    <div class="pedal-pedal"></div>
+                </button>
+                <button id="touch-gas" class="touch-btn pedal-btn gas" aria-label="Accelerate">
+                    <div class="pedal-label">GAS</div>
+                    <div class="pedal-pedal"></div>
                 </button>
             </div>
         </div>
@@ -342,7 +468,10 @@
     <footer style="display: none;" aria-hidden="true">
         <section>
             <h2>GEO Ride: The Future of Global 3D Exploration</h2>
-            <p>GEO Ride is a cutting-edge 3D driving simulator built for the modern web. Leveraging the power of Mapbox GL JS and Three.js, it offers a realistic driving experience across a digital twin of the entire planet. Whether you are looking to drive on Google Maps style environments or explore satellite 3D maps, GEO Ride provides the ultimate sandbox for world exploration.</p>
+            <p>GEO Ride is a cutting-edge 3D driving simulator built for the modern web. Leveraging the power of Mapbox
+                GL JS and Three.js, it offers a realistic driving experience across a digital twin of the entire planet.
+                Whether you are looking to drive on Google Maps style environments or explore satellite 3D maps, GEO
+                Ride provides the ultimate sandbox for world exploration.</p>
             <ul>
                 <li>3D Car Simulator with Realistic Physics</li>
                 <li>Truck and Bus Simulator on Real World Roads</li>
@@ -350,14 +479,20 @@
                 <li>Interactive Satellite Map Exploration</li>
                 <li>Educational Tool for Geography and Urban Planning</li>
             </ul>
-            <p>Keywords: Driving on real world map, 3D map simulator, best driving simulator web 2030, multiplayer car game no download, satellite view driving experience, Milan Web Portal innovation.</p>
+            <p>Keywords: Driving on real world map, 3D map simulator, best driving simulator web 2030, multiplayer car
+                game no download, satellite view driving experience, Milan Web Portal innovation.</p>
             <article>
                 <h3>Frequently Asked Questions about GEO Ride</h3>
-                <p><strong>Is this a Google Maps driving simulator?</strong> GEO Ride is a powerful alternative that uses high-fidelity Mapbox satellite data to provide a better 3D driving experience than standard map tools.</p>
-                <p><strong>Can I play GEO Ride on mobile?</strong> Yes, GEO Ride is fully optimized for mobile devices and can be installed as a PWA (Progressive Web App).</p>
-                <p><strong>Does it have multiplayer?</strong> Absolutely. You can race and explore the world with friends in real-time.</p>
+                <p><strong>Is this a Google Maps driving simulator?</strong> GEO Ride is a powerful alternative that
+                    uses high-fidelity Mapbox satellite data to provide a better 3D driving experience than standard map
+                    tools.</p>
+                <p><strong>Can I play GEO Ride on mobile?</strong> Yes, GEO Ride is fully optimized for mobile devices
+                    and can be installed as a PWA (Progressive Web App).</p>
+                <p><strong>Does it have multiplayer?</strong> Absolutely. You can race and explore the world with
+                    friends in real-time.</p>
             </article>
         </section>
     </footer>
 </body>
+
 </html>

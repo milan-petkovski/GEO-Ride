@@ -2,9 +2,33 @@ import { state, saveState } from './state.js';
 import { VEHICLE_CONFIG, INITIAL_CENTER } from './config.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
+import { haptics } from './haptics.js';
+import { initMultiplayer } from './multiplayer.js';
 
+let activeMap = null;
+
+function syncMapInteractions(map) {
+    if (!map) return;
+    const settingsPanel = document.getElementById('settings-panel');
+    const isSettingsOpen = settingsPanel?.classList.contains('active');
+
+    if (isSettingsOpen) {
+        map.dragPan?.disable();
+        map.scrollZoom?.disable();
+        map.doubleClickZoom?.disable();
+        map.touchZoomRotate?.disable();
+        map.keyboard?.disable();
+    } else {
+        map.dragPan?.enable();
+        map.scrollZoom?.enable();
+        map.doubleClickZoom?.enable();
+        map.touchZoomRotate?.enable();
+        map.keyboard?.enable();
+    }
+}
 
 export function initUI(map) {
+    activeMap = map;
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('settings-panel');
     const mpBtn = document.getElementById('mp-btn');
@@ -13,20 +37,64 @@ export function initUI(map) {
     const searchInput = document.getElementById('location-search');
     const searchBtn = document.getElementById('search-btn');
 
-    settingsBtn.onclick = (e) => {
-        e.stopPropagation();
-        mpDropdown?.classList.remove('active');
-        searchBox?.classList.remove('expanded');
-        settingsPanel.classList.toggle('active');
-    };
+    // Prevent all map interactions while settings is open
+    // Prevent touch, wheel, mouse, and pointer events from propagating to Mapbox to isolate panel scrolling
+    const stopPropagationEvents = [
+        'touchstart', 'touchmove', 'touchend',
+        'wheel', 'pointerdown', 'pointerup', 'pointermove',
+        'mousedown', 'mousemove', 'mouseup'
+    ];
+    stopPropagationEvents.forEach(evtType => {
+        settingsPanel?.addEventListener(evtType, (e) => e.stopPropagation(), { passive: true });
+        mpDropdown?.addEventListener(evtType, (e) => e.stopPropagation(), { passive: true });
+    });
 
-    document.onclick = (e) => {
-        if (!settingsPanel.contains(e.target) && e.target !== settingsBtn &&
-            !mpDropdown.contains(e.target) && e.target !== mpBtn &&
-            !searchBox.contains(e.target)) {
-            closeAllPanels();
+    settingsBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (mpDropdown) mpDropdown.classList.remove('active');
+        if (searchBox) searchBox.classList.remove('expanded');
+        settingsPanel.classList.toggle('active');
+        syncMapInteractions(map);
+        if (haptics) haptics.tap();
+        try {
+            if (typeof initMultiplayer === 'function') initMultiplayer();
+        } catch (err) {
+            console.error(err);
         }
     };
+
+    // Settings close button (X)
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
+    if (settingsCloseBtn) {
+        const closeSettings = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            settingsPanel.classList.remove('active');
+            syncMapInteractions(map);
+            if (haptics) haptics.tap();
+        };
+
+        settingsCloseBtn.addEventListener('click', closeSettings);
+        settingsCloseBtn.addEventListener('touchstart', closeSettings, { passive: false });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth > 1024) {
+            if (settingsPanel?.classList.contains('active') && !settingsPanel.contains(e.target) && e.target !== settingsBtn && !settingsBtn.contains(e.target)) {
+                settingsPanel.classList.remove('active');
+                syncMapInteractions(map);
+            }
+        }
+
+        if (mpDropdown?.classList.contains('active') && !mpDropdown.contains(e.target) && e.target !== mpBtn && !mpBtn.contains(e.target)) {
+            mpDropdown.classList.remove('active');
+        }
+
+        if (searchBox?.classList.contains('expanded') && !searchBox.contains(e.target)) {
+            searchBox.classList.remove('expanded');
+        }
+    });
 
     // Toggle Handlers
     document.querySelectorAll('.style-toggle button').forEach(btn => {
@@ -36,6 +104,7 @@ export function initUI(map) {
             updateToggleStates();
             saveState();
             trackEvent('change_map_style', { style: state.mapStyle });
+            haptics.select();
         };
     });
 
@@ -45,6 +114,7 @@ export function initUI(map) {
             updateToggleStates();
             saveState();
             trackEvent('change_units', { unit: state.unit });
+            haptics.select();
         };
     });
 
@@ -61,6 +131,7 @@ export function initUI(map) {
             updateToggleStates();
             saveState();
             trackEvent('select_vehicle', { vehicle: state.activeVehicle });
+            haptics.success();
         };
     });
 
@@ -72,6 +143,7 @@ export function initUI(map) {
             setupVehicleMarker(map);
             updateToggleStates();
             saveState();
+            haptics.select();
         };
     });
 
@@ -82,6 +154,7 @@ export function initUI(map) {
             add3DBuildings(map);
             updateToggleStates();
             saveState();
+            haptics.select();
         };
     });
 
@@ -91,6 +164,7 @@ export function initUI(map) {
             state.collisionsEnabled = btn.dataset.collision === 'on';
             updateToggleStates();
             saveState();
+            haptics.select();
         };
     });
 
@@ -112,13 +186,28 @@ export function initUI(map) {
             setupVehicleMarker(map);
             updateToggleStates();
             saveState();
+            haptics.select();
             trackEvent('toggle_god_mode', { enabled: state.godMode });
         };
     });
 
+    // Mobile controls toggle click handler
+    document.querySelectorAll('.controls-toggle button').forEach(btn => {
+        btn.onclick = () => {
+            state.controlsMode = btn.dataset.controls;
+            updateToggleStates();
+            saveState();
+            if (typeof window.applyControlsMode === 'function') {
+                window.applyControlsMode();
+            }
+            trackEvent('change_controls_mode', { mode: state.controlsMode });
+        };
+    });
+
     // Search logic
-    async function performSearch() {
-        const query = searchInput.value; if (!query) return;
+    async function performSearch(inputField) {
+        if (!inputField) return;
+        const query = inputField.value; if (!query) return;
         try {
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`);
             const data = await response.json();
@@ -134,6 +223,9 @@ export function initUI(map) {
                 state.teleportStart = [state.lng, state.lat];
                 state.teleportEnd = [lng, lat];
                 setup3DVehicleLayer(map);
+
+                // Auto-close settings dashboard on mobile or desktop if open
+                settingsPanel.classList.remove('active');
 
                 // Give it a moment to animate the shrinking/ball expansion at the start
                 setTimeout(() => {
@@ -157,33 +249,60 @@ export function initUI(map) {
                     });
                 }, 600); // 600ms delay to see the vehicle shrink and ball grow
                 trackEvent('search_location', { query: query });
-                searchInput.value = ''; searchInput.blur(); searchBox.classList.remove('expanded');
+                inputField.value = ''; inputField.blur(); searchBox.classList.remove('expanded');
             }
         } catch (err) { console.error("Search error:", err); }
     }
 
-    // Search Interaction
+    // Search Interaction (Desktop)
     searchBox.onclick = (e) => {
         e.stopPropagation();
         if (!searchBox.classList.contains('expanded')) {
             searchBox.classList.add('expanded');
             setTimeout(() => searchInput.focus(), 50);
             state.isInputFocused = true;
+            haptics.tap();
         }
     };
 
     searchBtn.onclick = (e) => {
         if (searchBox.classList.contains('expanded')) {
             e.stopPropagation();
-            performSearch();
+            performSearch(searchInput);
+            haptics.success();
         }
     };
 
     searchInput.onkeypress = (e) => {
         if (e.key === 'Enter') {
-            performSearch();
+            performSearch(searchInput);
         }
     };
+
+    // Search Interaction (Mobile Settings Dashboard)
+    const mobileSearchInput = document.getElementById('mobile-location-search');
+    const mobileSearchBtn = document.getElementById('mobile-search-btn');
+    if (mobileSearchBtn && mobileSearchInput) {
+        mobileSearchBtn.onclick = (e) => {
+            e.stopPropagation();
+            performSearch(mobileSearchInput);
+            haptics.success();
+        };
+        mobileSearchInput.onkeypress = (e) => {
+            if (e.key === 'Enter') {
+                performSearch(mobileSearchInput);
+                haptics.success();
+            }
+        };
+        // Prevent mobile search input from triggering panel close
+        const preventPropagationEvents = ['click', 'keydown', 'keyup', 'keypress', 'focus', 'mousedown'];
+        preventPropagationEvents.forEach(evt => {
+            mobileSearchInput.addEventListener(evt, (e) => {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            }, true);
+        });
+    }
 
     window.addEventListener('click', (e) => {
         if (!searchBox.contains(e.target)) {
@@ -207,15 +326,18 @@ export function initUI(map) {
     // Add tracking to external links
     document.querySelector('.coffee-btn')?.addEventListener('click', () => {
         trackEvent('click_coffee_btn');
+        haptics.tap();
     });
 
     document.querySelector('.author-link')?.addEventListener('click', () => {
         trackEvent('click_author_link');
+        haptics.tap();
     });
 
     document.getElementById('join-mp-btn')?.addEventListener('click', () => {
         const peerId = document.getElementById('join-peer-id')?.value;
         trackEvent('multiplayer_join_attempt', { peer_id_length: peerId?.length });
+        haptics.success();
     });
 }
 
@@ -226,6 +348,7 @@ export function closeAllPanels() {
     document.querySelector('.search-box')?.classList.remove('expanded');
     state.isInputFocused = false;
     document.getElementById('location-search')?.blur();
+    syncMapInteractions(activeMap);
 }
 
 export function updateToggleStates() {
@@ -254,6 +377,7 @@ export function updateToggleStates() {
     document.querySelectorAll('.god-toggle button').forEach(b => b.classList.toggle('active', b.dataset.god === (state.godMode ? 'on' : 'off')));
     if (unitLabel) unitLabel.textContent = state.unit === 'km' ? 'KM/H' : 'MPH';
     document.querySelectorAll('.style-toggle button').forEach(b => b.classList.toggle('active', b.dataset.style === state.mapStyle));
+    document.querySelectorAll('.controls-toggle button').forEach(b => b.classList.toggle('active', b.dataset.controls === state.controlsMode));
 }
 
 export function add3DBuildings(map) {

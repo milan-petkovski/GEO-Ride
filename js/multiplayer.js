@@ -17,15 +17,29 @@ export function initMultiplayer() {
     window.mpInitialized = true;
 
     const myPeerIdEl = document.getElementById('my-peer-id');
+    const mobileMyPeerIdEl = document.getElementById('mobile-my-peer-id');
+
     const copyBtn = document.getElementById('copy-id-btn');
+    const mobileCopyBtn = document.getElementById('mobile-copy-id-btn');
+
     const joinBtn = document.getElementById('join-mp-btn');
+    const mobileJoinBtn = document.getElementById('mobile-join-mp-btn');
+
     const joinInput = document.getElementById('join-peer-id');
+    const mobileJoinInput = document.getElementById('mobile-join-peer-id');
+
     const disconnectBtn = document.getElementById('disconnect-mp-btn');
+    const mobileDisconnectBtn = document.getElementById('mobile-disconnect-mp-btn');
+
     const mpStatusDot = document.getElementById('mp-status-dot');
     const statusLabel = document.getElementById('mp-connection-status');
+    const mobileStatusLabel = document.getElementById('mobile-mp-connection-status');
+
     const mpPlayersList = document.getElementById('mp-players-list');
+    const mobileMpPlayersList = document.getElementById('mobile-mp-players-list');
 
     if (myPeerIdEl) myPeerIdEl.textContent = myId.toUpperCase();
+    if (mobileMyPeerIdEl) mobileMyPeerIdEl.textContent = myId.toUpperCase();
 
     client = new Paho.MQTT.Client("broker.hivemq.com", 8884, "georide_" + myId);
 
@@ -73,6 +87,7 @@ export function initMultiplayer() {
         mpStatusDot?.classList.add('online');
         client.subscribe(currentTopic);
         if (disconnectBtn) disconnectBtn.style.display = 'block';
+        if (mobileDisconnectBtn) mobileDisconnectBtn.style.display = 'block';
         renderActivePlayers();
         startSyncTimers();
     }
@@ -85,10 +100,10 @@ export function initMultiplayer() {
             broadcastTimer = setInterval(() => {
                 if (client && client.isConnected && client.isConnected()) {
                     // FIX: Only send if data changed significantly
-                    const changed = Math.abs(state.lng - lastSent.lng) > 0.000001 || 
-                                    Math.abs(state.lat - lastSent.lat) > 0.000001 || 
-                                    Math.abs(state.bearing - lastSent.bearing) > 0.1 ||
-                                    state.activeVehicle !== lastSent.vehicle;
+                    const changed = Math.abs(state.lng - lastSent.lng) > 0.000001 ||
+                        Math.abs(state.lat - lastSent.lat) > 0.000001 ||
+                        Math.abs(state.bearing - lastSent.bearing) > 0.1 ||
+                        state.activeVehicle !== lastSent.vehicle;
 
                     if (changed) {
                         const message = new Paho.MQTT.Message(JSON.stringify({
@@ -102,13 +117,13 @@ export function initMultiplayer() {
                         }));
                         message.destinationName = currentTopic;
                         client.send(message);
-                        
-                        lastSent = { 
-                            lng: state.lng, 
-                            lat: state.lat, 
-                            bearing: state.bearing, 
+
+                        lastSent = {
+                            lng: state.lng,
+                            lat: state.lat,
+                            bearing: state.bearing,
                             velocity: state.velocity,
-                            vehicle: state.activeVehicle 
+                            vehicle: state.activeVehicle
                         };
                     }
                 }
@@ -130,163 +145,242 @@ export function initMultiplayer() {
         }
     }
 
+    const handleJoin = (targetCode, activeBtn) => {
+        isManualDisconnect = false;
+        if (targetCode) {
+            if (joinBtn) joinBtn.textContent = 'CONNECTING...';
+            if (mobileJoinBtn) mobileJoinBtn.textContent = 'CONNECTING...';
+
+            // CRITICAL: Cleanup old client to prevent memory leaks
+            if (client) {
+                try {
+                    client.onConnectionLost = null;
+                    client.onMessageArrived = null;
+                    if (client.isConnected()) client.disconnect();
+                } catch (e) { }
+                client = null;
+            }
+
+            // Create fresh client
+            client = new Paho.MQTT.Client("broker.hivemq.com", 8884, "georide_" + myId + "_" + Date.now().toString(36));
+
+            client.onConnectionLost = (responseObject) => {
+                console.log("MQTT Connection Lost:", responseObject.errorMessage);
+                mpStatusDot?.classList.remove('online');
+                if (!isManualDisconnect) {
+                    if (window.reconnectTimeout) clearTimeout(window.reconnectTimeout);
+                    window.reconnectTimeout = setTimeout(() => {
+                        if (!isManualDisconnect && client) client.connect({ onSuccess: onConnectSuccess, onFailure: onConnectFailure, useSSL: true });
+                    }, 3000);
+                }
+            };
+
+            client.onMessageArrived = (message) => {
+                try {
+                    const data = JSON.parse(message.payloadString);
+                    if (data.id === myId) return;
+                    if (!state.otherPlayers[data.id]) {
+                        state.otherPlayers[data.id] = {
+                            lng: data.lng, lat: data.lat, bearing: data.bearing,
+                            vehicle: data.vehicle || 'car', targetLng: data.lng,
+                            targetLat: data.lat, targetBearing: data.bearing, lastSeen: Date.now()
+                        };
+                    } else {
+                        const p = state.otherPlayers[data.id];
+                        p.targetLng = data.lng; p.targetLat = data.lat; p.targetBearing = data.bearing;
+                        p.velocity = data.v || 0; p.vehicle = data.vehicle || 'car'; p.lastSeen = Date.now();
+                    }
+                    renderActivePlayers();
+                } catch (e) { }
+            };
+
+            const onConnectSuccess = () => {
+                console.log("MQTT Connected to:", targetCode);
+                mpStatusDot?.classList.add('online');
+
+                if (joinBtn) joinBtn.style.display = 'none';
+                if (joinInput) joinInput.style.display = 'none';
+                if (mobileJoinBtn) mobileJoinBtn.style.display = 'none';
+                if (mobileJoinInput) mobileJoinInput.style.display = 'none';
+
+                if (statusLabel) {
+                    statusLabel.textContent = 'CONNECTED TO: ' + targetCode.toUpperCase();
+                    statusLabel.style.color = '#00ff88';
+                }
+                if (mobileStatusLabel) {
+                    mobileStatusLabel.textContent = 'CONNECTED TO: ' + targetCode.toUpperCase();
+                    mobileStatusLabel.style.color = '#00ff88';
+                }
+
+                if (disconnectBtn) disconnectBtn.style.display = 'block';
+                if (mobileDisconnectBtn) mobileDisconnectBtn.style.display = 'block';
+
+                if (mpPlayersList) mpPlayersList.style.display = 'block';
+                if (mobileMpPlayersList) mobileMpPlayersList.style.display = 'block';
+
+                currentTopic = "georide/room/" + targetCode;
+                client.subscribe(currentTopic);
+                startSyncTimers();
+                renderActivePlayers();
+
+                trackEvent('multiplayer_room_connect', { room: targetCode });
+            };
+
+            const onConnectFailure = (err) => {
+                console.error("MQTT Connect Failure:", err);
+                if (joinBtn) {
+                    joinBtn.textContent = 'ERROR';
+                    joinBtn.style.background = '#ff0055';
+                }
+                if (mobileJoinBtn) {
+                    mobileJoinBtn.textContent = 'ERROR';
+                    mobileJoinBtn.style.background = '#ff0055';
+                }
+                setTimeout(() => {
+                    if (joinBtn) {
+                        joinBtn.textContent = 'JOIN ROOM';
+                        joinBtn.style.background = '';
+                    }
+                    if (mobileJoinBtn) {
+                        mobileJoinBtn.textContent = 'JOIN ROOM';
+                        mobileJoinBtn.style.background = '';
+                    }
+                }, 3000);
+            };
+
+            client.connect({
+                onSuccess: onConnectSuccess,
+                onFailure: onConnectFailure,
+                useSSL: true,
+                timeout: 10,
+                keepAliveInterval: 30
+            });
+
+            // MP Settings
+            state.is3D = false;
+            state.is3DBuildings = false;
+            state.collisionsEnabled = false;
+            updateToggleStates();
+            setup3DVehicleLayer(window.map);
+            setupVehicleMarker(window.map);
+        }
+    };
+
     if (joinBtn) {
         joinBtn.onclick = () => {
             const targetCode = joinInput.value.trim().toLowerCase();
-            isManualDisconnect = false;
-            if (targetCode) {
-                joinBtn.textContent = 'CONNECTING...';
-                
-                // CRITICAL: Cleanup old client to prevent memory leaks
-                if (client) {
-                    try {
-                        client.onConnectionLost = null;
-                        client.onMessageArrived = null;
-                        if (client.isConnected()) client.disconnect();
-                    } catch (e) {}
-                    client = null;
-                }
-
-                // Create fresh client
-                client = new Paho.MQTT.Client("broker.hivemq.com", 8884, "georide_" + myId + "_" + Date.now().toString(36));
-
-                client.onConnectionLost = (responseObject) => {
-                    console.log("MQTT Connection Lost:", responseObject.errorMessage);
-                    mpStatusDot?.classList.remove('online');
-                    if (!isManualDisconnect) {
-                        if (window.reconnectTimeout) clearTimeout(window.reconnectTimeout);
-                        window.reconnectTimeout = setTimeout(() => {
-                            if (!isManualDisconnect && client) client.connect({ onSuccess: onConnectSuccess, onFailure: onConnectFailure, useSSL: true });
-                        }, 3000);
-                    }
-                };
-
-                client.onMessageArrived = (message) => {
-                    try {
-                        const data = JSON.parse(message.payloadString);
-                        if (data.id === myId) return;
-                        if (!state.otherPlayers[data.id]) {
-                            state.otherPlayers[data.id] = {
-                                lng: data.lng, lat: data.lat, bearing: data.bearing,
-                                vehicle: data.vehicle || 'car', targetLng: data.lng,
-                                targetLat: data.lat, targetBearing: data.bearing, lastSeen: Date.now()
-                            };
-                        } else {
-                            const p = state.otherPlayers[data.id];
-                            p.targetLng = data.lng; p.targetLat = data.lat; p.targetBearing = data.bearing;
-                            p.velocity = data.v || 0; p.vehicle = data.vehicle || 'car'; p.lastSeen = Date.now();
-                        }
-                        renderActivePlayers();
-                    } catch (e) { }
-                };
-
-                const onConnectSuccess = () => {
-                    console.log("MQTT Connected to:", targetCode);
-                    mpStatusDot?.classList.add('online');
-                    
-                    joinBtn.style.display = 'none';
-                    joinInput.style.display = 'none';
-
-                    if (statusLabel) {
-                        statusLabel.textContent = 'CONNECTED TO: ' + targetCode.toUpperCase();
-                        statusLabel.style.color = '#00ff88';
-                    }
-                    if (disconnectBtn) disconnectBtn.style.display = 'block';
-                    if (mpPlayersList) mpPlayersList.style.display = 'block';
-                    
-                    currentTopic = "georide/room/" + targetCode;
-                    client.subscribe(currentTopic);
-                    startSyncTimers();
-                    renderActivePlayers();
-
-                    trackEvent('multiplayer_room_connect', { room: targetCode });
-                };
-
-                const onConnectFailure = (err) => {
-                    console.error("MQTT Connect Failure:", err);
-                    joinBtn.textContent = 'ERROR';
-                    joinBtn.style.background = '#ff0055';
-                    setTimeout(() => { joinBtn.textContent = 'JOIN ROOM'; joinBtn.style.background = ''; }, 3000);
-                };
-
-                client.connect({ 
-                    onSuccess: onConnectSuccess, 
-                    onFailure: onConnectFailure, 
-                    useSSL: true,
-                    timeout: 10,
-                    keepAliveInterval: 30
-                });
-
-                // MP Settings
-                state.is3D = false;
-                state.is3DBuildings = false;
-                state.collisionsEnabled = false;
-                updateToggleStates();
-                setup3DVehicleLayer(window.map);
-                setupVehicleMarker(window.map);
-            }
+            handleJoin(targetCode, joinBtn);
         };
-
-        joinInput.oninput = null; // No longer needed
+    }
+    if (mobileJoinBtn) {
+        mobileJoinBtn.onclick = () => {
+            const targetCode = mobileJoinInput.value.trim().toLowerCase();
+            handleJoin(targetCode, mobileJoinBtn);
+        };
     }
 
-    if (disconnectBtn) {
-        disconnectBtn.onclick = () => {
-            isManualDisconnect = true;
-            if (client && client.isConnected && client.isConnected()) client.disconnect();
-            
-            if (broadcastTimer) { clearInterval(broadcastTimer); broadcastTimer = null; }
-            if (cleanupTimer) { clearInterval(cleanupTimer); cleanupTimer = null; }
-            
-            trackEvent('multiplayer_room_disconnect', { room: currentTopic.replace('georide/room/', '') });
+    const handleDisconnect = () => {
+        isManualDisconnect = true;
+        if (client && client.isConnected && client.isConnected()) client.disconnect();
 
-            disconnectBtn.style.display = 'none';
-            if (statusLabel) {
-                statusLabel.textContent = 'NOT CONNECTED';
-                statusLabel.style.color = '#ff4b4b';
-            }
-            if (mpPlayersList) mpPlayersList.style.display = 'none';
-            
+        if (broadcastTimer) { clearInterval(broadcastTimer); broadcastTimer = null; }
+        if (cleanupTimer) { clearInterval(cleanupTimer); cleanupTimer = null; }
+
+        trackEvent('multiplayer_room_disconnect', { room: currentTopic.replace('georide/room/', '') });
+
+        if (disconnectBtn) disconnectBtn.style.display = 'none';
+        if (mobileDisconnectBtn) mobileDisconnectBtn.style.display = 'none';
+
+        if (statusLabel) {
+            statusLabel.textContent = 'NOT CONNECTED';
+            statusLabel.style.color = '#ff4b4b';
+        }
+        if (mobileStatusLabel) {
+            mobileStatusLabel.textContent = 'NOT CONNECTED';
+            mobileStatusLabel.style.color = '#ff4b4b';
+        }
+
+        if (mpPlayersList) mpPlayersList.style.display = 'none';
+        if (mobileMpPlayersList) mobileMpPlayersList.style.display = 'none';
+
+        if (joinInput) {
             joinInput.style.display = 'block';
             joinInput.disabled = false;
             joinInput.style.opacity = '1';
             joinInput.value = '';
-            
+        }
+        if (mobileJoinInput) {
+            mobileJoinInput.style.display = 'block';
+            mobileJoinInput.disabled = false;
+            mobileJoinInput.style.opacity = '1';
+            mobileJoinInput.value = '';
+        }
+
+        if (joinBtn) {
             joinBtn.style.display = 'block';
             joinBtn.disabled = false;
             joinBtn.textContent = 'JOIN ROOM';
             joinBtn.style.background = '';
             joinBtn.style.opacity = '1';
             joinBtn.style.cursor = 'pointer';
-            
-            Object.keys(state.otherPlayers).forEach(id => {
-                if (state.otherPlayers[id].marker2d) state.otherPlayers[id].marker2d.remove();
-                delete state.otherPlayers[id];
-            });
-            renderActivePlayers();
-        };
-    }
+        }
+        if (mobileJoinBtn) {
+            mobileJoinBtn.style.display = 'block';
+            mobileJoinBtn.disabled = false;
+            mobileJoinBtn.textContent = 'JOIN ROOM';
+            mobileJoinBtn.style.background = '';
+            mobileJoinBtn.style.opacity = '1';
+            mobileJoinBtn.style.cursor = 'pointer';
+        }
 
-    if (copyBtn) {
-        copyBtn.onclick = () => {
-            navigator.clipboard.writeText(myId.toUpperCase());
-            copyBtn.textContent = 'OK';
-            setTimeout(() => { copyBtn.textContent = 'COPY'; }, 1000);
-        };
+        Object.keys(state.otherPlayers).forEach(id => {
+            if (state.otherPlayers[id].marker2d) state.otherPlayers[id].marker2d.remove();
+            delete state.otherPlayers[id];
+        });
+        renderActivePlayers();
+    };
+
+    if (disconnectBtn) disconnectBtn.onclick = handleDisconnect;
+    if (mobileDisconnectBtn) mobileDisconnectBtn.onclick = handleDisconnect;
+
+    const handleCopy = (btn) => {
+        navigator.clipboard.writeText(myId.toUpperCase());
+        btn.textContent = 'OK';
+        setTimeout(() => { btn.textContent = 'COPY'; }, 1000);
+    };
+    if (copyBtn) copyBtn.onclick = () => handleCopy(copyBtn);
+    if (mobileCopyBtn) mobileCopyBtn.onclick = () => handleCopy(mobileCopyBtn);
+
+    // Prevent inputs from triggering panel close when clicked or typed
+    const preventPropagationEvents = ['click', 'keydown', 'keyup', 'keypress', 'focus', 'mousedown'];
+    if (joinInput) {
+        preventPropagationEvents.forEach(evt => {
+            joinInput.addEventListener(evt, (e) => {
+                e.stopPropagation();
+            }); // Bubbling phase - after panel stopPropagation
+        });
+    }
+    if (mobileJoinInput) {
+        preventPropagationEvents.forEach(evt => {
+            mobileJoinInput.addEventListener(evt, (e) => {
+                e.stopPropagation();
+            }); // Bubbling phase - after panel stopPropagation
+        });
     }
 }
 
 export function renderActivePlayers() {
     const mpPlayersList = document.getElementById('mp-players-list');
-    if (!mpPlayersList) return;
+    const mobileMpPlayersList = document.getElementById('mobile-mp-players-list');
+    if (!mpPlayersList && !mobileMpPlayersList) return;
 
     // Build the list of player data
     const activePlayers = [
-        { id: myId, vehicle: state.activeVehicle, isSelf: true }, 
-        ...Object.keys(state.otherPlayers).map(id => ({ 
-            id, 
-            vehicle: state.otherPlayers[id].vehicle, 
-            isSelf: false 
+        { id: myId, vehicle: state.activeVehicle, isSelf: true },
+        ...Object.keys(state.otherPlayers).map(id => ({
+            id,
+            vehicle: state.otherPlayers[id].vehicle,
+            isSelf: false
         }))
     ];
 
@@ -295,23 +389,28 @@ export function renderActivePlayers() {
     if (window.lastPlayerIdList === currentIdList) return;
     window.lastPlayerIdList = currentIdList;
 
-    mpPlayersList.textContent = ''; // Clear existing
-    
-    activePlayers.forEach(p => {
-        const entry = document.createElement('div');
-        entry.className = `mp-player-entry ${p.isSelf ? 'mp-player-self' : ''}`;
-        
-        const idSpan = document.createElement('span');
-        idSpan.className = 'mp-player-id';
-        idSpan.textContent = p.id.toUpperCase();
-        
-        const vehicleSpan = document.createElement('span');
-        vehicleSpan.className = 'mp-player-vehicle';
-        vehicleSpan.textContent = p.isSelf ? 'YOU' : p.vehicle.toUpperCase();
-        
-        entry.append(idSpan, vehicleSpan);
-        mpPlayersList.appendChild(entry);
-    });
+    const buildList = (el) => {
+        if (!el) return;
+        el.textContent = '';
+        activePlayers.forEach(p => {
+            const entry = document.createElement('div');
+            entry.className = `mp-player-entry ${p.isSelf ? 'mp-player-self' : ''}`;
+
+            const idSpan = document.createElement('span');
+            idSpan.className = 'mp-player-id';
+            idSpan.textContent = p.id.toUpperCase();
+
+            const vehicleSpan = document.createElement('span');
+            vehicleSpan.className = 'mp-player-vehicle';
+            vehicleSpan.textContent = p.isSelf ? 'YOU' : p.vehicle.toUpperCase();
+
+            entry.append(idSpan, vehicleSpan);
+            el.appendChild(entry);
+        });
+    };
+
+    buildList(mpPlayersList);
+    buildList(mobileMpPlayersList);
 }
 
 export function updateOtherPlayers(dtFinal, map) {

@@ -6,7 +6,18 @@ export default defineConfig(({ mode }) => {
     base: './',
     server: {
       port: 3000,
-      open: true
+      open: true,
+      host: '0.0.0.0',
+      strictPort: false,
+      hmr: {
+        host: '192.168.0.50',
+        port: 3000,
+        protocol: 'ws'
+      },
+      cors: {
+        origin: '*',
+        credentials: true
+      }
     },
     build: {
       outDir: 'dist',

@@ -2,6 +2,7 @@ import { state, saveState } from './state.js';
 import { VEHICLE_CONFIG, INITIAL_CENTER } from './config.js';
 import { setup3DVehicleLayer } from './three-manager.js';
 import { trackEvent } from './analytics.js';
+import { haptics } from './haptics.js';
 
 let lastCollisionTrackTime = 0;
 
@@ -14,7 +15,7 @@ export function updatePhysics(dtFinal, map) {
             if (!state.isTeleporting) {
                 const isShiftReset = state.keys['shift'];
                 const [lng, lat] = isShiftReset ? INITIAL_CENTER : state.currentHome;
-                
+
                 state.velocity = 0;
                 state.isTeleporting = true;
                 state.isCameraAnimating = true;
@@ -22,7 +23,7 @@ export function updatePhysics(dtFinal, map) {
                 state.teleportDuration = isShiftReset ? 4500 : 2500;
                 state.teleportStart = [state.lng, state.lat];
                 state.teleportEnd = [lng, lat];
-                
+
                 map.flyTo({
                     center: [lng, lat],
                     zoom: 18,
@@ -31,7 +32,7 @@ export function updatePhysics(dtFinal, map) {
                     duration: state.teleportDuration
                 });
 
-                trackEvent('vehicle_reset', { 
+                trackEvent('vehicle_reset', {
                     is_global: isShiftReset,
                     generalized_location: "REDACTED" // Prevent PII leakage
                 });
@@ -128,13 +129,13 @@ export function updatePhysics(dtFinal, map) {
             let collisionOccurred = false;
             let isAlreadyInside = false;
             state.collisionCheckFrame = (state.collisionCheckFrame || 0) + 1;
-            
+
             if (state.collisionsEnabled && state.activeVehicle !== 'god' && Math.abs(state.velocity) > 0.01) {
                 // 1. Building Collisions (Throttled for performance)
                 if (state.collisionCheckFrame % 2 === 0) {
                     const currentP = map.project([state.lng, state.lat]);
                     const nextP = map.project([nextLng, nextLat]);
-                    
+
                     // Simple distance check to skip query if movement is micro
                     const distSq = Math.pow(nextP.x - currentP.x, 2) + Math.pow(nextP.y - currentP.y, 2);
                     if (distSq > 0.1) {
@@ -160,6 +161,10 @@ export function updatePhysics(dtFinal, map) {
                                 state.lng += Math.sin(rad) * bounceDirection * 0.00002;
                                 state.lat += Math.cos(rad) * bounceDirection * 0.00002;
                                 state.crashShake = Math.min(10, state.crashShake + Math.abs(state.velocity) * 1000);
+
+                                // Haptic feedback for collision
+                                const collisionIntensity = Math.abs(state.velocity) > 0.5 ? 'strong' : 'medium';
+                                haptics.impact(collisionIntensity);
                             }
                         }
                     }
@@ -168,14 +173,14 @@ export function updatePhysics(dtFinal, map) {
                 // 2. Multiplayer Player Collisions (High Precision)
                 const myMc = mapboxgl.MercatorCoordinate.fromLngLat([state.lng, state.lat], 0);
                 const meterScale = mapboxgl.MercatorCoordinate.fromLngLat([state.lng, state.lat], 0).meterInMercatorCoordinateUnits();
-                
+
                 Object.values(state.otherPlayers).forEach(p => {
                     if (!p.lng || !p.lat) return;
                     const pMc = mapboxgl.MercatorCoordinate.fromLngLat([p.lng, p.lat], 0);
                     const dx = (pMc.x - myMc.x) / meterScale;
                     const dy = (pMc.y - myMc.y) / meterScale;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    
+
                     const collisionThreshold = state.activeVehicle === 'car' ? 5.0 : 8.5;
                     if (dist < collisionThreshold) {
                         collisionOccurred = true;
@@ -186,7 +191,7 @@ export function updatePhysics(dtFinal, map) {
                 if (collisionOccurred && !isAlreadyInside) {
                     const now = Date.now();
                     if (now - lastCollisionTrackTime > 5000) {
-                        trackEvent('vehicle_collision', { 
+                        trackEvent('vehicle_collision', {
                             vehicle: state.activeVehicle,
                             velocity: Math.abs(state.velocity).toFixed(2)
                         });
@@ -198,6 +203,9 @@ export function updatePhysics(dtFinal, map) {
                     const rad = (state.bearing) * (Math.PI / 180);
                     state.lng += Math.sin(rad) * bounceDirection * 0.00001;
                     state.lat += Math.cos(rad) * bounceDirection * 0.00001;
+
+                    // Haptic feedback for multiplayer collision
+                    haptics.impact('strong');
                     state.isCharging = false; state.chargeLevel = 0; state.crashShake = 15;
                 }
             }

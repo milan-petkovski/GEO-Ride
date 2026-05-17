@@ -21,7 +21,7 @@ import { trackEvent, trackWebVitals } from './js/analytics.js';
 
 // Initialize Analytics & Performance Monitoring
 trackWebVitals();
-trackEvent('session_start', { 
+trackEvent('session_start', {
     platform: 'web',
     version: '2026.1.0',
     resolution: `${window.innerWidth}x${window.innerHeight}`
@@ -67,6 +67,9 @@ function startLoading() {
     const startTime = performance.now();
     const duration = 1000;
     smoothProgress();
+    // Ensure the loading overlay blocks input while we are actively loading
+    const overlayEl = document.getElementById('loading-overlay');
+    if (overlayEl) overlayEl.classList.add('blocking');
 
     const tick = (now) => {
         const elapsed = now - startTime;
@@ -81,9 +84,14 @@ function startLoading() {
 function finishLoading() {
     setProgress(100);
     setTimeout(() => {
-        document.getElementById('loading-overlay').classList.add('fade-out');
+        const overlayEl = document.getElementById('loading-overlay');
+        if (overlayEl) {
+            overlayEl.classList.add('fade-out');
+            // remove blocking so pointer-events follow .fade-out (which sets none)
+            overlayEl.classList.remove('blocking');
+        }
         setTimeout(() => {
-            document.getElementById('loading-overlay').style.display = 'none';
+            if (overlayEl) overlayEl.style.display = 'none';
             state.lastTime = performance.now();
             state.loopStarted = true;
             requestAnimationFrame(update);
@@ -120,7 +128,7 @@ function update(time) {
         updateCamera(dtFinal, map);
         updateOtherPlayers(dtFinal, map);
         updateSkidMarks(map);
-        
+
         // Marker Sync
         const vehicleMarker = getVehicleMarker();
         if (vehicleMarker) {
@@ -144,9 +152,9 @@ function update(time) {
         // HUD Update (Only if speed changed)
         let speedVal = Math.floor(Math.abs(state.velocity) * 600);
         if (state.unit === 'mi') speedVal = Math.floor(speedVal * 0.621371);
-        
+
         if (speedVal !== state.lastHUDUpdateSpeed) {
-            document.getElementById('speed').textContent = (state.velocity < -0.0001 ? '-' : '') + speedVal;
+            document.getElementById('speed').textContent = (speedVal > 0 && state.velocity < -0.0001 ? '-' : '') + speedVal;
             state.lastHUDUpdateSpeed = speedVal;
         }
     }
