@@ -110,7 +110,7 @@ export function setup3DVehicleLayer(map) {
             const accentColor = 0x00F2FF;
             const loader = new THREE.TextureLoader();
             const logoTex = loader.load('favicon.png');
-            const wheelSegments = state.performance.lowEnd ? 8 : 12;
+            const wheelSegments = state.performance.eliteEnd ? 24 : (state.performance.lowEnd ? 8 : 12);
 
             const teleSphereGeom = new THREE.SphereGeometry(1.2, 32, 32);
             const teleSphereMat = new THREE.MeshStandardMaterial({ color: 0x00F2FF, emissive: 0x00F2FF, emissiveIntensity: 5, transparent: true, opacity: 0.8 });
@@ -385,11 +385,12 @@ export function updateSkidMarks(map) {
             const createTrack = (side) => {
                 const tire = side === 1 ? currentTires.right : currentTires.left;
                 const lastTire = side === 1 ? state.lastSkidPos.right : state.lastSkidPos.left;
-                const jitter = isBurnout ? (Math.random() - 0.5) * 0.000005 : 0;
+                // Remove jitter for a perfectly smooth tire track curve
+                const jitter = 0;
 
                 return {
                     type: 'Feature',
-                    properties: { opacity: isBurnout ? 0.35 : 0.45, life: isBurnout ? 2.5 : 3.5 },
+                    properties: { opacity: isBurnout ? 0.7 : 0.85, life: isBurnout ? 3.0 : 4.5 },
                     geometry: {
                         type: 'LineString',
                         coordinates: [
@@ -408,12 +409,12 @@ export function updateSkidMarks(map) {
 
     if (state.skidMarks.length > 0) {
         state.skidMarks.forEach(m => {
-            m.properties.life -= 0.015;
-            m.properties.opacity = Math.max(0, m.properties.life * 0.4);
+            m.properties.life -= 0.005; // Fade 3x slower
+            m.properties.opacity = Math.max(0, m.properties.life * 0.2); // Smooth fade transition
         });
 
         state.skidMarks = state.skidMarks.filter(m => m.properties.life > 0);
-        const maxMarks = state.performance.lowEnd ? 300 : 1000;
+        const maxMarks = state.performance.eliteEnd ? 2000 : (state.performance.lowEnd ? 200 : 800);
         if (state.skidMarks.length > maxMarks) state.skidMarks = state.skidMarks.slice(-maxMarks);
 
         state.skidUpdateFrame++;

@@ -11,13 +11,15 @@ if ('serviceWorker' in navigator) {
 
 import { state, loadState, saveState } from './js/state.js';
 import { INITIAL_CENTER } from './js/config.js';
-import { initUI, updateToggleStates, add3DBuildings } from './js/ui.js';
+import { initUI, updateToggleStates, add3DBuildings, applyLightPreset } from './js/ui.js';
 import { initControls } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
 import { initMultiplayer, updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
 import { cleanMap, setProgress, addSkidMarksLayer } from './js/utils.js';
 import { trackEvent, trackWebVitals } from './js/analytics.js';
+import { checkDiscovery } from './js/discovery.js';
+import { updateAudio } from './js/audio.js';
 
 // Initialize Analytics & Performance Monitoring
 trackWebVitals();
@@ -31,6 +33,14 @@ trackEvent('session_start', {
 // Load initial state
 loadState();
 
+// Apply performance classes to document root based on calculated hardware capabilities
+if (state.performance && state.performance.lowEnd) {
+    document.documentElement.classList.add('geo-performance-low');
+}
+if (state.performance && state.performance.reducedMotion) {
+    document.documentElement.classList.add('geo-reduced-motion');
+}
+
 // Mapbox token initialization
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.MAPBOX_TOKEN;
 
@@ -40,9 +50,11 @@ const map = new mapboxgl.Map({
     center: [state.lng, state.lat],
     zoom: 18,
     pitch: 65,
-    bearing: 0,
+    bearing: state.bearing,
     interactive: false,
-    pixelRatio: state.performance.lowEnd ? 1 : Math.min(window.devicePixelRatio || 1, 1.3),
+    pixelRatio: state.performance.eliteEnd
+        ? Math.min(window.devicePixelRatio || 1, 2.0)
+        : (state.performance.lowEnd ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.3)),
     antialias: !state.performance.lowEnd
 });
 
@@ -81,7 +93,20 @@ function startLoading() {
     requestAnimationFrame(tick);
 }
 
+let isMapFullyLoaded = false;
+map.once('idle', () => {
+    isMapFullyLoaded = true;
+});
+// Safety fallback after 3 seconds in case network is slow or offline
+setTimeout(() => {
+    isMapFullyLoaded = true;
+}, 3000);
+
 function finishLoading() {
+    if (!isMapFullyLoaded) {
+        setTimeout(finishLoading, 50);
+        return;
+    }
     setProgress(100);
     setTimeout(() => {
         const overlayEl = document.getElementById('loading-overlay');
@@ -99,7 +124,10 @@ function finishLoading() {
     }, 50);
 }
 
+let isInitialMapLoad = true;
+
 map.on('load', () => {
+    isInitialMapLoad = false;
     cleanMap(map);
     add3DBuildings(map);
     setup3DVehicleLayer(map);
@@ -109,16 +137,11 @@ map.on('load', () => {
     startLoading();
 
     // Apply standard preset if active on load
-    if (state.mapStyle === 'standard') {
-        try {
-            map.setConfigProperty('basemap', 'lightPreset', state.lightPreset || 'day');
-        } catch (e) {
-            console.warn("Could not set standard preset on load:", e);
-        }
-    }
+    applyLightPreset(map);
 });
 
 map.on('style.load', () => {
+    if (isInitialMapLoad) return;
     cleanMap(map);
     add3DBuildings(map);
     setup3DVehicleLayer(map);
@@ -126,13 +149,7 @@ map.on('style.load', () => {
     addSkidMarksLayer(map);
 
     // Apply standard preset if active on style load
-    if (state.mapStyle === 'standard') {
-        try {
-            map.setConfigProperty('basemap', 'lightPreset', state.lightPreset || 'day');
-        } catch (e) {
-            console.warn("Could not set standard preset on style load:", e);
-        }
-    }
+    applyLightPreset(map);
 });
 
 function update(time) {
@@ -146,6 +163,14 @@ function update(time) {
         updateCamera(dtFinal, map);
         updateOtherPlayers(dtFinal, map);
         updateSkidMarks(map);
+        
+        // Check for new cities/locations
+        if (!state.isTeleporting) {
+            checkDiscovery(state.lng, state.lat);
+        }
+        
+        // Update dynamic 3D audio engine
+        updateAudio(state);
 
         // Marker Sync
         const vehicleMarker = getVehicleMarker();
@@ -192,6 +217,23 @@ document.getElementById('mp-btn').onclick = (e) => {
     if (mpDropdown && mpDropdown.contains(e.target)) return;
 
     e.stopPropagation();
+
+    // Enforce Exclusivity: Close other popups
+    const settingsPanel = document.getElementById('settings-panel');
+    if (settingsPanel && settingsPanel.classList.contains('active')) {
+        settingsPanel.classList.remove('active');
+        // Re-enable map interactions that were disabled by settings
+        if (window.map) {
+            window.map.dragPan?.enable();
+            window.map.scrollZoom?.enable();
+            window.map.doubleClickZoom?.enable();
+            window.map.touchZoomRotate?.enable();
+            window.map.keyboard?.enable();
+        }
+    }
+    const searchBox = document.querySelector('.search-box');
+    if (searchBox) searchBox.classList.remove('expanded');
+
     if (!window.mpInitialized) {
         initMultiplayer();
         if (mpDropdown) mpDropdown.classList.add('active');

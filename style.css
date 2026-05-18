@@ -142,6 +142,7 @@ a[href*="milanwebportal"]:hover,
     font-weight: 800;
     color: #fff;
     letter-spacing: 18px;
+    text-indent: 18px; /* Perfects centering by compensating for trailing letter-spacing */
     margin-bottom: 0.5rem;
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
@@ -162,16 +163,14 @@ a[href*="milanwebportal"]:hover,
 
 .progress-bar-fill {
     height: 100%;
-    width: 100%;
+    width: 0%;
     background: var(--primary);
     border-radius: 10px;
     box-shadow: 0 0 20px var(--primary),
         0 0 40px var(--primary-glow),
         0 0 60px rgba(0, 242, 255, 0.4);
-    transform: scaleX(0);
-    transform-origin: left;
-    /* Ultra-short transition for sub-frame smoothness without delay */
-    transition: transform 0.05s linear !important;
+    /* Buttery smooth easing for a clean, premium loading experience */
+    transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
 .loading-percentage {
@@ -2715,4 +2714,94 @@ html.geo-reduced-motion kbd {
         opacity: 1 !important;
         pointer-events: auto !important;
     }
+}
+
+/* Premium styling for God Mode button in Vehicle Toggle */
+.toggle-group button[data-vehicle="god"] {
+    background: rgba(255, 0, 229, 0.05) !important;
+    color: rgba(255, 0, 229, 0.6) !important;
+    border: 1px dashed rgba(255, 0, 229, 0.3) !important;
+}
+
+.toggle-group button[data-vehicle="god"]:hover {
+    color: #FF00E5 !important;
+    border-color: #FF00E5 !important;
+    box-shadow: 0 0 10px rgba(255, 0, 229, 0.3) !important;
+}
+
+.toggle-group button[data-vehicle="god"].active {
+    background: #FF00E5 !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px rgba(255, 0, 229, 0.8) !important;
+    border-style: solid !important;
+    border-color: #FF00E5 !important;
+}
+
+/* Cinematic Location Discovery */
+.location-discovery {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    text-align: center;
+    z-index: 500;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 80%);
+    padding: 30px 100px;
+}
+
+.location-discovery.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.discovery-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: #00F2FF;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+    text-transform: uppercase;
+}
+
+.discovery-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: 15px;
+    color: #FFFFFF;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    margin-bottom: 0px;
+    line-height: 1;
+}
+
+.discovery-country {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+    .discovery-title { font-size: 2rem; letter-spacing: 6px; white-space: nowrap; }
+    .discovery-subtitle { font-size: 0.7rem; letter-spacing: 5px; }
+    .discovery-country { font-size: 0.8rem; letter-spacing: 6px; }
+    .location-discovery { padding: 15px 10px; top: 18%; width: 100vw; background: radial-gradient(circle, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 90%); }
+}
+
+@media (max-width: 480px) {
+    .discovery-title { font-size: 1.35rem; letter-spacing: 4px; }
+    .discovery-subtitle { font-size: 0.6rem; letter-spacing: 4px; }
+    .discovery-country { font-size: 0.7rem; letter-spacing: 5px; }
+    .location-discovery { top: 12%; }
 }

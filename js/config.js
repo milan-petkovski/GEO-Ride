@@ -1,4 +1,4 @@
-export const INITIAL_CENTER = [20.251391, 44.831868]; // Belgrade
+export const INITIAL_CENTER = [20.449425, 44.809684] // Belgrade Waterfront
 export const INITIAL_ZOOM = 18;
 
 // Custom Premium SVGs
@@ -22,14 +22,45 @@ export const PERFORMANCE_PROFILE = (() => {
     const saveData = !!(connection && connection.saveData);
     const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const compactViewport = Math.min(window.innerWidth, window.innerHeight) <= 900;
-    const lowEnd = saveData || reducedMotion || (deviceMemory <= 4 && hardwareConcurrency <= 6) || (compactViewport && hardwareConcurrency <= 6) || (touchDevice && hardwareConcurrency <= 4);
+
+    const getGpuInfo = () => {
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return { renderer: 'Unknown', vendor: 'Unknown', isLowEndGpu: false };
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (!debugInfo) return { renderer: 'Unknown', vendor: 'Unknown', isLowEndGpu: false };
+            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+            const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '';
+            const lowEndGpuRegex = /intel|iris|hd graphics|uhd graphics|mali|adreno|swiftshader|software|google/i;
+            const isLowEndGpu = lowEndGpuRegex.test(renderer);
+            return { renderer, vendor, isLowEndGpu };
+        } catch (e) {
+            return { renderer: 'Error', vendor: 'Error', isLowEndGpu: false };
+        }
+    };
+
+    const gpu = getGpuInfo();
+    const isSlowConn = saveData || !!(connection && (connection.effectiveType === '2g' || connection.effectiveType === '3g'));
+
+    // Determine three-tier hardware classification
+    let tier = 'mid';
+    if (isSlowConn || deviceMemory <= 4 || hardwareConcurrency <= 4 || gpu.isLowEndGpu || (compactViewport && hardwareConcurrency <= 6)) {
+        tier = 'low';
+    } else if (deviceMemory >= 12 && hardwareConcurrency >= 8 && !gpu.isLowEndGpu) {
+        tier = 'elite';
+    }
 
     return {
-        lowEnd,
+        tier, // 'low' | 'mid' | 'elite'
+        lowEnd: tier === 'low',
+        midEnd: tier === 'mid',
+        eliteEnd: tier === 'elite',
+        gpu,
+        cores: hardwareConcurrency,
+        memory: deviceMemory,
         touchDevice,
         reducedMotion,
-        deviceMemory,
-        hardwareConcurrency,
-        saveData
+        isSlowConn
     };
 })();

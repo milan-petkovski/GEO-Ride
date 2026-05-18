@@ -19,8 +19,7 @@ export function setProgress(p) {
     const progressBar = document.getElementById('progress-bar');
     const clamped = Math.max(0, Math.min(p, 100));
     if (progressBar) {
-        progressBar.style.transform = `scaleX(${(clamped / 100).toFixed(3)})`;
-        progressBar.style.transformOrigin = 'left';
+        progressBar.style.width = `${clamped.toFixed(1)}%`;
     }
 }
 
@@ -37,8 +36,19 @@ export function addSkidMarksLayer(map) {
             type: 'line',
             source: 'skid-marks',
             paint: {
-                'line-color': '#111',
-                'line-width': 5,
+                'line-color': '#050505',
+                'line-width': [
+                    'interpolate', ['linear'], ['zoom'],
+                    14, 1.5,
+                    18, 4,
+                    22, 10
+                ],
+                'line-blur': [
+                    'interpolate', ['linear'], ['zoom'],
+                    14, 0,
+                    18, 1,
+                    22, 3
+                ],
                 'line-opacity': ['get', 'opacity']
             }
         });

@@ -171,6 +171,13 @@
 
     <div id="map"></div>
 
+    <!-- Cinematic Location Discovery Overlay -->
+    <div id="location-discovery" class="location-discovery hidden">
+        <div class="discovery-subtitle">ARRIVED IN</div>
+        <div class="discovery-title" id="discovery-title">BELGRADE</div>
+        <div class="discovery-country" id="discovery-country">SERBIA</div>
+    </div>
+
     <!-- UI Overlay -->
     <div class="ui-container">
         <h1
@@ -263,6 +270,8 @@
                             </button>
                         </div>
 
+
+
                         <!-- Dedicated Mobile Search Section (Mobile Only) -->
                         <div class="settings-section mobile-only-section" id="mobile-search-section">
                             <label>SEARCH LOCATION</label>
@@ -306,11 +315,20 @@
                         </div>
 
                         <div class="settings-section">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>MASTER SOUND</span>
+                                <span id="volume-label" style="font-size: 0.7rem; opacity: 0.7;">50%</span>
+                            </label>
+                            <input type="range" id="master-volume" min="0" max="1" step="0.05" value="0.5" style="width: 100%; cursor: pointer; accent-color: #00F2FF;">
+                        </div>
+
+                        <div class="settings-section">
                             <label>VEHICLE</label>
                             <div class="toggle-group vehicle-toggle">
                                 <button class="active" data-vehicle="car">CAR</button>
                                 <button data-vehicle="bus">BUS</button>
                                 <button data-vehicle="truck">TRUCK</button>
+                                <button data-vehicle="god" id="vehicle-god-btn" style="display: none; --glow: #FF00E5; color: #FF00E5;">GOD</button>
                             </div>
                         </div>
                         <div class="settings-section">
@@ -324,11 +342,21 @@
                         </div>
                         <div class="settings-section" id="light-preset-section" style="display: none;">
                             <label>LIGHT PRESET</label>
-                            <div class="toggle-group light-toggle">
-                                <button class="active" data-preset="day">DAY</button>
-                                <button data-preset="dawn">DAWN</button>
-                                <button data-preset="dusk">DUSK</button>
-                                <button data-preset="night">NIGHT</button>
+                            <div class="toggle-group light-toggle" id="light-main-group">
+                                <button class="active" id="btn-realtime" data-preset="realtime">REAL TIME</button>
+                                <button id="btn-manual-trigger">MANUAL</button>
+                            </div>
+                            <div id="light-manual-group" style="display: none; align-items: center; gap: 8px; width: 100%;">
+                                <button id="btn-light-back" 
+                                        style="flex-shrink: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; cursor: pointer; padding: 6px 12px; font-size: 11px; font-weight: 600; transition: all 0.2s ease;"
+                                        onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.2)'" 
+                                        onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)'">←</button>
+                                <div class="toggle-group light-toggle" style="flex: 1; margin: 0;">
+                                    <button data-preset="day">DAY</button>
+                                    <button data-preset="dawn">DAWN</button>
+                                    <button data-preset="dusk">DUSK</button>
+                                    <button data-preset="night">NIGHT</button>
+                                </div>
                             </div>
                         </div>
                         <div class="settings-section">
@@ -338,7 +366,7 @@
                                 <button data-unit="mi">MPH</button>
                             </div>
                         </div>
-                        <div class="settings-section">
+                        <div class="settings-section" id="collision-settings-section">
                             <label>COLLISIONS</label>
                             <div class="toggle-group collision-toggle">
                                 <button class="active" data-collision="on">ON</button>

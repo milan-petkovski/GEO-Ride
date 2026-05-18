@@ -3,19 +3,21 @@ import { INITIAL_CENTER, PERFORMANCE_PROFILE } from './config.js';
 export const state = {
     lng: INITIAL_CENTER[0],
     lat: INITIAL_CENTER[1],
-    bearing: 0, travelBearing: 0, camBearing: 0,
+    bearing: 107, travelBearing: 107, camBearing: 107,
     velocity: 0, steeringAngle: 0,
     keys: {}, activeVehicle: 'car',
     unit: 'km',
-    mapStyle: 'satellite-streets-v12',
-    lightPreset: 'day',
+    mapStyle: 'standard',
+    lightPreset: 'realtime',
     controlsMode: 'tilt',
+    masterVolume: 0.5,
     isInputFocused: false, godMode: false,
     lastTime: performance.now(),
     stopTime: 0, sKeyReleasedSinceStop: true, wKeyReleasedSinceStop: true,
     chargeLevel: 0, isCharging: false, currentPitch: 65,
     crashShake: 0, collisionsEnabled: true,
     is3D: true, is3DBuildings: true,
+    userPrefs: { collisionsEnabled: true, is3D: true, is3DBuildings: true },
     currentHome: [...INITIAL_CENTER],
     skidMarks: [],
     lastSkidPoints: null,
@@ -52,7 +54,9 @@ export function saveState() {
             is3DBuildings: state.is3DBuildings,
             mapStyle: state.mapStyle,
             lightPreset: state.lightPreset,
-            controlsMode: state.controlsMode
+            controlsMode: state.controlsMode,
+            masterVolume: state.masterVolume,
+            userPrefs: state.userPrefs
         };
         localStorage.setItem('geo_ride_state', JSON.stringify(dataToSave));
     } catch (e) {
@@ -80,9 +84,15 @@ export function loadState() {
         state.collisionsEnabled = validateBool(parsed.collisionsEnabled, true);
         state.is3D = validateBool(parsed.is3D, true);
         state.is3DBuildings = validateBool(parsed.is3DBuildings, true);
-        state.mapStyle = validateStr(parsed.mapStyle, ['streets-v12', 'satellite-v9', 'satellite-streets-v12', 'standard'], 'streets-v12');
-        state.lightPreset = validateStr(parsed.lightPreset, ['day', 'night', 'dusk', 'dawn'], 'day');
+        state.userPrefs = parsed.userPrefs || {
+            collisionsEnabled: state.collisionsEnabled,
+            is3D: state.is3D,
+            is3DBuildings: state.is3DBuildings
+        };
+        state.mapStyle = validateStr(parsed.mapStyle, ['streets-v12', 'satellite-v9', 'satellite-streets-v12', 'standard'], 'standard');
+        state.lightPreset = validateStr(parsed.lightPreset, ['realtime', 'day', 'night', 'dusk', 'dawn'], 'realtime');
         state.controlsMode = validateStr(parsed.controlsMode, ['tilt', 'off'], 'tilt');
+        state.masterVolume = typeof parsed.masterVolume === 'number' && !isNaN(parsed.masterVolume) ? Math.max(0, Math.min(1, parsed.masterVolume)) : 0.5;
         
         state.currentHome = [state.lng, state.lat];
     } catch (e) {

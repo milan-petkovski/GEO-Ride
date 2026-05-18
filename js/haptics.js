@@ -4,6 +4,9 @@
  * Supports both Vibration API and fallbacks for different browsers
  */
 
+import { playCrashSound } from './audio.js';
+import { state } from './state.js';
+
 export const haptics = {
   /**
    * Check if device supports haptic feedback
@@ -113,6 +116,9 @@ export const haptics = {
    * Used for collisions with objects
    */
   impact(intensity = 'medium') {
+    let crashVol = intensity === 'strong' ? 1.0 : (intensity === 'medium' ? 0.6 : 0.3);
+    const masterVol = state.masterVolume !== undefined ? state.masterVolume : 1.0;
+    playCrashSound(crashVol, masterVol);
     if (!this.isSupported()) return;
     const vibrate = this.getVibrationFunction();
     if (!vibrate) return;

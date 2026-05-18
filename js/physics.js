@@ -15,6 +15,7 @@ export function updatePhysics(dtFinal, map) {
             if (!state.isTeleporting) {
                 const isShiftReset = state.keys['shift'];
                 const [lng, lat] = isShiftReset ? INITIAL_CENTER : state.currentHome;
+                const targetResetBearing = 107;
 
                 state.velocity = 0;
                 state.isTeleporting = true;
@@ -28,7 +29,7 @@ export function updatePhysics(dtFinal, map) {
                     center: [lng, lat],
                     zoom: 18,
                     pitch: 65,
-                    bearing: 0,
+                    bearing: targetResetBearing,
                     duration: state.teleportDuration
                 });
 

@@ -7,6 +7,14 @@ let kbdElements = null;
 export function initControls() {
     kbdElements = document.querySelectorAll('kbd');
     window.addEventListener('keydown', (e) => {
+        // Prevent default Spacebar behavior (scrolling / clicking focused buttons) unless typing in input
+        if (e.code === 'Space' && document.activeElement && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            if (document.activeElement.tagName === 'BUTTON') {
+                document.activeElement.blur(); // Remove focus from the button
+            }
+        }
+
         const key = e.key.toLowerCase();
         if (e.ctrlKey || e.metaKey) return;
 
