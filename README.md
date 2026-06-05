@@ -39,7 +39,7 @@ Hi! I am **Milan**, a 19-year-old student and web developer from Serbia. **GEO R
 
 I am committed to keeping my projects 100% free and open-source. If you enjoy driving around the globe in GEO Ride and want to support my late-night coding sessions, you can buy me a coffee!
 
-💖 **[Support my work via PayPal](https://paypal.me/milanpetkovski1)**
+💖 **[Support my work via PayPal](https://paypal.me/milanwebportal)**
 
 ---
 
@@ -153,4 +153,4 @@ Choose from four distinct vehicles, each featuring unique driving characteristic
 * **Author's Portfolio:** [milanwebportal.com](https://milanwebportal.com)
 * **Email Contact:** [contact@milanwebportal.com](mailto:contact@milanwebportal.com)
 
-💖 **[Support my work via PayPal](https://paypal.me/milanpetkovski1)**
+💖 **[Support my work via PayPal](https://paypal.me/milanwebportal)**
