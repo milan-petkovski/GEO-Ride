@@ -160,14 +160,99 @@
 
     <!-- Premium Loading Screen -->
     <div id="loading-overlay"
-        style="position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1;">
+        style="position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1; pointer-events: auto;">
         <div class="loading-content">
             <div class="loading-logo">GEO <span>RIDE</span></div>
             <div class="progress-bar-container">
                 <div class="progress-bar-fill" id="progress-bar"></div>
             </div>
+            <div class="loading-percentage" id="loading-pct">0%</div>
+            <div class="loading-tip-container">
+                <div class="loading-tip" id="loading-tip">Press 'R' to instantly reset your vehicle if you get stuck or flip over.</div>
+            </div>
         </div>
     </div>
+
+    <script>
+        (function() {
+            let pct = 0;
+            let target = 25;
+            const bar = document.getElementById('progress-bar');
+            const pctText = document.getElementById('loading-pct');
+
+            window.setLoadingTarget = function(newTarget) {
+                target = Math.max(target, newTarget);
+            };
+
+            function tick() {
+                if (pct < 100) {
+                    if (target >= 100) {
+                        // Fast completion when target is 100%
+                        pct += Math.max(0.8, (100 - pct) * 0.12);
+                        if (pct >= 99.9) pct = 100;
+                    } else {
+                        // Continuous speed: catches up when far, crawls forward when close
+                        const catchUpSpeed = (target - pct) * 0.05;
+                        const crawlSpeed = 0.04 + Math.random() * 0.02;
+                        
+                        pct += Math.max(catchUpSpeed, crawlSpeed);
+                        
+                        // Keep loading bar under 100% until Mapbox/Three.js are fully ready
+                        if (pct > 98.8) pct = 98.8;
+                    }
+
+                    if (bar) bar.style.width = pct.toFixed(1) + '%';
+                    if (pctText) pctText.innerText = Math.floor(pct) + '%';
+                    window.currentLoadingPct = pct;
+                    requestAnimationFrame(tick);
+                }
+            }
+            requestAnimationFrame(tick);
+
+            // Simulation of slow initial download progress
+            let initialSim = setInterval(() => {
+                if (target < 85) {
+                    target += Math.random() * 4 + 1;
+                } else {
+                    clearInterval(initialSim);
+                }
+            }, 250);
+            window.loadingSimInterval = initialSim;
+
+            // Rotating tips logic
+            const tips = [
+                "Press 'R' to instantly reset your vehicle if you get stuck or flip over.",
+                "Switch to Satellite view in settings for a photorealistic global driving experience.",
+                "Invite your friends to roam the world together by sharing your Room ID in multiplayer!",
+                "Wow style displays fully detailed 3D buildings and realistic lighting in major cities.",
+                "Use the handbrake (Spacebar) or mobile drift button to slide around sharp corners.",
+                "Toggle Collision mode off in settings if you want to drive through buildings and fly over mountains.",
+                "Realtime light preset synchronizes the sun's position with your local computer time!",
+                "Driving a bus or truck changes the vehicle physics, mass, and braking distance.",
+                "The simulator uses real-world geographical coordinates mapped in real time.",
+                "Zoom out with scroll or pinch gestures to see a wider view of your surroundings."
+            ];
+
+            let tipIndex = Math.floor(Math.random() * tips.length);
+            const tipText = document.getElementById('loading-tip');
+
+            if (tipText) {
+                tipText.innerText = tips[tipIndex];
+                tipIndex = (tipIndex + 1) % tips.length;
+            }
+
+            function showNextTip() {
+                if (!tipText) return;
+                tipText.style.opacity = 0;
+                setTimeout(() => {
+                    tipText.innerText = tips[tipIndex];
+                    tipText.style.opacity = 1;
+                    tipIndex = (tipIndex + 1) % tips.length;
+                }, 300);
+            }
+            window.loadingTipInterval = setInterval(showNextTip, 3800);
+        })();
+    </script>
 
     <div id="map"></div>
 
@@ -498,6 +583,36 @@
                     <div class="pedal-pedal"></div>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Premium Donation Toast Popup -->
+    <div id="donation-popup" class="donation-popup">
+        <!-- Floating Accent Badge -->
+        <div class="donation-badge">
+            <svg class="donation-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+        </div>
+        <button class="donation-close-btn" id="donation-close-btn" aria-label="Close message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        <div class="donation-content-wrapper">
+            <h3 class="donation-title">Enjoying GEO Ride?</h3>
+            <p class="donation-text">Consider supporting the simulator. Your donation keeps our high-speed 3D mapping and multiplayer servers online!</p>
+            <a href="https://paypal.me/milanwebportal" target="_blank" id="donation-paypal-btn" class="donation-paypal-btn">
+                <svg class="donation-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+                BUY ME A COFFEE (PAYPAL)
+            </a>
         </div>
     </div>
 

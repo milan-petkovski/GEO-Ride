@@ -16,10 +16,14 @@ export function cleanMap(map) {
 }
 
 export function setProgress(p) {
-    const progressBar = document.getElementById('progress-bar');
-    const clamped = Math.max(0, Math.min(p, 100));
-    if (progressBar) {
-        progressBar.style.width = `${clamped.toFixed(1)}%`;
+    if (window.setLoadingTarget) {
+        window.setLoadingTarget(p);
+    } else {
+        const progressBar = document.getElementById('progress-bar');
+        const clamped = Math.max(0, Math.min(p, 100));
+        if (progressBar) {
+            progressBar.style.width = `${clamped.toFixed(1)}%`;
+        }
     }
 }
 

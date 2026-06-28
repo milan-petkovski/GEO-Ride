@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator) {
 
 import { state, loadState, saveState } from './js/state.js';
 import { INITIAL_CENTER } from './js/config.js';
-import { initUI, updateToggleStates, add3DBuildings, applyLightPreset } from './js/ui.js';
+import { initUI, updateToggleStates, add3DBuildings, applyLightPreset, triggerDonationPopup } from './js/ui.js';
 import { initControls } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
 import { initMultiplayer, updateOtherPlayers } from './js/multiplayer.js';
@@ -62,82 +62,65 @@ const map = new mapboxgl.Map({
 window.map = map;
 window.THREE = THREE;
 
-let currentProgress = 0;
-let targetProgress = 0;
-
-function smoothProgress() {
-    if (currentProgress < targetProgress) {
-        const alpha = (targetProgress >= 100) ? 0.45 : 0.35;
-        currentProgress += (targetProgress - currentProgress) * alpha;
-        if (targetProgress >= 100 && 100 - currentProgress < 0.05) currentProgress = 100;
-        setProgress(currentProgress);
-    }
-    if (currentProgress < 100) requestAnimationFrame(smoothProgress);
-}
-
-function startLoading() {
-    const startTime = performance.now();
-    const duration = 1000;
-    smoothProgress();
-    // Ensure the loading overlay blocks input while we are actively loading
-    const overlayEl = document.getElementById('loading-overlay');
-    if (overlayEl) overlayEl.classList.add('blocking');
-
-    const tick = (now) => {
-        const elapsed = now - startTime;
-        const progress = Math.min((elapsed / duration) * 100, 100);
-        targetProgress = progress;
-        if (progress < 100) requestAnimationFrame(tick);
-        else finishLoading();
-    };
-    requestAnimationFrame(tick);
+// Instantly update progress target to 60% since app.js has loaded
+if (window.setLoadingTarget) {
+    window.setLoadingTarget(60);
 }
 
 let isMapFullyLoaded = false;
 map.once('idle', () => {
     isMapFullyLoaded = true;
+    if (window.setLoadingTarget) window.setLoadingTarget(100);
 });
 // Safety fallback after 3 seconds in case network is slow or offline
 setTimeout(() => {
     isMapFullyLoaded = true;
+    if (window.setLoadingTarget) window.setLoadingTarget(100);
 }, 3000);
 
 function finishLoading() {
-    if (!isMapFullyLoaded) {
+    // Wait until Mapbox reports idle AND the smooth percentage animation reaches 100%
+    if (!isMapFullyLoaded || (window.currentLoadingPct !== undefined && window.currentLoadingPct < 100)) {
         setTimeout(finishLoading, 50);
         return;
     }
-    setProgress(100);
+    if (window.loadingSimInterval) clearInterval(window.loadingSimInterval);
+    if (window.loadingTipInterval) clearInterval(window.loadingTipInterval);
+    const overlayEl = document.getElementById('loading-overlay');
+    if (overlayEl) {
+        overlayEl.classList.add('fade-out');
+    }
     setTimeout(() => {
-        const overlayEl = document.getElementById('loading-overlay');
-        if (overlayEl) {
-            overlayEl.classList.add('fade-out');
-            // remove blocking so pointer-events follow .fade-out (which sets none)
-            overlayEl.classList.remove('blocking');
-        }
-        setTimeout(() => {
-            if (overlayEl) overlayEl.style.display = 'none';
-            state.lastTime = performance.now();
-            state.loopStarted = true;
-            requestAnimationFrame(update);
-        }, 200);
-    }, 50);
+        if (overlayEl) overlayEl.style.display = 'none';
+        state.lastTime = performance.now();
+        state.loopStarted = true;
+        requestAnimationFrame(update);
+        
+        // Show PayPal donation popup at specific milestones (2m, 10m, 30m, 1h)
+        const donationMilestones = [120000, 600000, 1800000, 3600000];
+        donationMilestones.forEach(delay => {
+            setTimeout(triggerDonationPopup, delay);
+        });
+    }, 600); // Wait for the 0.6s css transition to finish
 }
 
 let isInitialMapLoad = true;
 
 map.on('load', () => {
     isInitialMapLoad = false;
+    if (window.setLoadingTarget) window.setLoadingTarget(85);
     cleanMap(map);
     add3DBuildings(map);
     setup3DVehicleLayer(map);
     setupVehicleMarker(map);
     addSkidMarksLayer(map);
     updateToggleStates();
-    startLoading();
+    if (window.setLoadingTarget) window.setLoadingTarget(95);
 
     // Apply standard preset if active on load
     applyLightPreset(map);
+
+    finishLoading();
 });
 
 map.on('style.load', () => {

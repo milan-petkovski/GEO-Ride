@@ -420,6 +420,25 @@ export function initUI(map) {
         trackEvent('multiplayer_join_attempt', { peer_id_length: peerId?.length });
         haptics.success();
     });
+
+    // Donation Popup Event Listeners
+    const donationPopup = document.getElementById('donation-popup');
+    const closeDonationBtn = document.getElementById('donation-close-btn');
+    const donatePaypalBtn = document.getElementById('donation-paypal-btn');
+
+    if (donationPopup && closeDonationBtn) {
+        closeDonationBtn.addEventListener('click', () => {
+            donationPopup.classList.remove('show');
+            if (haptics) haptics.tap();
+        });
+    }
+    if (donatePaypalBtn) {
+        donatePaypalBtn.addEventListener('click', () => {
+            donationPopup.classList.remove('show');
+            localStorage.setItem('geo-ride-donation-dismissed', 'true');
+            if (haptics) haptics.success();
+        });
+    }
 }
 
 
@@ -575,6 +594,21 @@ export function applyLightPreset(map) {
         map.setConfigProperty('basemap', 'lightPreset', targetPreset);
     } catch (e) {
         console.warn("Could not set lightPreset:", e);
+    }
+}
+
+export function triggerDonationPopup() {
+    const isDismissed = localStorage.getItem('geo-ride-donation-dismissed');
+    if (isDismissed === 'true') return;
+
+    const donationPopup = document.getElementById('donation-popup');
+    if (donationPopup) {
+        donationPopup.classList.add('show');
+        
+        // Auto-hide popup after 20 seconds of inactivity (so it doesn't stay permanently)
+        setTimeout(() => {
+            donationPopup.classList.remove('show');
+        }, 20000);
     }
 }
 

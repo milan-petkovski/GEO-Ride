@@ -96,44 +96,56 @@ a[href*="milanwebportal"]:hover,
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
-    background: #000 !important;
+    background: #020205 !important; /* Deep blue-black */
     z-index: 10000 !important;
-    /* By default don't block pointer events - JS will add `.blocking` while load is active */
+    pointer-events: auto !important; /* Block clicks by default for loading safety */
+    transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    overflow: hidden;
+}
+
+#loading-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        linear-gradient(rgba(0, 242, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    background-position: center;
+    z-index: 1;
     pointer-events: none;
-    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    animation: loaderGridPulse 6s ease-in-out infinite alternate;
+}
+
+#loading-overlay::after {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 242, 255, 0.06) 0%, transparent 70%);
+    z-index: 2;
+    pointer-events: none;
+    filter: blur(40px);
+    animation: loaderGlowPulse 4s ease-in-out infinite alternate;
 }
 
 #loading-overlay.fade-out {
     opacity: 0 !important;
-    transform: scale(1.02);
-    pointer-events: none;
-}
-
-/* Allow blocking only when explicitly enabled by JS */
-#loading-overlay.blocking {
-    pointer-events: auto !important;
+    transform: scale(1.05); /* Cyber transition zoom out */
+    pointer-events: none !important;
 }
 
 .loading-content {
+    position: relative;
+    z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 1.5rem;
-    opacity: 0;
+    gap: 1.2rem;
+    opacity: 1; /* Make instantly visible */
     pointer-events: none;
-    transition: opacity 0.2s ease-out;
-}
-
-.loading-content.fonts-ready {
-    opacity: 1;
-    /* promeni auto -> none da klikovi prolaze kroz */
-    pointer-events: none;
-    animation: loadingEntrance 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-#loading-overlay.blocking .loading-content.fonts-ready {
-    pointer-events: auto !important;
+    animation: loadingEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .loading-logo {
@@ -141,46 +153,102 @@ a[href*="milanwebportal"]:hover,
     font-size: 6.5rem;
     font-weight: 800;
     color: #fff;
-    letter-spacing: 18px;
-    text-indent: 18px; /* Perfects centering by compensating for trailing letter-spacing */
-    margin-bottom: 0.5rem;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    letter-spacing: 20px;
+    text-indent: 20px;
+    margin-bottom: 0rem;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    animation: loaderLogoPulse 3s ease-in-out infinite alternate;
 }
 
 .loading-logo span {
     color: var(--primary);
-    text-shadow: 0 0 30px var(--primary-glow);
+    text-shadow: 0 0 25px var(--primary-glow);
 }
 
-
 .progress-bar-container {
-    width: 450px;
-    height: 4px;
-    background: transparent;
+    width: 380px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 242, 255, 0.15);
     border-radius: 10px;
     position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    margin-top: 1.5rem;
 }
 
 .progress-bar-fill {
     height: 100%;
     width: 0%;
-    background: var(--primary);
+    background: linear-gradient(90deg, #0072ff 0%, var(--primary) 100%);
     border-radius: 10px;
-    box-shadow: 0 0 20px var(--primary),
-        0 0 40px var(--primary-glow),
-        0 0 60px rgba(0, 242, 255, 0.4);
-    /* Buttery smooth easing for a clean, premium loading experience */
-    transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    box-shadow: 0 0 12px rgba(0, 242, 255, 0.8);
+    position: relative;
+    transition: none !important; /* disabled to allow ultra-smooth requestAnimationFrame updates without layout engine fights */
+    overflow: hidden;
+}
+
+/* Beautiful moving glow/shimmer effect */
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -100px;
+    width: 80px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: loaderShimmer 1.8s ease-in-out infinite;
 }
 
 .loading-percentage {
     font-family: 'Outfit', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 2.2rem;
+    font-weight: 800;
     color: #fff;
-    letter-spacing: 2px;
-    margin-top: 1rem;
-    text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+    letter-spacing: 1px;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+    font-variant-numeric: tabular-nums;
+}
+
+.loading-tip-container {
+    margin-top: 1.8rem;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.loading-tip {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--text-dim);
+    line-height: 1.4;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    min-height: 40px; /* prevent layout shift on multiline tips */
+    transition: opacity 0.3s ease;
+    opacity: 1; /* instantly visible */
+}
+
+@keyframes loaderGridPulse {
+    0% { opacity: 0.35; transform: scale(1.0); }
+    100% { opacity: 0.75; transform: scale(1.03); }
+}
+
+@keyframes loaderGlowPulse {
+    0% { transform: scale(0.85); opacity: 0.5; }
+    100% { transform: scale(1.1); opacity: 0.95; }
+}
+
+@keyframes loaderLogoPulse {
+    0% { text-shadow: 0 0 15px rgba(255, 255, 255, 0.1), 0 0 5px rgba(0, 242, 255, 0.05); }
+    100% { text-shadow: 0 0 35px rgba(255, 255, 255, 0.3), 0 0 15px rgba(0, 242, 255, 0.25); }
+}
+
+@keyframes loaderShimmer {
+    0% { left: -100px; }
+    100% { left: 100%; }
 }
 
 
@@ -2804,4 +2872,182 @@ html.geo-reduced-motion kbd {
     .discovery-subtitle { font-size: 0.6rem; letter-spacing: 4px; }
     .discovery-country { font-size: 0.7rem; letter-spacing: 5px; }
     .location-discovery { top: 12%; }
+}
+
+/* Premium Donation Toast Popup */
+.donation-popup {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 330px;
+    background: rgba(8, 8, 12, 0.97); /* Very dark deep cyber color */
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(0, 242, 255, 0.35);
+    border-radius: 20px;
+    padding: 26px 20px 20px 20px;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(0, 242, 255, 0.25),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    z-index: 9999;
+    
+    /* Premium Spring Entrance Animation */
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8) translateY(80px) rotate(2deg);
+    transition: 
+        opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0.6s;
+    pointer-events: none;
+}
+
+.donation-popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1) translateY(0) rotate(0deg);
+    pointer-events: auto !important;
+}
+
+/* On mobile, center it at the bottom */
+@media (max-width: 480px) {
+    .donation-popup {
+        right: 15px;
+        left: 15px;
+        width: auto;
+        transform: scale(0.8) translateY(120px);
+    }
+    .donation-popup.show {
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Floating Top Badge */
+.donation-badge {
+    position: absolute;
+    top: -24px;
+    left: 24px;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(8, 8, 12, 0.97);
+}
+
+.donation-badge-icon {
+    width: 22px;
+    height: 22px;
+    color: #fff;
+    fill: rgba(255, 255, 255, 0.2);
+    animation: heartBeat 2s infinite;
+}
+
+.donation-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.donation-close-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+.donation-close-btn:hover {
+    background: rgba(255, 75, 75, 0.15);
+    border-color: rgba(255, 75, 75, 0.4);
+    color: #ff4b4b;
+    transform: rotate(90deg);
+}
+
+.donation-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.donation-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1px;
+    margin: 0;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+.donation-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.donation-paypal-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 114, 255, 0.15) 100%);
+    border: 1px solid rgba(0, 242, 255, 0.5);
+    color: #00F2FF;
+    padding: 13px;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 242, 255, 0.15);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation: btnPulse 3s infinite;
+}
+
+.donation-paypal-btn:hover {
+    background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%);
+    border-color: #00f2ff;
+    box-shadow: 0 6px 25px rgba(0, 242, 255, 0.4), 0 0 15px rgba(0, 242, 255, 0.2);
+    transform: translateY(-2px);
+    color: #fff;
+    text-shadow: none;
+}
+
+.donation-paypal-btn:hover .donation-btn-icon {
+    transform: rotate(10deg) scale(1.1);
+    color: #fff;
+}
+
+.donation-btn-icon {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    transition: all 0.3s ease;
+}
+
+@keyframes btnPulse {
+    0%, 100% { box-shadow: 0 4px 15px rgba(0, 242, 255, 0.15); }
+    50% { box-shadow: 0 4px 22px rgba(0, 242, 255, 0.35), 0 0 8px rgba(0, 242, 255, 0.2); }
 }
