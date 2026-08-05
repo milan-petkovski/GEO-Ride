@@ -1,3 +1,8 @@
+/**
+ * @file multiplayer.js
+ * @description Real-time multiplayer synchronization engine over MQTT (HiveMQ broker/Paho WebSockets), featuring payload sanitization, client-side rate-limiting, and remote player marker rendering.
+ */
+
 import { state } from './state.js';
 import { VEHICLE_CONFIG } from './config.js';
 import { updateToggleStates } from './ui.js';
@@ -5,16 +10,62 @@ import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 
 let client;
-let currentTopic = "georide/global/pro";
+let currentTopic = 'georide/global/pro';
 let myId = 'p_' + Math.random().toString(36).substr(2, 4);
 let lastSent = { lng: 0, lat: 0, bearing: 0, velocity: 0, vehicle: '' };
 let isManualDisconnect = false;
 
 const Paho = typeof window !== 'undefined' ? window.Paho : null;
 
+function getPaho() {
+    return typeof window !== 'undefined' && window.Paho ? window.Paho : Paho;
+}
+
 // Rate limiting & validation state
 const playerMessageTimes = new Map();
+let broadcastTimer = null;
+let cleanupTimer = null;
 
+/**
+ * Stops multiplayer timers and disconnects MQTT client (useful for teardown and unit tests).
+ * @returns {void}
+ */
+export function stopMultiplayerTimers() {
+    isManualDisconnect = true;
+    if (typeof window !== 'undefined') window.mpInitialized = false;
+    if (broadcastTimer) {
+        clearInterval(broadcastTimer);
+        broadcastTimer = null;
+    }
+    if (cleanupTimer) {
+        clearInterval(cleanupTimer);
+        cleanupTimer = null;
+    }
+    if (client) {
+        try {
+            client.onConnectionLost = null;
+            client.onMessageArrived = null;
+            if (client.isConnected && client.isConnected()) client.disconnect();
+        } catch (_e) {}
+        client = null;
+    }
+}
+
+/**
+ * @typedef {Object} PlayerPayload
+ * @property {string} id - Unique peer player ID string.
+ * @property {number} lng - Longitude coordinate in valid range [-180, 180].
+ * @property {number} lat - Latitude coordinate in valid range [-90, 90].
+ * @property {number} bearing - Heading angle normalized in range [0, 360).
+ * @property {number} v - Vehicle velocity scalar.
+ * @property {string} vehicle - Drivable vehicle type string.
+ */
+
+/**
+ * Validates and sanitizes raw incoming MQTT payload objects against XSS vectors and malformed values.
+ * @param {*} raw - Raw unparsed or parsed message object.
+ * @returns {PlayerPayload|null} Sanitized player payload or null if invalid.
+ */
 export function sanitizePlayerPayload(raw) {
     if (!raw || typeof raw !== 'object') return null;
     const { id, lng, lat, bearing, v, vehicle } = raw;
@@ -23,7 +74,7 @@ export function sanitizePlayerPayload(raw) {
     if (typeof lat !== 'number' || isNaN(lat) || lat < -90 || lat > 90) return null;
     if (typeof bearing !== 'number' || isNaN(bearing)) return null;
 
-    const sanitizedV = (typeof v === 'number' && !isNaN(v)) ? Math.max(-300, Math.min(300, v)) : 0;
+    const sanitizedV = typeof v === 'number' && !isNaN(v) ? Math.max(-300, Math.min(300, v)) : 0;
     const allowedVehicles = ['car', 'sports', 'truck', 'bus', 'cyber', 'supercar', 'suv', 'taxi', 'police'];
     const sanitizedVehicle = allowedVehicles.includes(vehicle) ? vehicle : 'car';
 
@@ -37,9 +88,17 @@ export function sanitizePlayerPayload(raw) {
     };
 }
 
+/**
+ * Purges inactive multiplayer players from local state dictionary if no updates arrive within maxAgeMs.
+ * @param {Object} otherPlayers - Map of player records.
+ * @param {Function} [removeCallback] - Cleanup callback function.
+ * @param {number} [maxAgeMs=30000] - Expiration threshold in ms.
+ * @param {number} [now=Date.now()] - Timestamp reference.
+ * @returns {void}
+ */
 export function cleanupInactivePlayers(otherPlayers, removeCallback, maxAgeMs = 30000, now = Date.now()) {
     if (!otherPlayers) return;
-    Object.keys(otherPlayers).forEach(id => {
+    Object.keys(otherPlayers).forEach((id) => {
         if (now - otherPlayers[id].lastSeen > maxAgeMs) {
             if (typeof removeCallback === 'function') {
                 removeCallback(otherPlayers[id]);
@@ -50,12 +109,24 @@ export function cleanupInactivePlayers(otherPlayers, removeCallback, maxAgeMs = 
     });
 }
 
+/**
+ * Formats a sanitized room code string into a deterministic MQTT topic path.
+ * @param {string} roomCode - Raw input room code.
+ * @returns {string} Sanitized topic path string.
+ */
 export function getRoomTopic(roomCode) {
-    if (!roomCode || typeof roomCode !== 'string') return "georide/global/pro";
-    const sanitized = roomCode.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
-    return sanitized ? "georide/room/" + sanitized : "georide/global/pro";
+    if (!roomCode || typeof roomCode !== 'string') return 'georide/global/pro';
+    const sanitized = roomCode
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '');
+    return sanitized ? 'georide/room/' + sanitized : 'georide/global/pro';
 }
 
+/**
+ * Initializes multiplayer event handlers, MQTT client connection, and HUD UI elements.
+ * @returns {void}
+ */
 export function initMultiplayer() {
     if (window.mpInitialized) return;
     window.mpInitialized = true;
@@ -85,10 +156,13 @@ export function initMultiplayer() {
     if (myPeerIdEl) myPeerIdEl.textContent = myId.toUpperCase();
     if (mobileMyPeerIdEl) mobileMyPeerIdEl.textContent = myId.toUpperCase();
 
-    client = new Paho.MQTT.Client("broker.hivemq.com", 8884, "georide_" + myId);
+    const paho = getPaho();
+    if (paho && paho.MQTT) {
+        client = new paho.MQTT.Client('broker.hivemq.com', 8884, 'georide_' + myId);
+    }
 
     client.onConnectionLost = (responseObject) => {
-        console.log("MQTT Connection Lost:", responseObject.errorMessage);
+        console.log('MQTT Connection Lost:', responseObject.errorMessage);
         mpStatusDot?.classList.remove('online');
         if (!isManualDisconnect) {
             setTimeout(() => {
@@ -130,11 +204,11 @@ export function initMultiplayer() {
                 p.lastSeen = now;
             }
             renderActivePlayers();
-        } catch (_e) { }
+        } catch (_e) {}
     };
 
     function onConnect() {
-        console.log("MQTT Connected to:", currentTopic);
+        console.log('MQTT Connected to:', currentTopic);
         mpStatusDot?.classList.add('online');
         client.subscribe(currentTopic);
         if (disconnectBtn) disconnectBtn.style.display = 'block';
@@ -143,31 +217,34 @@ export function initMultiplayer() {
         startSyncTimers();
     }
 
-    let broadcastTimer = null;
-    let cleanupTimer = null;
-
     function startSyncTimers() {
         if (!broadcastTimer) {
             broadcastTimer = setInterval(() => {
                 if (client && client.isConnected && client.isConnected()) {
                     // FIX: Only send if data changed significantly
-                    const changed = Math.abs(state.lng - lastSent.lng) > 0.000001 ||
+                    const changed =
+                        Math.abs(state.lng - lastSent.lng) > 0.000001 ||
                         Math.abs(state.lat - lastSent.lat) > 0.000001 ||
                         Math.abs(state.bearing - lastSent.bearing) > 0.1 ||
                         state.activeVehicle !== lastSent.vehicle;
 
                     if (changed) {
-                        const message = new Paho.MQTT.Message(JSON.stringify({
-                            id: myId,
-                            lng: state.lng,
-                            lat: state.lat,
-                            bearing: state.bearing,
-                            v: state.velocity,
-                            vehicle: state.activeVehicle,
-                            t: Date.now()
-                        }));
-                        message.destinationName = currentTopic;
-                        client.send(message);
+                        const paho = getPaho();
+                        if (paho && paho.MQTT) {
+                            const message = new paho.MQTT.Message(
+                                JSON.stringify({
+                                    id: myId,
+                                    lng: state.lng,
+                                    lat: state.lat,
+                                    bearing: state.bearing,
+                                    v: state.velocity,
+                                    vehicle: state.activeVehicle,
+                                    t: Date.now()
+                                })
+                            );
+                            message.destinationName = currentTopic;
+                            client.send(message);
+                        }
 
                         lastSent = {
                             lng: state.lng,
@@ -203,20 +280,28 @@ export function initMultiplayer() {
                     client.onConnectionLost = null;
                     client.onMessageArrived = null;
                     if (client.isConnected()) client.disconnect();
-                } catch (_e) { }
+                } catch (_e) {}
                 client = null;
             }
 
             // Create fresh client
-            client = new Paho.MQTT.Client("broker.hivemq.com", 8884, "georide_" + myId + "_" + Date.now().toString(36));
+            const paho = getPaho();
+            if (paho && paho.MQTT) {
+                client = new paho.MQTT.Client(
+                    'broker.hivemq.com',
+                    8884,
+                    'georide_' + myId + '_' + Date.now().toString(36)
+                );
+            }
 
             client.onConnectionLost = (responseObject) => {
-                console.log("MQTT Connection Lost:", responseObject.errorMessage);
+                console.log('MQTT Connection Lost:', responseObject.errorMessage);
                 mpStatusDot?.classList.remove('online');
                 if (!isManualDisconnect) {
                     if (window.reconnectTimeout) clearTimeout(window.reconnectTimeout);
                     window.reconnectTimeout = setTimeout(() => {
-                        if (!isManualDisconnect && client) client.connect({ onSuccess: onConnectSuccess, onFailure: onConnectFailure, useSSL: true });
+                        if (!isManualDisconnect && client)
+                            client.connect({ onSuccess: onConnectSuccess, onFailure: onConnectFailure, useSSL: true });
                     }, 3000);
                 }
             };
@@ -234,21 +319,30 @@ export function initMultiplayer() {
 
                     if (!state.otherPlayers[data.id]) {
                         state.otherPlayers[data.id] = {
-                            lng: data.lng, lat: data.lat, bearing: data.bearing,
-                            vehicle: data.vehicle, targetLng: data.lng,
-                            targetLat: data.lat, targetBearing: data.bearing, lastSeen: now
+                            lng: data.lng,
+                            lat: data.lat,
+                            bearing: data.bearing,
+                            vehicle: data.vehicle,
+                            targetLng: data.lng,
+                            targetLat: data.lat,
+                            targetBearing: data.bearing,
+                            lastSeen: now
                         };
                     } else {
                         const p = state.otherPlayers[data.id];
-                        p.targetLng = data.lng; p.targetLat = data.lat; p.targetBearing = data.bearing;
-                        p.velocity = data.v; p.vehicle = data.vehicle; p.lastSeen = now;
+                        p.targetLng = data.lng;
+                        p.targetLat = data.lat;
+                        p.targetBearing = data.bearing;
+                        p.velocity = data.v;
+                        p.vehicle = data.vehicle;
+                        p.lastSeen = now;
                     }
                     renderActivePlayers();
-                } catch (_e) { }
+                } catch (_e) {}
             };
 
             const onConnectSuccess = () => {
-                console.log("MQTT Connected to:", targetCode);
+                console.log('MQTT Connected to:', targetCode);
                 mpStatusDot?.classList.add('online');
 
                 if (joinBtn) joinBtn.style.display = 'none';
@@ -280,7 +374,7 @@ export function initMultiplayer() {
             };
 
             const onConnectFailure = (err) => {
-                console.error("MQTT Connect Failure:", err);
+                console.error('MQTT Connect Failure:', err);
                 if (joinBtn) {
                     joinBtn.textContent = 'ERROR';
                     joinBtn.style.background = '#ff0055';
@@ -337,8 +431,14 @@ export function initMultiplayer() {
         playerMessageTimes.clear();
         if (client && client.isConnected && client.isConnected()) client.disconnect();
 
-        if (broadcastTimer) { clearInterval(broadcastTimer); broadcastTimer = null; }
-        if (cleanupTimer) { clearInterval(cleanupTimer); cleanupTimer = null; }
+        if (broadcastTimer) {
+            clearInterval(broadcastTimer);
+            broadcastTimer = null;
+        }
+        if (cleanupTimer) {
+            clearInterval(cleanupTimer);
+            cleanupTimer = null;
+        }
 
         trackEvent('multiplayer_room_disconnect', { room: currentTopic.replace('georide/room/', '') });
 
@@ -387,7 +487,7 @@ export function initMultiplayer() {
             mobileJoinBtn.style.cursor = 'pointer';
         }
 
-        Object.keys(state.otherPlayers).forEach(id => {
+        Object.keys(state.otherPlayers).forEach((id) => {
             if (state.otherPlayers[id].marker2d) state.otherPlayers[id].marker2d.remove();
             delete state.otherPlayers[id];
         });
@@ -400,7 +500,9 @@ export function initMultiplayer() {
     const handleCopy = (btn) => {
         navigator.clipboard.writeText(myId.toUpperCase());
         btn.textContent = 'OK';
-        setTimeout(() => { btn.textContent = 'COPY'; }, 1000);
+        setTimeout(() => {
+            btn.textContent = 'COPY';
+        }, 1000);
     };
     if (copyBtn) copyBtn.onclick = () => handleCopy(copyBtn);
     if (mobileCopyBtn) mobileCopyBtn.onclick = () => handleCopy(mobileCopyBtn);
@@ -408,14 +510,14 @@ export function initMultiplayer() {
     // Prevent inputs from triggering panel close when clicked or typed
     const preventPropagationEvents = ['click', 'keydown', 'keyup', 'keypress', 'focus', 'mousedown'];
     if (joinInput) {
-        preventPropagationEvents.forEach(evt => {
+        preventPropagationEvents.forEach((evt) => {
             joinInput.addEventListener(evt, (e) => {
                 e.stopPropagation();
             }); // Bubbling phase - after panel stopPropagation
         });
     }
     if (mobileJoinInput) {
-        preventPropagationEvents.forEach(evt => {
+        preventPropagationEvents.forEach((evt) => {
             mobileJoinInput.addEventListener(evt, (e) => {
                 e.stopPropagation();
             }); // Bubbling phase - after panel stopPropagation
@@ -423,6 +525,10 @@ export function initMultiplayer() {
     }
 }
 
+/**
+ * Re-renders HUD peer player listing cards in desktop and mobile panels.
+ * @returns {void}
+ */
 export function renderActivePlayers() {
     const mpPlayersList = document.getElementById('mp-players-list');
     const mobileMpPlayersList = document.getElementById('mobile-mp-players-list');
@@ -431,7 +537,7 @@ export function renderActivePlayers() {
     // Build the list of player data
     const activePlayers = [
         { id: myId, vehicle: state.activeVehicle, isSelf: true },
-        ...Object.keys(state.otherPlayers).map(id => ({
+        ...Object.keys(state.otherPlayers).map((id) => ({
             id,
             vehicle: state.otherPlayers[id].vehicle,
             isSelf: false
@@ -439,14 +545,19 @@ export function renderActivePlayers() {
     ];
 
     // Optimize: Only update DOM if the player count or IDs changed
-    const currentIdList = activePlayers.map(p => p.id).sort().join(',');
-    if (window.lastPlayerIdList === currentIdList) return;
-    window.lastPlayerIdList = currentIdList;
+    const currentIdList = activePlayers
+        .map((p) => p.id)
+        .sort()
+        .join(',');
+    if (typeof window !== 'undefined') {
+        if (window.lastPlayerIdList === currentIdList) return;
+        window.lastPlayerIdList = currentIdList;
+    }
 
     const buildList = (el) => {
         if (!el) return;
         el.textContent = '';
-        activePlayers.forEach(p => {
+        activePlayers.forEach((p) => {
             const entry = document.createElement('div');
             entry.className = `mp-player-entry ${p.isSelf ? 'mp-player-self' : ''}`;
 
@@ -467,12 +578,19 @@ export function renderActivePlayers() {
     buildList(mobileMpPlayersList);
 }
 
+/**
+ * Updates positions and rotations of remote peer player markers on Mapbox map.
+ * @param {number} dtFinal - Delta time frame multiplier.
+ * @param {Object} map - Mapbox GL JS map instance.
+ * @returns {void}
+ */
 export function updateOtherPlayers(dtFinal, map) {
-    Object.keys(state.otherPlayers).forEach(id => {
+    if (typeof document === 'undefined') return;
+    Object.keys(state.otherPlayers).forEach((id) => {
         const p = state.otherPlayers[id];
 
         if (p.velocity && Math.abs(p.velocity) > 0.0001) {
-            const rad = (p.bearing) * (Math.PI / 180);
+            const rad = p.bearing * (Math.PI / 180);
             const latRad = p.lat * (Math.PI / 180);
             const projectionFactor = 1 / Math.cos(latRad);
             p.lng += Math.sin(rad) * p.velocity * 0.0001 * projectionFactor * dtFinal;
@@ -496,7 +614,9 @@ export function updateOtherPlayers(dtFinal, map) {
             el.dataset.vehicle = p.vehicle || 'car';
             el.innerHTML = config.svg;
             p.marker2d = new mapboxgl.Marker({ element: el, rotationAlignment: 'map', pitchAlignment: 'map' })
-                .setLngLat([p.lng, p.lat]).setRotation(p.bearing).addTo(map);
+                .setLngLat([p.lng, p.lat])
+                .setRotation(p.bearing)
+                .addTo(map);
         } else {
             // Update marker icon if vehicle type changed
             const el = p.marker2d.getElement();

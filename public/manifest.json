@@ -1,20 +1,50 @@
 {
-  "name": "GEO Ride Simulator",
-  "short_name": "GEO Ride",
-  "description": "3D Driving Simulator & World Explorer",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "orientation": "landscape",
-  "background_color": "#000000",
-  "theme_color": "#020202",
-  "categories": ["games", "simulation", "travel"],
-  "icons": [
-    {
-      "src": "favicon.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+    "name": "GEO Ride - 3D World Driving Simulator",
+    "short_name": "GEO Ride",
+    "description": "Drive anywhere on Earth in real-time 3D. Realistic physics, multiplayer, and satellite maps - no plugins required.",
+    "start_url": "/?source=pwa",
+    "scope": "/",
+    "id": "georide-simulator",
+    "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "browser"],
+    "orientation": "landscape",
+    "background_color": "#000000",
+    "theme_color": "#020202",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": ["games", "simulation", "travel", "entertainment"],
+    "iarc_rating_id": "",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "favicon.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "images/landing.jpg",
+            "sizes": "800x450",
+            "type": "image/jpeg",
+            "form_factor": "wide",
+            "label": "GEO Ride - 3D World Driving Simulator"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Play Now",
+            "short_name": "Play",
+            "description": "Jump straight into driving",
+            "url": "/?action=play&source=pwa",
+            "icons": [{ "src": "favicon.png", "sizes": "128x128", "type": "image/png" }]
+        }
+    ]
 }

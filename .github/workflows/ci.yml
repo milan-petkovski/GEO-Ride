@@ -1,33 +1,48 @@
 name: GEO Ride CI
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    push:
+        branches: [main, master]
+    pull_request:
+        branches: [main, master]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+    build-and-test:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 20
+                  cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm ci
+            - name: Install Dependencies
+              run: npm ci
 
-      - name: Run Linter
-        run: npm run lint
+            - name: Security Dependency Audit
+              run: npm audit --audit-level=high
 
-      - name: Run Unit Tests
-        run: npm test
+            - name: Code Style Check
+              run: npx prettier --check .
 
-      - name: Build Application
-        run: npm run build
+            - name: Run Linter
+              run: npm run lint
+
+            - name: Run Unit Tests
+              run: npm test
+
+            - name: Build Application
+              run: npm run build
+
+            - name: Bundle Size Check
+              run: npm run size
+
+            - name: Lighthouse Audit
+              uses: treosh/lighthouse-ci-action@v12
+              with:
+                  uploadArtifacts: true
+                  temporaryPublicStorage: true

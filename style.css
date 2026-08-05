@@ -31,7 +31,7 @@ button,
 button *,
 .toggle-group button,
 .search-box button,
-[role="button"],
+[role='button'],
 .settings-main-btn,
 .settings-main-btn *,
 .coffee-btn,
@@ -71,12 +71,12 @@ textarea {
 #settings-btn,
 #mp-btn,
 .coffee-btn,
-a[href*="milanwebportal"],
+a[href*='milanwebportal'],
 #search-btn:hover,
 #settings-btn:hover,
 #mp-btn:hover,
 .coffee-btn:hover,
-a[href*="milanwebportal"]:hover,
+a[href*='milanwebportal']:hover,
 #search-btn svg,
 #settings-btn svg,
 #mp-btn svg,
@@ -88,7 +88,6 @@ a[href*="milanwebportal"]:hover,
     cursor: pointer !important;
 }
 
-
 #loading-overlay {
     position: fixed !important;
     inset: 0 !important;
@@ -99,7 +98,9 @@ a[href*="milanwebportal"]:hover,
     background: #020205 !important; /* Deep blue-black */
     z-index: 10000 !important;
     pointer-events: auto !important; /* Block clicks by default for loading safety */
-    transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    transition:
+        opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
     overflow: hidden;
 }
 
@@ -107,7 +108,7 @@ a[href*="milanwebportal"]:hover,
     content: '';
     position: absolute;
     inset: 0;
-    background: 
+    background:
         linear-gradient(rgba(0, 242, 255, 0.015) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 242, 255, 0.015) 1px, transparent 1px);
     background-size: 60px 60px;
@@ -232,27 +233,48 @@ a[href*="milanwebportal"]:hover,
 }
 
 @keyframes loaderGridPulse {
-    0% { opacity: 0.35; transform: scale(1.0); }
-    100% { opacity: 0.75; transform: scale(1.03); }
+    0% {
+        opacity: 0.35;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0.75;
+        transform: scale(1.03);
+    }
 }
 
 @keyframes loaderGlowPulse {
-    0% { transform: scale(0.85); opacity: 0.5; }
-    100% { transform: scale(1.1); opacity: 0.95; }
+    0% {
+        transform: scale(0.85);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.1);
+        opacity: 0.95;
+    }
 }
 
 @keyframes loaderLogoPulse {
-    0% { text-shadow: 0 0 15px rgba(255, 255, 255, 0.1), 0 0 5px rgba(0, 242, 255, 0.05); }
-    100% { text-shadow: 0 0 35px rgba(255, 255, 255, 0.3), 0 0 15px rgba(0, 242, 255, 0.25); }
+    0% {
+        text-shadow:
+            0 0 15px rgba(255, 255, 255, 0.1),
+            0 0 5px rgba(0, 242, 255, 0.05);
+    }
+    100% {
+        text-shadow:
+            0 0 35px rgba(255, 255, 255, 0.3),
+            0 0 15px rgba(0, 242, 255, 0.25);
+    }
 }
 
 @keyframes loaderShimmer {
-    0% { left: -100px; }
-    100% { left: 100%; }
+    0% {
+        left: -100px;
+    }
+    100% {
+        left: 100%;
+    }
 }
-
-
-
 
 @keyframes loadingEntrance {
     0% {
@@ -304,8 +326,6 @@ body {
     z-index: 1;
     cursor: auto;
 }
-
-
 
 input,
 kbd,
@@ -362,7 +382,9 @@ header {
     color: var(--text);
     text-transform: uppercase;
     line-height: 0.9;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 1), 0 0 30px var(--primary-glow);
+    text-shadow:
+        0 4px 20px rgba(0, 0, 0, 1),
+        0 0 30px var(--primary-glow);
 }
 
 .logo span {
@@ -403,7 +425,9 @@ header {
     color: var(--primary);
     text-decoration: none;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 15px var(--glass-bright);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        inset 0 0 15px var(--glass-bright);
 }
 
 .coffee-btn svg {
@@ -431,7 +455,9 @@ header {
     height: 66px;
     overflow: hidden;
     transition: width 0.7s cubic-bezier(0.19, 1, 0.22, 1);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 15px var(--glass-bright);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        inset 0 0 15px var(--glass-bright);
     position: relative;
     cursor: pointer;
     /* Anchor for absolute button */
@@ -514,7 +540,9 @@ header {
     z-index: 100 !important;
     transition: opacity 0.3s !important;
     white-space: nowrap !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8) !important;
+    text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 8px rgba(0, 0, 0, 0.8) !important;
     /* Strong dark shadow for maximum contrast */
 }
 
@@ -594,7 +622,7 @@ header {
     border: 1px dashed rgba(0, 242, 255, 0.4);
     border-radius: 4px;
     padding: 8px 12px;
-    color: #00F2FF;
+    color: #00f2ff;
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 18px;
@@ -864,7 +892,6 @@ kbd.pressed {
     box-shadow: 0 0 15px var(--primary-glow);
 }
 
-
 /* Responsive Optimization for Tablet and Mobile (Portrait) */
 @media (max-width: 1000px) {
     .ui-container {
@@ -873,7 +900,9 @@ kbd.pressed {
 
     .logo {
         font-size: 3rem;
-        text-shadow: 0 4px 20px rgba(0, 0, 0, 1), 0 0 30px var(--primary-glow) !important;
+        text-shadow:
+            0 4px 20px rgba(0, 0, 0, 1),
+            0 0 30px var(--primary-glow) !important;
     }
 
     .author-link {
@@ -1115,7 +1144,9 @@ html.geo-reduced-motion kbd {
     color: var(--primary);
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 15px var(--glass-bright);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        inset 0 0 15px var(--glass-bright);
 }
 
 .mp-main-btn svg {
@@ -1284,7 +1315,7 @@ html.geo-reduced-motion kbd {
 .mp-player-id {
     font-weight: 800;
     letter-spacing: 1px;
-    color: #00F2FF;
+    color: #00f2ff;
 }
 
 .mp-player-vehicle {
@@ -1312,7 +1343,6 @@ html.geo-reduced-motion kbd {
     box-shadow: 0 0 10px #00ff88;
 }
 
-
 /* --- PREMIUM MULTIPLAYER UI (merged) --- */
 /* Consolidated earlier in file — kept concise here to avoid duplicate rules. */
 
@@ -1334,7 +1364,7 @@ html.geo-reduced-motion kbd {
     background: rgba(0, 242, 255, 0.05);
     border: 1px dashed rgba(0, 242, 255, 0.3);
     border-radius: 8px;
-    color: #00F2FF;
+    color: #00f2ff;
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 15px;
@@ -1371,7 +1401,7 @@ html.geo-reduced-motion kbd {
 }
 
 .primary-btn {
-    background: #00F2FF;
+    background: #00f2ff;
     color: #000;
     border: none;
     border-radius: 10px;
@@ -1379,7 +1409,9 @@ html.geo-reduced-motion kbd {
     font-weight: 900;
     font-size: 13px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
 .primary-btn:hover {
@@ -1408,7 +1440,7 @@ html.geo-reduced-motion kbd {
     position: absolute;
     top: -5px;
     right: -5px;
-    background: #00F2FF;
+    background: #00f2ff;
     color: #000;
     font-size: 7px;
     font-weight: 900;
@@ -1422,7 +1454,7 @@ html.geo-reduced-motion kbd {
 
 .beta-pill {
     background: rgba(0, 242, 255, 0.15);
-    color: #00F2FF;
+    color: #00f2ff;
     font-size: 8px;
     padding: 2px 6px;
     border-radius: 4px;
@@ -1434,10 +1466,9 @@ html.geo-reduced-motion kbd {
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
 }
 
-
 /* Show mobile-only sections on mobile/tablet devices */
 #mobile-search-section,
-#mobile-mp-section{
+#mobile-mp-section {
     display: none !important;
 }
 
@@ -1622,7 +1653,9 @@ html.geo-reduced-motion kbd {
         border-bottom: 2px solid var(--primary) !important;
         /* Premium cyan dashboard accent */
         border-radius: 22px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.05) !important;
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.6),
+            inset 0 0 10px rgba(255, 255, 255, 0.05) !important;
         display: flex !important;
         flex-direction: row !important;
         justify-content: center !important;
@@ -1640,7 +1673,7 @@ html.geo-reduced-motion kbd {
         min-width: auto !important;
     }
 
-    #speed+span {
+    #speed + span {
         font-size: 0.6rem !important;
         font-weight: 800 !important;
         color: rgba(255, 255, 255, 0.95) !important;
@@ -1705,7 +1738,9 @@ html.geo-reduced-motion kbd {
         background: var(--bg-glass) !important;
         backdrop-filter: blur(40px) !important;
         border: 1px solid var(--border) !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 0 10px var(--glass-bright) !important;
+        box-shadow:
+            0 10px 25px rgba(0, 0, 0, 0.4),
+            inset 0 0 10px var(--glass-bright) !important;
     }
 
     .settings-main-btn span {
@@ -1759,7 +1794,9 @@ html.geo-reduced-motion kbd {
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         border-radius: 24px !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(255, 255, 255, 0.05) !important;
+        box-shadow:
+            0 30px 100px rgba(0, 0, 0, 0.95),
+            inset 0 0 25px rgba(255, 255, 255, 0.05) !important;
         scrollbar-width: thin !important;
         scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
         /* Move panel content down so the fixed close button remains alone at the top.
@@ -1812,7 +1849,9 @@ html.geo-reduced-motion kbd {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 18px rgba(0, 242, 255, 0.06) !important;
+        box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.6),
+            0 0 18px rgba(0, 242, 255, 0.06) !important;
         border-radius: 50% !important;
     }
 
@@ -1846,7 +1885,9 @@ html.geo-reduced-motion kbd {
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         border-radius: 24px !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(255, 255, 255, 0.05) !important;
+        box-shadow:
+            0 30px 100px rgba(0, 0, 0, 0.95),
+            inset 0 0 25px rgba(255, 255, 255, 0.05) !important;
     }
 
     .mp-dropdown.active {
@@ -1933,7 +1974,9 @@ html.geo-reduced-motion kbd {
         justify-content: center;
         align-items: center;
         transition: all 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px var(--glass-bright);
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.5),
+            inset 0 0 15px var(--glass-bright);
         -webkit-user-select: none;
         user-select: none;
         touch-action: none;
@@ -1973,16 +2016,16 @@ html.geo-reduced-motion kbd {
 
     .pedal-btn.drift.active {
         background: rgba(255, 0, 229, 0.12) !important;
-        border-color: #FF00E5 !important;
-        color: #FF00E5 !important;
+        border-color: #ff00e5 !important;
+        color: #ff00e5 !important;
         box-shadow: 0 0 20px rgba(255, 0, 229, 0.2) !important;
     }
 
     .pedal-btn.drift.active .pedal-pedal {
-        background: #FF00E5 !important;
+        background: #ff00e5 !important;
         height: 25px !important;
-        border-top-color: #FF00E5 !important;
-        box-shadow: 0 0 15px #FF00E5 !important;
+        border-top-color: #ff00e5 !important;
+        box-shadow: 0 0 15px #ff00e5 !important;
     }
 
     #touch-reset {
@@ -2433,7 +2476,6 @@ html.geo-reduced-motion kbd {
 
 /* Portrait Mode Optimization (height > width) */
 @media (orientation: portrait) {
-
     /* Additional portrait optimizations */
     .ui-container {
         display: flex;
@@ -2508,7 +2550,6 @@ html.geo-reduced-motion kbd {
 
 /* Touch Feedback Animations */
 @media (hover: none) and (pointer: coarse) {
-
     /* Mobile/Touch devices */
     button,
     .toggle-group button,
@@ -2520,7 +2561,9 @@ html.geo-reduced-motion kbd {
     }
 
     .touch-btn {
-        transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+        transition:
+            transform 0.08s ease-out,
+            box-shadow 0.08s ease-out;
     }
 
     .touch-btn:active {
@@ -2555,8 +2598,7 @@ html.geo-reduced-motion kbd {
 }
 
 /* High DPI Devices (Retina/Pixel displays) */
-@media (-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     kbd {
         border-bottom-width: 2px;
     }
@@ -2565,7 +2607,9 @@ html.geo-reduced-motion kbd {
     .settings-main-btn,
     .coffee-btn,
     .mp-main-btn {
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 8px var(--glass-bright);
+        box-shadow:
+            0 8px 20px rgba(0, 0, 0, 0.5),
+            inset 0 0 8px var(--glass-bright);
     }
 }
 
@@ -2646,9 +2690,9 @@ html.geo-reduced-motion kbd {
     .ui-container {
         display: grid;
         grid-template-areas:
-            "header"
-            "main"
-            "footer";
+            'header'
+            'main'
+            'footer';
         grid-template-rows: auto 1fr auto;
     }
 }
@@ -2699,7 +2743,6 @@ html.geo-reduced-motion kbd {
 
 /* Print Styles - Hide all interactive UI */
 @media print {
-
     .ui-container,
     header,
     .bottom-ui,
@@ -2715,9 +2758,8 @@ html.geo-reduced-motion kbd {
     }
 }
 
-
 .settings-mobile-header {
-    display: none !important;        
+    display: none !important;
     margin-bottom: 15px !important;
 }
 
@@ -2729,7 +2771,7 @@ html.geo-reduced-motion kbd {
         position: sticky !important;
         top: -24px !important;
         width: calc(100% + 40px) !important;
-        margin: -20px -20px 25px -20px !important; 
+        margin: -20px -20px 25px -20px !important;
         padding: 15px 20px !important;
         box-sizing: border-box !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -2742,7 +2784,7 @@ html.geo-reduced-motion kbd {
     .settings-panel {
         padding: 24px !important;
     }
-    
+
     .settings-mobile-header span {
         color: var(--primary) !important;
         font-size: 1.2rem !important;
@@ -2757,10 +2799,11 @@ html.geo-reduced-motion kbd {
 
 /* Fiksiranje panela za vrh ekrana na mobilnom kako ih tastatura ne bi gurala van vidokruga */
 @media (max-width: 1024px) {
-    .settings-panel, .mp-dropdown {
+    .settings-panel,
+    .mp-dropdown {
         position: fixed !important;
-        top: 15px !important;       /* Zakucavamo panel za vrh */
-        bottom: auto !important;    /* Skidamo vezu sa dnom */
+        top: 15px !important; /* Zakucavamo panel za vrh */
+        bottom: auto !important; /* Skidamo vezu sa dnom */
         right: 0 !important;
         left: 0 !important;
         margin: 0 auto !important;
@@ -2773,7 +2816,8 @@ html.geo-reduced-motion kbd {
         transform-origin: top center !important;
     }
 
-    .settings-panel.active, .mp-dropdown.active {
+    .settings-panel.active,
+    .mp-dropdown.active {
         transform: scale(1) translateY(0) !important;
         opacity: 1 !important;
         pointer-events: auto !important;
@@ -2781,24 +2825,24 @@ html.geo-reduced-motion kbd {
 }
 
 /* Premium styling for God Mode button in Vehicle Toggle */
-.toggle-group button[data-vehicle="god"] {
+.toggle-group button[data-vehicle='god'] {
     background: rgba(255, 0, 229, 0.05) !important;
     color: rgba(255, 0, 229, 0.6) !important;
     border: 1px dashed rgba(255, 0, 229, 0.3) !important;
 }
 
-.toggle-group button[data-vehicle="god"]:hover {
-    color: #FF00E5 !important;
-    border-color: #FF00E5 !important;
+.toggle-group button[data-vehicle='god']:hover {
+    color: #ff00e5 !important;
+    border-color: #ff00e5 !important;
     box-shadow: 0 0 10px rgba(255, 0, 229, 0.3) !important;
 }
 
-.toggle-group button[data-vehicle="god"].active {
-    background: #FF00E5 !important;
+.toggle-group button[data-vehicle='god'].active {
+    background: #ff00e5 !important;
     color: #000 !important;
     box-shadow: 0 0 15px rgba(255, 0, 229, 0.8) !important;
     border-style: solid !important;
-    border-color: #FF00E5 !important;
+    border-color: #ff00e5 !important;
 }
 
 /* Cinematic Location Discovery */
@@ -2813,7 +2857,7 @@ html.geo-reduced-motion kbd {
     opacity: 0;
     visibility: hidden;
     transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-    background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 80%);
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 80%);
     padding: 30px 100px;
 }
 
@@ -2828,7 +2872,7 @@ html.geo-reduced-motion kbd {
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 6px;
-    color: #00F2FF;
+    color: #00f2ff;
     margin-bottom: 5px;
     text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
     text-transform: uppercase;
@@ -2839,8 +2883,10 @@ html.geo-reduced-motion kbd {
     font-size: 3.5rem;
     font-weight: 900;
     letter-spacing: 15px;
-    color: #FFFFFF;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    text-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.8),
+        0 0 15px rgba(255, 255, 255, 0.3);
     text-transform: uppercase;
     margin-bottom: 0px;
     line-height: 1;
@@ -2857,17 +2903,43 @@ html.geo-reduced-motion kbd {
 }
 
 @media (max-width: 768px) {
-    .discovery-title { font-size: 2rem; letter-spacing: 6px; white-space: nowrap; }
-    .discovery-subtitle { font-size: 0.7rem; letter-spacing: 5px; }
-    .discovery-country { font-size: 0.8rem; letter-spacing: 6px; }
-    .location-discovery { padding: 15px 10px; top: 18%; width: 100vw; background: radial-gradient(circle, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 90%); }
+    .discovery-title {
+        font-size: 2rem;
+        letter-spacing: 6px;
+        white-space: nowrap;
+    }
+    .discovery-subtitle {
+        font-size: 0.7rem;
+        letter-spacing: 5px;
+    }
+    .discovery-country {
+        font-size: 0.8rem;
+        letter-spacing: 6px;
+    }
+    .location-discovery {
+        padding: 15px 10px;
+        top: 18%;
+        width: 100vw;
+        background: radial-gradient(circle, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 90%);
+    }
 }
 
 @media (max-width: 480px) {
-    .discovery-title { font-size: 1.35rem; letter-spacing: 4px; }
-    .discovery-subtitle { font-size: 0.6rem; letter-spacing: 4px; }
-    .discovery-country { font-size: 0.7rem; letter-spacing: 5px; }
-    .location-discovery { top: 12%; }
+    .discovery-title {
+        font-size: 1.35rem;
+        letter-spacing: 4px;
+    }
+    .discovery-subtitle {
+        font-size: 0.6rem;
+        letter-spacing: 4px;
+    }
+    .discovery-country {
+        font-size: 0.7rem;
+        letter-spacing: 5px;
+    }
+    .location-discovery {
+        top: 12%;
+    }
 }
 
 /* Premium Donation Toast Popup */
@@ -2882,17 +2954,17 @@ html.geo-reduced-motion kbd {
     border: 1px solid rgba(0, 242, 255, 0.35);
     border-radius: 20px;
     padding: 26px 20px 20px 20px;
-    box-shadow: 
+    box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.8),
         0 0 30px rgba(0, 242, 255, 0.25),
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
     z-index: 9999;
-    
+
     /* Premium Spring Entrance Animation */
     opacity: 0;
     visibility: hidden;
     transform: scale(0.8) translateY(80px) rotate(2deg);
-    transition: 
+    transition:
         opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
         transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
         visibility 0.6s;
@@ -2931,7 +3003,9 @@ html.geo-reduced-motion kbd {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 20px rgba(0, 242, 255, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow:
+        0 0 20px rgba(0, 242, 255, 0.6),
+        0 4px 10px rgba(0, 0, 0, 0.4);
     border: 2px solid rgba(8, 8, 12, 0.97);
 }
 
@@ -3005,7 +3079,7 @@ html.geo-reduced-motion kbd {
     gap: 10px;
     background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 114, 255, 0.15) 100%);
     border: 1px solid rgba(0, 242, 255, 0.5);
-    color: #00F2FF;
+    color: #00f2ff;
     padding: 13px;
     border-radius: 12px;
     font-family: 'Outfit', sans-serif;
@@ -3023,7 +3097,9 @@ html.geo-reduced-motion kbd {
 .donation-paypal-btn:hover {
     background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%);
     border-color: #00f2ff;
-    box-shadow: 0 6px 25px rgba(0, 242, 255, 0.4), 0 0 15px rgba(0, 242, 255, 0.2);
+    box-shadow:
+        0 6px 25px rgba(0, 242, 255, 0.4),
+        0 0 15px rgba(0, 242, 255, 0.2);
     transform: translateY(-2px);
     color: #fff;
     text-shadow: none;
@@ -3044,6 +3120,13 @@ html.geo-reduced-motion kbd {
 }
 
 @keyframes btnPulse {
-    0%, 100% { box-shadow: 0 4px 15px rgba(0, 242, 255, 0.15); }
-    50% { box-shadow: 0 4px 22px rgba(0, 242, 255, 0.35), 0 0 8px rgba(0, 242, 255, 0.2); }
+    0%,
+    100% {
+        box-shadow: 0 4px 15px rgba(0, 242, 255, 0.15);
+    }
+    50% {
+        box-shadow:
+            0 4px 22px rgba(0, 242, 255, 0.35),
+            0 0 8px rgba(0, 242, 255, 0.2);
+    }
 }

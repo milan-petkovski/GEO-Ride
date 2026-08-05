@@ -1,0 +1,164 @@
+# GEO Ride - LLM Context File
+# https://georide.milanwebportal.com
+# Format: llms.txt (https://llmstxt.org)
+
+> GEO Ride is a browser-based 3D driving simulator that lets users explore any location on Earth using real-world Mapbox satellite and terrain data, combined with a Three.js custom rendering layer. No plugins or downloads are required.
+
+## Project Summary
+
+GEO Ride is a passion project by Milan Petkovski, a 19-year-old web developer from Serbia. The goal is to push the boundaries of what a modern browser can do by combining real geographic data with interactive 3D vehicle physics, real-time multiplayer, and a synthesized Web Audio engine — all in a single-page JavaScript application.
+
+- **Live URL:** https://georide.milanwebportal.com
+- **Repository:** https://github.com/milan-petkovski/GEO-Ride
+- **Author:** Milan Petkovski (contact@milanwebportal.com)
+- **License:** Open Source
+
+## Tech Stack
+
+- **Map & Terrain:** Mapbox GL JS (real-world satellite imagery, terrain elevation, 3D building extrusion)
+- **3D Rendering:** Three.js (custom WebGL layer rendered directly on top of Mapbox)
+- **Physics Engine:** Custom JavaScript vehicle dynamics (drift, tire slip, weight transfer, skidmarks)
+- **Multiplayer:** MQTT over WebSockets via HiveMQ public broker (real-time position sync)
+- **Audio:** Web Audio API (synthesized engine, drift, and collision sounds — no external audio files)
+- **Haptics:** Vibration API (tactile feedback on mobile on collisions and acceleration)
+- **Build Tool:** Vite with OXC minification and manual chunk splitting (mapbox-vendor, three-vendor)
+- **Testing:** Node.js built-in test runner (unit), Playwright (E2E)
+- **CI/CD:** GitHub Actions (lint, prettier, audit, tests, build, bundle size, Lighthouse)
+- **Deployment:** Netlify (CDN, automatic deploys, CSP/HSTS security headers via netlify.toml)
+- **PWA:** Service Worker + Web App Manifest (installable, landscape-oriented, offline shell)
+
+## Architecture
+
+The application follows a reactive, event-driven modular architecture:
+
+- `app.js` — Main orchestrator. Initializes all modules and runs the animation loop.
+- `js/state.js` — Central reactive store (pub/sub Observer pattern). All modules communicate through state events instead of direct coupling.
+- `js/physics.js` — Vehicle dynamics engine. Handles acceleration, braking, steering, drift, skidmarks, collision detection with Mapbox 3D buildings.
+- `js/three-manager.js` — Three.js custom layer. Manages vehicle 3D meshes, wheel animation, camera positioning, cinematic orbit, screen shake.
+- `js/controls.js` — Input handling for keyboard, touch (virtual joystick), and device tilt (gyroscope).
+- `js/ui.js` — HUD and overlay management. Speedometer, minimap, settings panel, multiplayer UI, discovery cinematic overlay.
+- `js/multiplayer.js` — MQTT real-time sync. Publishes player position/state, renders other players' vehicles, applies message rate limiting and XSS sanitization.
+- `js/audio.js` — Web Audio synthesizer. Generates engine, drift, boost, and collision sounds procedurally using OscillatorNodes and BiquadFilters.
+- `js/haptics.js` — Vibration API abstraction for mobile tactile feedback.
+- `js/config.js` — All tunable physics constants, vehicle configs, map defaults, and camera parameters.
+- `js/analytics.js` — Google Analytics 4 event tracking and Web Vitals reporting.
+- `js/discovery.js` — Reverse geocoding via Mapbox API to detect when the player enters a notable location, triggering a cinematic overlay.
+- `js/utils.js` — Shared utilities (coordinate distance, speed conversion, DOM helpers).
+- `js/check-size.js` — Dev-time bundle size checker that enforces a maximum output size budget.
+- `js/physics.worker.js` — Web Worker entry point for offloading physics calculations from the main thread.
+
+## Vehicles
+
+Four drivable vehicles with unique physics profiles:
+- **Sports Car** — Fast, agile, ideal for drifting.
+- **Heavy Duty Truck** — Slow acceleration, heavy momentum.
+- **Transit Bus** — Long wheelbase, wide turning radius.
+- **God Mode Speedster** — Supersonic speed, ignores all physics and collisions.
+
+## Controls
+
+| Action | Input |
+| --- | --- |
+| Drive / Reverse | W / S or Arrow Up / Down |
+| Steer | A / D or Arrow Left / Right |
+| Drift / Handbrake | Spacebar |
+| Launch Boost | Hold Space + W (from standstill), then release Space |
+| Orbit Camera | Left-Click + drag |
+| Checkpoint Respawn | R |
+| Global Reset (to Belgrade) | Shift + R |
+
+## Key Features
+
+- Drive anywhere on Earth using real satellite imagery and terrain elevation
+- Realistic drifting physics with visual skidmarks rendered on the map
+- Launch Control boost system (charge burnout from standstill)
+- Live multiplayer — see other players in real-time on the same map
+- Cinematic camera shake on building collisions and high-speed impacts
+- Discovery system — triggers location name cinematic when entering notable areas
+- Dynamic day/night and weather lighting presets
+- PWA-installable on desktop and mobile (landscape-oriented)
+
+## Security
+
+- Mapbox token is domain-restricted via Mapbox Dashboard URL restrictions.
+- Content Security Policy (CSP) enforced via `netlify.toml` headers.
+- HSTS with preload enabled (`max-age=31536000; includeSubDomains; preload`).
+- Multiplayer payloads undergo coordinate range validation, string sanitization (XSS protection), and client-side rate limiting (20 msg/s ceiling).
+- `npm audit` runs in CI and fails the build on any high or critical severity vulnerability.
+
+## Development Commands
+
+```bash
+npm run dev       # Start Vite dev server at localhost:3000
+npm test          # Run unit tests with Node.js built-in test runner + coverage
+npm run test:e2e  # Run Playwright end-to-end tests
+npm run lint      # Run ESLint on all JS files
+npm run format    # Format all files with Prettier
+npm run build     # Production build to /dist
+npm run size      # Check bundle output size against budget
+```
+
+## File Structure
+
+```
+geo-ride/
+├── app.js                    # Main application orchestrator
+├── index.html                # Single-page application entry point
+├── style.css                 # All application styles
+├── vite.config.js            # Vite build configuration
+├── eslint.config.js          # ESLint flat config (ES2026)
+├── playwright.config.js      # Playwright E2E test config
+├── netlify.toml              # Netlify build + security headers
+├── .env.example              # Required environment variables template
+├── js/
+│   ├── state.js              # Reactive central store
+│   ├── physics.js            # Vehicle dynamics engine
+│   ├── physics.worker.js     # Web Worker for physics offloading
+│   ├── three-manager.js      # Three.js 3D rendering layer
+│   ├── controls.js           # Keyboard/touch/tilt input handling
+│   ├── ui.js                 # HUD, overlays, settings panel
+│   ├── multiplayer.js        # MQTT real-time multiplayer sync
+│   ├── audio.js              # Web Audio synthesized sound engine
+│   ├── haptics.js            # Vibration API abstraction
+│   ├── config.js             # All physics and app constants
+│   ├── analytics.js          # GA4 event tracking + Web Vitals
+│   ├── discovery.js          # Location detection + cinematic overlay
+│   ├── utils.js              # Shared utility functions
+│   ├── check-size.js         # Build-time bundle size budget checker
+│   ├── gtag-init.js          # Google Tag Manager consent init
+│   └── loading-init.js       # Loading screen progress animation
+├── tests/
+│   ├── analytics.test.js
+│   ├── audio.test.js
+│   ├── config.test.js
+│   ├── discovery.test.js
+│   ├── haptics.test.js
+│   ├── multiplayer.test.js
+│   ├── physics.test.js
+│   ├── state.test.js
+│   ├── three-manager.test.js
+│   ├── ui.test.js
+│   ├── utils.test.js
+│   └── e2e/
+│       └── driving.spec.js   # Playwright E2E test
+├── public/
+│   ├── manifest.json         # PWA Web App Manifest
+│   ├── sw.js                 # Service Worker (cache-first strategy)
+│   ├── favicon.png           # App icon
+│   ├── robots.txt
+│   ├── sitemap.xml
+│   └── images/               # Screenshot assets for README and PWA
+└── .github/
+    ├── dependabot.yml        # Automated dependency updates (weekly)
+    └── workflows/
+        ├── ci.yml            # Full CI pipeline
+        └── release-please.yml # Automated changelog + versioning
+```
+
+## Contact
+
+- **Website:** https://georide.milanwebportal.com
+- **Portfolio:** https://milanwebportal.com
+- **Email:** contact@milanwebportal.com
+- **GitHub:** https://github.com/milan-petkovski
+- **Support:** https://paypal.me/milanwebportal
