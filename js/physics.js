@@ -1,13 +1,62 @@
+/**
+ * @file physics.js
+ * @description Vehicle physics engine for GEO Ride, handling acceleration, braking, drifting, steering, collision detection, and camera tracking.
+ */
+
 import { state, saveState } from './state.js';
-import { VEHICLE_CONFIG, INITIAL_CENTER } from './config.js';
+import { VEHICLE_CONFIG, INITIAL_CENTER, AIR_DRAG_FACTOR } from './config.js';
+
 import { setup3DVehicleLayer } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
 
 let lastCollisionTrackTime = 0;
 
+// Off-thread Web Worker initialization for physics trajectory pre-computation
+let physicsWorker = null;
+if (typeof window !== 'undefined' && typeof window.Worker !== 'undefined') {
+    try {
+        physicsWorker = new Worker(new URL('./physics.worker.js', import.meta.url), { type: 'module' });
+        physicsWorker.onmessage = (e) => {
+            if (e.data && e.data.type === 'TRAJECTORY_RESULT') {
+                state.predictedTrajectory = e.data.payload.trajectory;
+            }
+        };
+    } catch (_e) {
+        // Fallback gracefully if workers are disabled
+    }
+}
+
+/**
+ * Dispatches trajectory prediction calculation to the dedicated Web Worker.
+ * @param {number} dtFinal - Delta time frame multiplier.
+ * @returns {void}
+ */
+export function requestOffthreadTrajectory(dtFinal) {
+    if (physicsWorker && Math.abs(state.velocity) > 0.02) {
+        physicsWorker.postMessage({
+            type: 'COMPUTE_TRAJECTORY',
+            payload: {
+                lng: state.lng,
+                lat: state.lat,
+                bearing: state.bearing,
+                velocity: state.velocity,
+                dt: dtFinal,
+                steps: 10
+            }
+        });
+    }
+}
+
+/**
+ * Updates vehicle position, velocity, heading, drifting, and collision responses for the current frame step.
+ * @param {number} dtFinal - Delta time frame multiplier.
+ * @param {Object} map - Mapbox GL JS map instance.
+ * @returns {void}
+ */
 export function updatePhysics(dtFinal, map) {
     const config = VEHICLE_CONFIG[state.activeVehicle];
+    requestOffthreadTrajectory(dtFinal);
 
     if (!state.isInputFocused) {
         // Reset Logic (STARO.js style)
@@ -35,7 +84,7 @@ export function updatePhysics(dtFinal, map) {
 
                 trackEvent('vehicle_reset', {
                     is_global: isShiftReset,
-                    generalized_location: "REDACTED" // Prevent PII leakage
+                    generalized_location: 'REDACTED' // Prevent PII leakage
                 });
 
                 map.once('moveend', () => {
@@ -57,7 +106,11 @@ export function updatePhysics(dtFinal, map) {
         if (isWDown) {
             if (state.velocity < 0) {
                 state.velocity += config.brake * 1.5 * dtFinal;
-                if (state.velocity >= 0) { state.velocity = 0; state.stopTime = performance.now(); state.wKeyReleasedSinceStop = false; }
+                if (state.velocity >= 0) {
+                    state.velocity = 0;
+                    state.stopTime = performance.now();
+                    state.wKeyReleasedSinceStop = false;
+                }
             } else {
                 const timeSinceStop = performance.now() - state.stopTime;
                 if (state.wKeyReleasedSinceStop || timeSinceStop > 500) state.velocity += config.power * dtFinal;
@@ -66,14 +119,18 @@ export function updatePhysics(dtFinal, map) {
         } else if (isSDown) {
             if (state.velocity > 0) {
                 state.velocity -= config.brake * dtFinal;
-                if (state.velocity <= 0) { state.velocity = 0; state.stopTime = performance.now(); state.sKeyReleasedSinceStop = false; }
+                if (state.velocity <= 0) {
+                    state.velocity = 0;
+                    state.stopTime = performance.now();
+                    state.sKeyReleasedSinceStop = false;
+                }
             } else {
                 const timeSinceStop = performance.now() - state.stopTime;
-                if (state.sKeyReleasedSinceStop || timeSinceStop > 500) state.velocity -= (config.power * 0.6) * dtFinal;
+                if (state.sKeyReleasedSinceStop || timeSinceStop > 500) state.velocity -= config.power * 0.6 * dtFinal;
                 else state.velocity = 0;
             }
         } else {
-            state.velocity *= Math.pow(state.activeVehicle === 'god' ? 0.999 : 0.998, dtFinal);
+            state.velocity *= Math.pow(state.activeVehicle === 'god' ? 0.999 : AIR_DRAG_FACTOR, dtFinal);
             if (Math.abs(state.velocity) < 0.0001) state.velocity = 0;
         }
 
@@ -93,7 +150,9 @@ export function updatePhysics(dtFinal, map) {
 
         state.velocity = Math.max(-config.maxSpeed / 2.5, Math.min(config.maxSpeed, state.velocity));
 
-        const inputDir = (state.keys['a'] || state.keys['arrowleft'] ? -1 : 0) + (state.keys['d'] || state.keys['arrowright'] ? 1 : 0);
+        const inputDir =
+            (state.keys['a'] || state.keys['arrowleft'] ? -1 : 0) +
+            (state.keys['d'] || state.keys['arrowright'] ? 1 : 0);
         const steeringSmooth = Math.min(config.steeringWeight * dtFinal, 0.3);
         state.steeringAngle += (inputDir * config.turnRate - state.steeringAngle) * steeringSmooth;
 
@@ -115,12 +174,13 @@ export function updatePhysics(dtFinal, map) {
             }
 
             const turnDir = state.velocity > 0 ? 1 : -0.7;
-            const bearingChange = (Math.sqrt(Math.abs(state.velocity)) * state.steeringAngle * turnPower * damping * turnDir) * dtFinal;
+            const bearingChange =
+                Math.sqrt(Math.abs(state.velocity)) * state.steeringAngle * turnPower * damping * turnDir * dtFinal;
             state.bearing += bearingChange;
             const diff = state.bearing - state.travelBearing;
             state.travelBearing += diff * slipGrip * dtFinal;
 
-            const rad = (state.travelBearing) * (Math.PI / 180);
+            const rad = state.travelBearing * (Math.PI / 180);
             const latRad = state.lat * (Math.PI / 180);
             const projectionFactor = 1 / Math.cos(latRad);
             const nextLng = state.lng + Math.sin(rad) * state.velocity * 0.0001 * projectionFactor * dtFinal;
@@ -140,25 +200,36 @@ export function updatePhysics(dtFinal, map) {
                     // Simple distance check to skip query if movement is micro
                     const distSq = Math.pow(nextP.x - currentP.x, 2) + Math.pow(nextP.y - currentP.y, 2);
                     if (distSq > 0.1) {
-                        const combinedBbox = [[Math.min(currentP.x, nextP.x) - 14, Math.min(currentP.y, nextP.y) - 14], [Math.max(currentP.x, nextP.x) + 14, Math.max(currentP.y, nextP.y) + 14]];
+                        const combinedBbox = [
+                            [Math.min(currentP.x, nextP.x) - 14, Math.min(currentP.y, nextP.y) - 14],
+                            [Math.max(currentP.x, nextP.x) + 14, Math.max(currentP.y, nextP.y) + 14]
+                        ];
 
                         let collisions = [];
                         try {
-                            const layers = ['3d-buildings', 'building'].filter(l => map.getLayer(l));
+                            const layers = ['3d-buildings', 'building'].filter((l) => map.getLayer(l));
                             if (layers.length > 0) collisions = map.queryRenderedFeatures(combinedBbox, { layers });
-                        } catch (_e) { }
+                        } catch (_e) {}
 
                         if (collisions.length > 0) {
                             try {
-                                const layers = ['3d-buildings', 'building'].filter(l => map.getLayer(l));
-                                isAlreadyInside = layers.length > 0 && map.queryRenderedFeatures([[currentP.x - 8, currentP.y - 8], [currentP.x + 8, currentP.y + 8]], { layers }).length > 0;
-                            } catch (_e) { }
+                                const layers = ['3d-buildings', 'building'].filter((l) => map.getLayer(l));
+                                isAlreadyInside =
+                                    layers.length > 0 &&
+                                    map.queryRenderedFeatures(
+                                        [
+                                            [currentP.x - 8, currentP.y - 8],
+                                            [currentP.x + 8, currentP.y + 8]
+                                        ],
+                                        { layers }
+                                    ).length > 0;
+                            } catch (_e) {}
 
                             if (!isAlreadyInside) {
                                 collisionOccurred = true;
                                 const bounceDirection = state.velocity > 0 ? -1 : 1;
                                 state.velocity = -state.velocity * 0.02;
-                                const rad = (state.bearing) * (Math.PI / 180);
+                                const rad = state.bearing * (Math.PI / 180);
                                 state.lng += Math.sin(rad) * bounceDirection * 0.00002;
                                 state.lat += Math.cos(rad) * bounceDirection * 0.00002;
                                 state.crashShake = Math.min(10, state.crashShake + Math.abs(state.velocity) * 1000);
@@ -172,22 +243,27 @@ export function updatePhysics(dtFinal, map) {
                 }
 
                 // 2. Multiplayer Player Collisions (High Precision)
-                const myMc = mapboxgl.MercatorCoordinate.fromLngLat([state.lng, state.lat], 0);
-                const meterScale = mapboxgl.MercatorCoordinate.fromLngLat([state.lng, state.lat], 0).meterInMercatorCoordinateUnits();
+                if (typeof mapboxgl !== 'undefined') {
+                    const myMc = mapboxgl.MercatorCoordinate.fromLngLat([state.lng, state.lat], 0);
+                    const meterScale = mapboxgl.MercatorCoordinate.fromLngLat(
+                        [state.lng, state.lat],
+                        0
+                    ).meterInMercatorCoordinateUnits();
 
-                Object.values(state.otherPlayers).forEach(p => {
-                    if (!p.lng || !p.lat) return;
-                    const pMc = mapboxgl.MercatorCoordinate.fromLngLat([p.lng, p.lat], 0);
-                    const dx = (pMc.x - myMc.x) / meterScale;
-                    const dy = (pMc.y - myMc.y) / meterScale;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    Object.values(state.otherPlayers).forEach((p) => {
+                        if (!p.lng || !p.lat) return;
+                        const pMc = mapboxgl.MercatorCoordinate.fromLngLat([p.lng, p.lat], 0);
+                        const dx = (pMc.x - myMc.x) / meterScale;
+                        const dy = (pMc.y - myMc.y) / meterScale;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    const collisionThreshold = state.activeVehicle === 'car' ? 5.0 : 8.5;
-                    if (dist < collisionThreshold) {
-                        collisionOccurred = true;
-                        isAlreadyInside = false; // Always bounce for players
-                    }
-                });
+                        const collisionThreshold = state.activeVehicle === 'car' ? 5.0 : 8.5;
+                        if (dist < collisionThreshold) {
+                            collisionOccurred = true;
+                            isAlreadyInside = false; // Always bounce for players
+                        }
+                    });
+                }
 
                 if (collisionOccurred && !isAlreadyInside) {
                     const now = Date.now();
@@ -201,33 +277,43 @@ export function updatePhysics(dtFinal, map) {
 
                     const bounceDirection = state.velocity > 0 ? -1 : 1;
                     state.velocity = -state.velocity * 0.4;
-                    const rad = (state.bearing) * (Math.PI / 180);
+                    const rad = state.bearing * (Math.PI / 180);
                     state.lng += Math.sin(rad) * bounceDirection * 0.00001;
                     state.lat += Math.cos(rad) * bounceDirection * 0.00001;
 
                     // Haptic feedback for multiplayer collision
                     haptics.impact('strong');
-                    state.isCharging = false; state.chargeLevel = 0; state.crashShake = 15;
+                    state.isCharging = false;
+                    state.chargeLevel = 0;
+                    state.crashShake = 15;
                 }
             }
 
             if (!collisionOccurred) {
-                state.lng = nextLng; state.lat = nextLat;
+                state.lng = nextLng;
+                state.lat = nextLat;
             }
         }
     }
 }
 
+/**
+ * Smoothly updates orbit camera bearing, pitch, and camera shake relative to vehicle velocity and mouse drag.
+ * @param {number} dtFinal - Delta time frame multiplier.
+ * @param {Object} map - Mapbox GL JS map instance.
+ * @returns {void}
+ */
 export function updateCamera(dtFinal, map) {
     const isDrivingNow = Math.abs(state.velocity) > 0.02;
     const timeSinceLastMove = Date.now() - state.lastCameraManualMove;
-    const shouldAutoReturn = !state.isDragging && (timeSinceLastMove > 5000 || (isDrivingNow && timeSinceLastMove > 1000));
+    const shouldAutoReturn =
+        !state.isDragging && (timeSinceLastMove > 5000 || (isDrivingNow && timeSinceLastMove > 1000));
 
     if (shouldAutoReturn) {
         state.mouseRotation += (0 - state.mouseRotation) * 0.05 * dtFinal;
         let maxPitch = 70;
         if (state.activeVehicle === 'truck' || state.activeVehicle === 'bus') maxPitch = 68;
-        const targetPitch = Math.min(65 + (state.chargeLevel * 10) + Math.abs(state.velocity) * 12, maxPitch);
+        const targetPitch = Math.min(65 + state.chargeLevel * 10 + Math.abs(state.velocity) * 12, maxPitch);
         state.currentPitch += (targetPitch - state.currentPitch) * 0.08 * dtFinal;
     }
 
@@ -266,4 +352,3 @@ export function updateCamera(dtFinal, map) {
         state.crashShake *= Math.pow(0.85, dtFinal);
     }
 }
-

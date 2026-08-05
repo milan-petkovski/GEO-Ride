@@ -1,20 +1,20 @@
 {
-  "name": "GEO Ride Simulator",
-  "short_name": "GEO Ride",
-  "description": "3D Driving Simulator & World Explorer",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "orientation": "landscape",
-  "background_color": "#000000",
-  "theme_color": "#020202",
-  "categories": ["games", "simulation", "travel"],
-  "icons": [
-    {
-      "src": "favicon.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+    "name": "GEO Ride Simulator",
+    "short_name": "GEO Ride",
+    "description": "3D Driving Simulator & World Explorer",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "landscape",
+    "background_color": "#000000",
+    "theme_color": "#020202",
+    "categories": ["games", "simulation", "travel"],
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
 }

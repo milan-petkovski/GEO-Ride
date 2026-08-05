@@ -1,10 +1,15 @@
+/**
+ * @file app.js
+ * @description Main application orchestrator for GEO Ride, initializing Mapbox GL JS map, Three.js custom layer, audio engine, controls, and main animation loop.
+ */
+
 // Service Worker Handling
 if ('serviceWorker' in navigator) {
     if (window.location.hostname === 'localhost') {
-        navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+        navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()));
     } else {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed:', err));
+            navigator.serviceWorker.register('./sw.js').catch((err) => console.log('SW failed:', err));
         });
     }
 }
@@ -20,6 +25,17 @@ import { trackEvent, trackWebVitals } from './js/analytics.js';
 import { checkDiscovery } from './js/discovery.js';
 import { updateAudio } from './js/audio.js';
 
+// Global Production Error Boundary Handler
+window.addEventListener('error', (event) => {
+    console.error('GEO Ride Global Error:', event.error || event.message);
+    trackEvent('app_error', { message: event.message, filename: event.filename, lineno: event.lineno });
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('GEO Ride Unhandled Promise Rejection:', event.reason);
+    trackEvent('app_unhandled_rejection', { reason: String(event.reason) });
+});
+
 // Initialize Analytics & Performance Monitoring
 trackWebVitals();
 trackEvent('session_start', {
@@ -27,7 +43,6 @@ trackEvent('session_start', {
     version: '2026.1.0',
     resolution: `${window.innerWidth}x${window.innerHeight}`
 });
-
 
 // Load initial state
 loadState();
@@ -53,7 +68,9 @@ const map = new mapboxgl.Map({
     interactive: false,
     pixelRatio: state.performance.eliteEnd
         ? Math.min(window.devicePixelRatio || 1, 2.0)
-        : (state.performance.lowEnd ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.3)),
+        : state.performance.lowEnd
+          ? 1.0
+          : Math.min(window.devicePixelRatio || 1, 1.3),
     antialias: !state.performance.lowEnd
 });
 
@@ -87,6 +104,10 @@ setTimeout(() => {
     if (window.setLoadingTarget) window.setLoadingTarget(100);
 }, 3000);
 
+/**
+ * Finalizes loading sequence, hides loading overlay banner, and launches requestAnimationFrame update loop.
+ * @returns {void}
+ */
 function finishLoading() {
     // Wait until Mapbox reports idle AND the smooth percentage animation reaches 100%
     if (!isMapFullyLoaded || (window.currentLoadingPct !== undefined && window.currentLoadingPct < 100)) {
@@ -104,10 +125,10 @@ function finishLoading() {
         state.lastTime = performance.now();
         state.loopStarted = true;
         requestAnimationFrame(update);
-        
+
         // Show PayPal donation popup at specific milestones (2m, 10m, 30m, 1h)
         const donationMilestones = [120000, 600000, 1800000, 3600000];
-        donationMilestones.forEach(delay => {
+        donationMilestones.forEach((delay) => {
             setTimeout(triggerDonationPopup, delay);
         });
     }, 600); // Wait for the 0.6s css transition to finish
@@ -144,6 +165,11 @@ map.on('style.load', () => {
     applyLightPreset(map);
 });
 
+/**
+ * Main application animation frame step updating physics, camera, multiplayer, skidmarks, and HUD stats.
+ * @param {number} time - High-resolution timestamp from requestAnimationFrame.
+ * @returns {void}
+ */
 function update(time) {
     const currentTime = time || performance.now();
     let rawDt = (currentTime - state.lastTime) / 16.667;
@@ -155,12 +181,12 @@ function update(time) {
         updateCamera(dtFinal, map);
         updateOtherPlayers(dtFinal, map);
         updateSkidMarks(map);
-        
+
         // Check for new cities/locations
         if (!state.isTeleporting) {
             checkDiscovery(state.lng, state.lat);
         }
-        
+
         // Update dynamic 3D audio engine
         updateAudio(state);
 
@@ -189,7 +215,8 @@ function update(time) {
         if (state.unit === 'mi') speedVal = Math.floor(speedVal * 0.621371);
 
         if (speedVal !== state.lastHUDUpdateSpeed) {
-            document.getElementById('speed').textContent = (speedVal > 0 && state.velocity < -0.0001 ? '-' : '') + speedVal;
+            document.getElementById('speed').textContent =
+                (speedVal > 0 && state.velocity < -0.0001 ? '-' : '') + speedVal;
             state.lastHUDUpdateSpeed = speedVal;
         }
     }
@@ -202,7 +229,7 @@ initUI(map);
 initControls();
 
 // Disable Right-Click
-document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 document.getElementById('mp-btn').onclick = (e) => {
     const mpDropdown = document.getElementById('mp-dropdown');

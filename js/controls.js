@@ -1,9 +1,18 @@
+/**
+ * @file controls.js
+ * @description Input handler for GEO Ride, managing keyboard bindings, touch/tilt controls, mouse orbit dragging, and UI visual key feedback.
+ */
+
 import { state } from './state.js';
 import { closeAllPanels } from './ui.js';
 import { haptics } from './haptics.js';
 
 let kbdElements = null;
 
+/**
+ * Initializes keyboard, mouse, and touch event listeners for vehicle control and camera navigation.
+ * @returns {void}
+ */
 export function initControls() {
     kbdElements = document.querySelectorAll('kbd');
     window.addEventListener('keydown', (e) => {
@@ -18,12 +27,32 @@ export function initControls() {
         const key = e.key.toLowerCase();
         if (e.ctrlKey || e.metaKey) return;
 
-        const drivingKeys = ['w', 'a', 's', 'd', ' ', 'r', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'shift', 'escape', 'tab'];
+        const drivingKeys = [
+            'w',
+            'a',
+            's',
+            'd',
+            ' ',
+            'r',
+            'arrowup',
+            'arrowdown',
+            'arrowleft',
+            'arrowright',
+            'shift',
+            'escape',
+            'tab'
+        ];
         if (!drivingKeys.includes(key)) return;
 
-        if (key === 'escape') { closeAllPanels(); return; }
+        if (key === 'escape') {
+            closeAllPanels();
+            return;
+        }
         if (key === 'shift') state.keys['shift'] = true;
-        if (key === 'tab') { e.preventDefault(); return; }
+        if (key === 'tab') {
+            e.preventDefault();
+            return;
+        }
 
         if (state.isInputFocused) return;
 
@@ -48,7 +77,7 @@ export function initControls() {
 
     window.addEventListener('blur', () => {
         state.keys = {};
-        document.querySelectorAll('kbd').forEach(k => k.classList.remove('pressed'));
+        document.querySelectorAll('kbd').forEach((k) => k.classList.remove('pressed'));
         state.velocity *= 0.8;
     });
 
@@ -57,7 +86,11 @@ export function initControls() {
             document.body.classList.add('hide-cursor');
         }
         if (e.button === 0 && !state.isInputFocused) {
-            if (e.target.closest('.ui-container') || e.target.closest('.settings-panel') || e.target.closest('.mp-dropdown')) {
+            if (
+                e.target.closest('.ui-container') ||
+                e.target.closest('.settings-panel') ||
+                e.target.closest('.mp-dropdown')
+            ) {
                 document.body.classList.remove('hide-cursor');
                 return;
             }
@@ -157,54 +190,74 @@ function initTouchControls() {
     setupTouchBtn(headerReset, 'r');
 
     // Drag-to-look touch rotation for mobile device map interactions
-    window.addEventListener('touchstart', (e) => {
-        if (state.isInputFocused) return;
+    window.addEventListener(
+        'touchstart',
+        (e) => {
+            if (state.isInputFocused) return;
 
-        // Skip touch dragging if we touched any UI or touch button
-        if (e.target.closest('.touch-btn') || e.target.closest('.ui-container') || e.target.closest('.settings-panel') || e.target.closest('.mp-dropdown')) {
-            return;
-        }
+            // Skip touch dragging if we touched any UI or touch button
+            if (
+                e.target.closest('.touch-btn') ||
+                e.target.closest('.ui-container') ||
+                e.target.closest('.settings-panel') ||
+                e.target.closest('.mp-dropdown')
+            ) {
+                return;
+            }
 
-        if (e.touches.length === 1) {
-            state.isDragging = true;
-            const touch = e.touches[0];
-            state.lastMouseX = touch.clientX;
-            state.lastMouseY = touch.clientY;
-        }
-    }, { passive: true });
+            if (e.touches.length === 1) {
+                state.isDragging = true;
+                const touch = e.touches[0];
+                state.lastMouseX = touch.clientX;
+                state.lastMouseY = touch.clientY;
+            }
+        },
+        { passive: true }
+    );
 
-    window.addEventListener('touchmove', (e) => {
-        if (state.isDragging && e.touches.length === 1) {
-            const touch = e.touches[0];
-            const moveX = touch.clientX - state.lastMouseX;
-            const moveY = touch.clientY - state.lastMouseY;
+    window.addEventListener(
+        'touchmove',
+        (e) => {
+            if (state.isDragging && e.touches.length === 1) {
+                const touch = e.touches[0];
+                const moveX = touch.clientX - state.lastMouseX;
+                const moveY = touch.clientY - state.lastMouseY;
 
-            state.mouseRotation += moveX * 0.5;
-            state.currentPitch = Math.max(5, Math.min(80, state.currentPitch - moveY * 0.5));
-            state.lastMouseX = touch.clientX;
-            state.lastMouseY = touch.clientY;
-            state.lastCameraManualMove = Date.now();
-        }
-    }, { passive: true });
+                state.mouseRotation += moveX * 0.5;
+                state.currentPitch = Math.max(5, Math.min(80, state.currentPitch - moveY * 0.5));
+                state.lastMouseX = touch.clientX;
+                state.lastMouseY = touch.clientY;
+                state.lastCameraManualMove = Date.now();
+            }
+        },
+        { passive: true }
+    );
 
-    window.addEventListener('touchend', () => {
-        state.isDragging = false;
-    }, { passive: true });
+    window.addEventListener(
+        'touchend',
+        () => {
+            state.isDragging = false;
+        },
+        { passive: true }
+    );
 
     // Gyroscope/Accelerometer Sensor Permission Request on User Gesture
     let tiltPermissionRequested = false;
     const requestTiltPermission = () => {
         if (tiltPermissionRequested) return;
 
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        if (
+            typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function'
+        ) {
             DeviceOrientationEvent.requestPermission()
-                .then(permissionState => {
+                .then((permissionState) => {
                     if (permissionState === 'granted') {
                         tiltPermissionRequested = true;
                         window.addEventListener('deviceorientation', handleDeviceOrientation);
                     }
                 })
-                .catch(err => console.warn('Gyroscope permission error:', err));
+                .catch((err) => console.warn('Gyroscope permission error:', err));
         } else {
             tiltPermissionRequested = true;
             window.addEventListener('deviceorientation', handleDeviceOrientation);
@@ -278,11 +331,10 @@ function handleDeviceOrientation(e) {
     }
 }
 
-
 function updateKbdHUD(key, pressed) {
     if (!kbdElements) return;
     if (state.isTeleporting) {
-        kbdElements.forEach(k => k.classList.remove('pressed'));
+        kbdElements.forEach((k) => k.classList.remove('pressed'));
         return;
     }
     let searchKey = key === ' ' ? 'space' : key;
@@ -291,7 +343,7 @@ function updateKbdHUD(key, pressed) {
     if (key === 'arrowleft') searchKey = 'a';
     if (key === 'arrowright') searchKey = 'd';
 
-    kbdElements.forEach(k => {
+    kbdElements.forEach((k) => {
         if (k.textContent.trim().toLowerCase() === searchKey) {
             if (pressed) k.classList.add('pressed');
             else k.classList.remove('pressed');
@@ -364,7 +416,9 @@ function updateOrientationLayout() {
     }
 
     // Trigger layout recalculation
-    window.dispatchEvent(new CustomEvent('orientationUpdated', {
-        detail: { isLandscape, isMobile, isTablet }
-    }));
+    window.dispatchEvent(
+        new CustomEvent('orientationUpdated', {
+            detail: { isLandscape, isMobile, isTablet }
+        })
+    );
 }
