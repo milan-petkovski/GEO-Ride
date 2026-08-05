@@ -15,16 +15,20 @@ export const VEHICLE_CONFIG = {
 };
 
 export const PERFORMANCE_PROFILE = (() => {
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    const deviceMemory = navigator.deviceMemory || 8;
-    const hardwareConcurrency = navigator.hardwareConcurrency || 8;
-    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isWin = typeof window !== 'undefined';
+    const isNav = typeof navigator !== 'undefined';
+
+    const connection = isNav ? (navigator.connection || navigator.mozConnection || navigator.webkitConnection) : null;
+    const deviceMemory = isNav ? (navigator.deviceMemory || 8) : 8;
+    const hardwareConcurrency = isNav ? (navigator.hardwareConcurrency || 8) : 8;
+    const reducedMotion = isWin && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
     const saveData = !!(connection && connection.saveData);
-    const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const compactViewport = Math.min(window.innerWidth, window.innerHeight) <= 900;
+    const touchDevice = isWin ? ('ontouchstart' in window || (isNav && navigator.maxTouchPoints > 0)) : false;
+    const compactViewport = isWin ? Math.min(window.innerWidth, window.innerHeight) <= 900 : false;
 
     const getGpuInfo = () => {
         try {
+            if (typeof document === 'undefined') return { renderer: 'Server', vendor: 'Server', isLowEndGpu: false };
             const canvas = document.createElement('canvas');
             const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
             if (!gl) return { renderer: 'Unknown', vendor: 'Unknown', isLowEndGpu: false };
@@ -35,7 +39,7 @@ export const PERFORMANCE_PROFILE = (() => {
             const lowEndGpuRegex = /intel|iris|hd graphics|uhd graphics|mali|adreno|swiftshader|software|google/i;
             const isLowEndGpu = lowEndGpuRegex.test(renderer);
             return { renderer, vendor, isLowEndGpu };
-        } catch (e) {
+        } catch (_e) {
             return { renderer: 'Error', vendor: 'Error', isLowEndGpu: false };
         }
     };

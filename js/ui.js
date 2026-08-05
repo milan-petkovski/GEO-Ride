@@ -1,5 +1,4 @@
 import { state, saveState } from './state.js';
-import { VEHICLE_CONFIG, INITIAL_CENTER } from './config.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';

@@ -1434,10 +1434,6 @@ html.geo-reduced-motion kbd {
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
 }
 
-/* Mobile Notice Overlay - DISABLED to allow mobile/tablet play */
-#mobile-notice {
-    display: none !important;
-}
 
 /* Show mobile-only sections on mobile/tablet devices */
 #mobile-search-section,

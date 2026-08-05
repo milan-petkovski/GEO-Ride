@@ -10,13 +10,12 @@ if ('serviceWorker' in navigator) {
 }
 
 import { state, loadState, saveState } from './js/state.js';
-import { INITIAL_CENTER } from './js/config.js';
 import { initUI, updateToggleStates, add3DBuildings, applyLightPreset, triggerDonationPopup } from './js/ui.js';
 import { initControls } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
 import { initMultiplayer, updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
-import { cleanMap, setProgress, addSkidMarksLayer } from './js/utils.js';
+import { cleanMap, addSkidMarksLayer } from './js/utils.js';
 import { trackEvent, trackWebVitals } from './js/analytics.js';
 import { checkDiscovery } from './js/discovery.js';
 import { updateAudio } from './js/audio.js';
@@ -66,6 +65,16 @@ window.THREE = THREE;
 if (window.setLoadingTarget) {
     window.setLoadingTarget(60);
 }
+
+let loadedDataCount = 0;
+map.on('data', (e) => {
+    if (e.isSourceLoaded) {
+        loadedDataCount++;
+        if (window.setLoadingTarget) {
+            window.setLoadingTarget(Math.min(95, 60 + loadedDataCount * 4));
+        }
+    }
+});
 
 let isMapFullyLoaded = false;
 map.once('idle', () => {

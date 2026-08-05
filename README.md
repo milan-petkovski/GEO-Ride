@@ -144,6 +144,32 @@ Choose from four distinct vehicles, each featuring unique driving characteristic
    ```bash
    npm run dev
    ```
+5. **Run tests and linting:**
+   ```bash
+   npm test
+   npm run lint
+   npm run build
+   ```
+
+---
+
+# 🔒 Security, Testing & CI Architecture
+
+- **Inline Script Extraction**: All inline `<script>` tags (e.g. Google Analytics and loading overlay scripts) have been extracted to dedicated standalone JavaScript files (`js/gtag-init.js`, `js/loading-init.js`). This allows removing `'unsafe-inline'` from CSP `script-src` in `netlify.toml`, while retaining required `'unsafe-eval'` for Mapbox GL JS / WebGL shader compilation and `'unsafe-inline'` for dynamic HUD `style-src`.
+- **Whitelisted Endpoints**:
+  - `events.mapbox.com`: Mapbox GL JS telemetry endpoint whitelisted in `connect-src` to eliminate CSP console warnings.
+  - GA4 Regional Endpoints: `https://*.google-analytics.com` and `https://region1.google-analytics.com` explicitly permitted for analytics.
+- **Mapbox Token Security**: The client-facing Mapbox public token is protected via **HTTP Referrer Restrictions** in the Mapbox Account Dashboard (restricted exclusively to `https://georide.milanwebportal.com/*`).
+
+### 📡 Multiplayer Architecture & Rate Limiting
+- **Message Sanitization & Validation**: All incoming & outgoing MQTT player payloads are strictly validated (`id`, numeric `lng`/`lat`/`bearing` bounds, and allowed vehicle strings).
+- **Client-Side Throttling**: Message updates are capped at 10 Hz (100ms interval) with an incoming rate-limiter per sender.
+- **Room Isolation**: Private room codes are sanitized into deterministic topics (`georide/room/<code_hash>`).
+
+### 🧪 Automated Testing & CI
+- **Unit Tests**: Automated tests (`tests/physics.test.js`, `tests/multiplayer.test.js`) verify vehicle physics calculations and multiplayer payload processing using Node's native test runner (`npm test`).
+- **ESLint & Code Hygiene**: Configured with `eslint.config.js` to catch dead code, syntax issues, and enforce consistent code style (`npm run lint`).
+- **Continuous Integration**: Powered by GitHub Actions (`.github/workflows/ci.yml`), automatically running `npm ci`, `npm test`, and `npm run build` on all commits and pull requests.
 
 ---
 

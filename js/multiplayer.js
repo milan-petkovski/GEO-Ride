@@ -10,7 +10,51 @@ let myId = 'p_' + Math.random().toString(36).substr(2, 4);
 let lastSent = { lng: 0, lat: 0, bearing: 0, velocity: 0, vehicle: '' };
 let isManualDisconnect = false;
 
-const Paho = window.Paho;
+const Paho = typeof window !== 'undefined' ? window.Paho : null;
+
+// Rate limiting & validation state
+const playerMessageTimes = new Map();
+
+export function sanitizePlayerPayload(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const { id, lng, lat, bearing, v, vehicle } = raw;
+    if (typeof id !== 'string' || id.length < 2 || id.length > 64) return null;
+    if (typeof lng !== 'number' || isNaN(lng) || lng < -180 || lng > 180) return null;
+    if (typeof lat !== 'number' || isNaN(lat) || lat < -90 || lat > 90) return null;
+    if (typeof bearing !== 'number' || isNaN(bearing)) return null;
+
+    const sanitizedV = (typeof v === 'number' && !isNaN(v)) ? Math.max(-300, Math.min(300, v)) : 0;
+    const allowedVehicles = ['car', 'sports', 'truck', 'bus', 'cyber', 'supercar', 'suv', 'taxi', 'police'];
+    const sanitizedVehicle = allowedVehicles.includes(vehicle) ? vehicle : 'car';
+
+    return {
+        id,
+        lng,
+        lat,
+        bearing: ((bearing % 360) + 360) % 360,
+        v: sanitizedV,
+        vehicle: sanitizedVehicle
+    };
+}
+
+export function cleanupInactivePlayers(otherPlayers, removeCallback, maxAgeMs = 30000, now = Date.now()) {
+    if (!otherPlayers) return;
+    Object.keys(otherPlayers).forEach(id => {
+        if (now - otherPlayers[id].lastSeen > maxAgeMs) {
+            if (typeof removeCallback === 'function') {
+                removeCallback(otherPlayers[id]);
+            }
+            playerMessageTimes.delete(id);
+            delete otherPlayers[id];
+        }
+    });
+}
+
+export function getRoomTopic(roomCode) {
+    if (!roomCode || typeof roomCode !== 'string') return "georide/global/pro";
+    const sanitized = roomCode.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    return sanitized ? "georide/room/" + sanitized : "georide/global/pro";
+}
 
 export function initMultiplayer() {
     if (window.mpInitialized) return;
@@ -55,31 +99,38 @@ export function initMultiplayer() {
 
     client.onMessageArrived = (message) => {
         try {
-            const data = JSON.parse(message.payloadString);
-            if (data.id === myId) return;
+            const rawData = JSON.parse(message.payloadString);
+            const data = sanitizePlayerPayload(rawData);
+            if (!data || data.id === myId) return;
+
+            // Rate-limiting check per sender (max 20 messages / sec)
+            const now = Date.now();
+            const lastMsgTime = playerMessageTimes.get(data.id) || 0;
+            if (now - lastMsgTime < 45) return;
+            playerMessageTimes.set(data.id, now);
 
             if (!state.otherPlayers[data.id]) {
                 state.otherPlayers[data.id] = {
                     lng: data.lng,
                     lat: data.lat,
                     bearing: data.bearing,
-                    vehicle: data.vehicle || 'car',
+                    vehicle: data.vehicle,
                     targetLng: data.lng,
                     targetLat: data.lat,
                     targetBearing: data.bearing,
-                    lastSeen: Date.now()
+                    lastSeen: now
                 };
             } else {
                 const p = state.otherPlayers[data.id];
                 p.targetLng = data.lng;
                 p.targetLat = data.lat;
                 p.targetBearing = data.bearing;
-                p.velocity = data.v || 0;
-                p.vehicle = data.vehicle || 'car';
-                p.lastSeen = Date.now();
+                p.velocity = data.v;
+                p.vehicle = data.vehicle;
+                p.lastSeen = now;
             }
             renderActivePlayers();
-        } catch (e) { }
+        } catch (_e) { }
     };
 
     function onConnect() {
@@ -132,20 +183,15 @@ export function initMultiplayer() {
 
         if (!cleanupTimer) {
             cleanupTimer = setInterval(() => {
-                const now = Date.now();
-                Object.keys(state.otherPlayers).forEach(id => {
-                    if (now - state.otherPlayers[id].lastSeen > 30000) {
-                        const p = state.otherPlayers[id];
-                        if (p.marker2d) p.marker2d.remove();
-                        delete state.otherPlayers[id];
-                    }
+                cleanupInactivePlayers(state.otherPlayers, (player) => {
+                    if (player.marker2d) player.marker2d.remove();
                 });
                 renderActivePlayers();
             }, 5000);
         }
     }
 
-    const handleJoin = (targetCode, activeBtn) => {
+    const handleJoin = (targetCode, _activeBtn) => {
         isManualDisconnect = false;
         if (targetCode) {
             if (joinBtn) joinBtn.textContent = 'CONNECTING...';
@@ -157,7 +203,7 @@ export function initMultiplayer() {
                     client.onConnectionLost = null;
                     client.onMessageArrived = null;
                     if (client.isConnected()) client.disconnect();
-                } catch (e) { }
+                } catch (_e) { }
                 client = null;
             }
 
@@ -177,21 +223,28 @@ export function initMultiplayer() {
 
             client.onMessageArrived = (message) => {
                 try {
-                    const data = JSON.parse(message.payloadString);
-                    if (data.id === myId) return;
+                    const rawData = JSON.parse(message.payloadString);
+                    const data = sanitizePlayerPayload(rawData);
+                    if (!data || data.id === myId) return;
+
+                    const now = Date.now();
+                    const lastMsgTime = playerMessageTimes.get(data.id) || 0;
+                    if (now - lastMsgTime < 45) return;
+                    playerMessageTimes.set(data.id, now);
+
                     if (!state.otherPlayers[data.id]) {
                         state.otherPlayers[data.id] = {
                             lng: data.lng, lat: data.lat, bearing: data.bearing,
-                            vehicle: data.vehicle || 'car', targetLng: data.lng,
-                            targetLat: data.lat, targetBearing: data.bearing, lastSeen: Date.now()
+                            vehicle: data.vehicle, targetLng: data.lng,
+                            targetLat: data.lat, targetBearing: data.bearing, lastSeen: now
                         };
                     } else {
                         const p = state.otherPlayers[data.id];
                         p.targetLng = data.lng; p.targetLat = data.lat; p.targetBearing = data.bearing;
-                        p.velocity = data.v || 0; p.vehicle = data.vehicle || 'car'; p.lastSeen = Date.now();
+                        p.velocity = data.v; p.vehicle = data.vehicle; p.lastSeen = now;
                     }
                     renderActivePlayers();
-                } catch (e) { }
+                } catch (_e) { }
             };
 
             const onConnectSuccess = () => {
@@ -218,7 +271,7 @@ export function initMultiplayer() {
                 if (mpPlayersList) mpPlayersList.style.display = 'block';
                 if (mobileMpPlayersList) mobileMpPlayersList.style.display = 'block';
 
-                currentTopic = "georide/room/" + targetCode;
+                currentTopic = getRoomTopic(targetCode);
                 client.subscribe(currentTopic);
                 startSyncTimers();
                 renderActivePlayers();
@@ -281,6 +334,7 @@ export function initMultiplayer() {
 
     const handleDisconnect = () => {
         isManualDisconnect = true;
+        playerMessageTimes.clear();
         if (client && client.isConnected && client.isConnected()) client.disconnect();
 
         if (broadcastTimer) { clearInterval(broadcastTimer); broadcastTimer = null; }

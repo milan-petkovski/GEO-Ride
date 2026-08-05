@@ -18,7 +18,7 @@ export function initControls() {
         const key = e.key.toLowerCase();
         if (e.ctrlKey || e.metaKey) return;
 
-        const drivingKeys = ['w', 'a', 's', 'd', ' ', 'r', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'shift', 'escape'];
+        const drivingKeys = ['w', 'a', 's', 'd', ' ', 'r', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'shift', 'escape', 'tab'];
         if (!drivingKeys.includes(key)) return;
 
         if (key === 'escape') { closeAllPanels(); return; }
@@ -330,7 +330,6 @@ function updateOrientationLayout() {
     if (isMobile) {
         // Mobile/Tablet specific layout adjustments
         const uiContainer = document.querySelector('.ui-container');
-        const centerControls = document.querySelector('.center-controls');
         const touchControls = document.getElementById('touch-controls');
         const speedContainer = document.querySelector('.speed-container');
 

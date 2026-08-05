@@ -80,15 +80,16 @@ const unlockAudio = () => {
     document.removeEventListener('keydown', unlockAudio);
     document.removeEventListener('pointerdown', unlockAudio);
 };
-document.addEventListener('keydown', unlockAudio);
-document.addEventListener('pointerdown', unlockAudio);
+if (typeof document !== 'undefined') {
+    document.addEventListener('keydown', unlockAudio);
+    document.addEventListener('pointerdown', unlockAudio);
+}
 
 export function updateAudio(state) {
     if (!isInitialized || !ctx || ctx.state !== 'running') return;
     
     const absVel = Math.abs(state.velocity);
     let baseFreq = 50;
-    let maxFreq = 200;
     let volMult = 1.0;
     
     // Vehicle-specific acoustic profiles

@@ -1,4 +1,3 @@
-import { state } from './state.js';
 
 export function cleanMap(map) {
     const style = map.getStyle();

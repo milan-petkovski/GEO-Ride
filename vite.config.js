@@ -15,8 +15,7 @@ export default defineConfig(({ mode }) => {
         protocol: 'ws'
       },
       cors: {
-        origin: '*',
-        credentials: true
+        origin: '*'
       }
     },
     build: {

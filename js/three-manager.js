@@ -3,7 +3,7 @@ import { VEHICLE_CONFIG } from './config.js';
 
 let threeLayer;
 let vehicleMarker;
-const THREE = window.THREE;
+const THREE = typeof window !== 'undefined' ? window.THREE : null;
 
 export function getThreeLayer() { return threeLayer; }
 export function getVehicleMarker() { return vehicleMarker; }

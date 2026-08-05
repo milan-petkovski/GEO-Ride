@@ -146,13 +146,13 @@ export function updatePhysics(dtFinal, map) {
                         try {
                             const layers = ['3d-buildings', 'building'].filter(l => map.getLayer(l));
                             if (layers.length > 0) collisions = map.queryRenderedFeatures(combinedBbox, { layers });
-                        } catch (e) { }
+                        } catch (_e) { }
 
                         if (collisions.length > 0) {
                             try {
                                 const layers = ['3d-buildings', 'building'].filter(l => map.getLayer(l));
                                 isAlreadyInside = layers.length > 0 && map.queryRenderedFeatures([[currentP.x - 8, currentP.y - 8], [currentP.x + 8, currentP.y + 8]], { layers }).length > 0;
-                            } catch (e) { }
+                            } catch (_e) { }
 
                             if (!isAlreadyInside) {
                                 collisionOccurred = true;

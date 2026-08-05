@@ -1,0 +1,10 @@
+# Set default behavior to handle all files automatically with LF line endings
+* text=auto eol=lf
+
+# Explicitly mark binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary

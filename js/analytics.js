@@ -3,11 +3,14 @@
  * Optimized for GA4, Google Tag, and Consent Mode v2
  */
 
-// Initialize dataLayer if not exists
-window.dataLayer = window.dataLayer || [];
+if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer || [];
+}
 
 export function gtag() {
-    window.dataLayer.push(arguments);
+    if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push(arguments);
+    }
 }
 
 // Default Consent Mode v2 settings
@@ -16,13 +19,13 @@ export const initConsentMode = () => {
         'ad_storage': 'denied',
         'ad_user_data': 'denied',
         'ad_personalization': 'denied',
-        'analytics_storage': 'granted', // Assuming we are focusing on analytics
+        'analytics_storage': 'granted',
         'wait_for_update': 500
     });
 };
 
 // Error Tracking
-export const trackError = (message, source, lineno, colno, error) => {
+export const trackError = (message, source, lineno, colno, _error) => {
     trackEvent('exception', {
         'description': `${message} at ${source}:${lineno}:${colno}`,
         'fatal': false
@@ -31,7 +34,7 @@ export const trackError = (message, source, lineno, colno, error) => {
 
 // Core Web Vitals Tracking (Lighthouse / Search Console Optimization)
 export const trackWebVitals = () => {
-    if ('performance' in window && 'getEntriesByType' in performance) {
+    if (typeof window !== 'undefined' && 'performance' in window && 'getEntriesByType' in performance) {
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const paint = performance.getEntriesByType('paint');
@@ -49,12 +52,13 @@ export const trackWebVitals = () => {
 
 // Enhanced Event Tracking
 export const trackEvent = (eventName, params = {}) => {
-    // Sanitize URL to prevent token leakage
+    if (typeof window === 'undefined') return;
+
     let sanitizedLocation = window.location.href;
     try {
         const u = new URL(window.location.href);
         sanitizedLocation = u.origin + u.pathname;
-    } catch (e) {}
+    } catch (_e) {}
 
     const eventParams = {
         ...params,
@@ -67,8 +71,7 @@ export const trackEvent = (eventName, params = {}) => {
             ...eventParams,
             send_to: 'G-C33HV1QV3S'
         });
-    } else {
-        // Fallback to pushing directly to dataLayer
+    } else if (window.dataLayer) {
         window.dataLayer.push({
             event: eventName,
             ...eventParams
@@ -76,13 +79,13 @@ export const trackEvent = (eventName, params = {}) => {
     }
 };
 
-// Global Error Handler
-window.onerror = trackError;
-
-// Global Unhandled Rejection Handler
-window.onunhandledrejection = (event) => {
-    trackEvent('exception', {
-        'description': `Unhandled Rejection: ${event.reason}`,
-        'fatal': false
-    });
-};
+// Global Handlers
+if (typeof window !== 'undefined') {
+    window.onerror = trackError;
+    window.onunhandledrejection = (event) => {
+        trackEvent('exception', {
+            'description': `Unhandled Rejection: ${event.reason}`,
+            'fatal': false
+        });
+    };
+}

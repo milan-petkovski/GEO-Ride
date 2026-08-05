@@ -8,7 +8,7 @@ export function checkDiscovery(lng, lat, force = false) {
     
     const now = Date.now();
     // Only check every 10 seconds normally, unless forced (e.g. after teleport)
-    if (!force && now - lastCheckTime < 1000) return;
+    if (!force && now - lastCheckTime < 10000) return;
     
     lastCheckTime = now;
     isDiscovering = true;
