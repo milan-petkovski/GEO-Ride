@@ -32,7 +32,7 @@ function calculateSteering(currentBearing, isLeft, isRight, speed, dt, steerSens
 
 test('physics acceleration logic', () => {
     const config = { accel: 2.0, brake: 3.0, maxSpeed: 100, drag: 0.95 };
-    
+
     // Test accelerating from 0
     let speed = calculateAcceleration(0, true, false, 1.0, config);
     assert.strictEqual(speed, 2.0);
@@ -44,7 +44,7 @@ test('physics acceleration logic', () => {
 
 test('physics braking logic', () => {
     const config = { accel: 2.0, brake: 3.0, maxSpeed: 100, drag: 0.95 };
-    
+
     // Test braking when moving forward
     const speed = calculateAcceleration(10, false, true, 1.0, config);
     assert.strictEqual(speed, 7.0);

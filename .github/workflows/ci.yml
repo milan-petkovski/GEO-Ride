@@ -1,33 +1,58 @@
 name: GEO Ride CI
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    push:
+        branches: [main, master]
+    pull_request:
+        branches: [main, master]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+    build-and-test:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 20
+                  cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm ci
+            - name: Install Dependencies
+              run: npm ci
 
-      - name: Run Linter
-        run: npm run lint
+            - name: Security Dependency Audit
+              run: npm audit --audit-level=high
 
-      - name: Run Unit Tests
-        run: npm test
+            - name: License Compliance Audit
+              run: npx license-checker --summary || true
 
-      - name: Build Application
-        run: npm run build
+            - name: Code Style Check
+              run: npx prettier --check .
+
+            - name: Run Linter
+              run: npm run lint
+
+            - name: Run Unit Tests
+              run: npm test
+
+            - name: Build Application
+              run: npm run build
+
+            - name: Install Playwright Browsers
+              run: npx playwright install --with-deps chromium
+
+            - name: Run E2E Tests
+              run: npx playwright test
+
+            - name: Bundle Size Check
+              run: npm run size
+
+            - name: Lighthouse Audit
+              uses: treosh/lighthouse-ci-action@v12
+              with:
+                  configPath: './lighthouserc.json'
+                  uploadArtifacts: true
+                  temporaryPublicStorage: true

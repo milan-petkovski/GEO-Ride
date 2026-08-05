@@ -1,0 +1,31 @@
+# GEO Ride
+
+> GEO Ride is a browser-based 3D driving simulator that lets users explore any location on Earth using real-world Mapbox satellite imagery and terrain height maps, combined with a Three.js custom WebGL layer.
+
+GEO Ride is a passion project built by Milan Petkovski, a web developer from Serbia. It runs natively in any modern web browser without requiring external plugins or downloads.
+
+## Links
+
+- [Live Application](https://georide.milanwebportal.com): Play GEO Ride live in your browser with real-world satellite maps and multiplayer.
+- [GitHub Repository](https://github.com/milan-petkovski/GEO-Ride): Access source code, architecture documentation, issue tracking, and contributions.
+- [Author Portfolio](https://milanwebportal.com): Personal web development portfolio of Milan Petkovski.
+- [Support via PayPal](https://paypal.me/milanwebportal): Support open-source development of GEO Ride.
+
+## Key Features
+
+- **World-Scale Driving:** Explore any city, mountain, or landmark on Earth using satellite terrain height maps.
+- **Vehicle Dynamics:** Custom physics engine handling drifting, tire slip, vehicle mass, and skidmarks.
+- **Procedural Web Audio:** Synthesized engine, drift, and crash sounds generated in real-time via Web Audio API.
+- **Live Multiplayer:** Connect with other players around the world using HiveMQ MQTT over WebSockets.
+- **PWA Experience:** Installable desktop/mobile Progressive Web App with offline shell caching.
+
+## Tech Stack & Architecture
+
+- **Map Engine:** Mapbox GL JS (satellite imagery, elevation maps, 3D extruded buildings)
+- **3D Rendering:** Three.js (custom WebGL layer rendered over Mapbox GL JS)
+- **State Management:** Reactive central store using Observer pattern (`js/state.js`)
+- **Multiplayer:** MQTT over WebSockets (`js/multiplayer.js`)
+- **Audio:** Web Audio API procedural synthesis (`js/audio.js`)
+- **Build Tool:** Vite with OXC minification and custom vendor chunk splitting
+- **Testing:** Built-in Node.js test runner (unit tests) and Playwright (E2E)
+- **CI/CD:** GitHub Actions and Netlify automated deployments

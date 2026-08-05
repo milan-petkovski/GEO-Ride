@@ -1,6 +1,6 @@
 /**
- * GEO Ride - Advanced Analytics & Performance Monitoring (2026 Edition)
- * Optimized for GA4, Google Tag, and Consent Mode v2
+ * @file analytics.js
+ * @description GEO Ride analytics and performance monitoring module, integrating GA4, Google Tag Manager, Consent Mode v2, and Core Web Vitals tracking.
  */
 
 if (typeof window !== 'undefined') {
@@ -9,26 +9,26 @@ if (typeof window !== 'undefined') {
 
 export function gtag() {
     if (typeof window !== 'undefined' && window.dataLayer) {
-        window.dataLayer.push(arguments);
+        window.dataLayer.push(Array.from(arguments));
     }
 }
 
 // Default Consent Mode v2 settings
 export const initConsentMode = () => {
     gtag('consent', 'default', {
-        'ad_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied',
-        'analytics_storage': 'granted',
-        'wait_for_update': 500
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'granted',
+        wait_for_update: 500
     });
 };
 
 // Error Tracking
 export const trackError = (message, source, lineno, colno, _error) => {
     trackEvent('exception', {
-        'description': `${message} at ${source}:${lineno}:${colno}`,
-        'fatal': false
+        description: `${message} at ${source}:${lineno}:${colno}`,
+        fatal: false
     });
 };
 
@@ -38,7 +38,7 @@ export const trackWebVitals = () => {
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const paint = performance.getEntriesByType('paint');
-                paint.forEach(entry => {
+                paint.forEach((entry) => {
                     trackEvent('web_vitals', {
                         metric_name: entry.name,
                         metric_value: entry.startTime,
@@ -54,16 +54,18 @@ export const trackWebVitals = () => {
 export const trackEvent = (eventName, params = {}) => {
     if (typeof window === 'undefined') return;
 
-    let sanitizedLocation = window.location.href;
-    try {
-        const u = new URL(window.location.href);
-        sanitizedLocation = u.origin + u.pathname;
-    } catch (_e) {}
+    let sanitizedLocation = window.location?.href || '';
+    if (window.location?.href) {
+        try {
+            const u = new URL(window.location.href);
+            sanitizedLocation = u.origin + u.pathname;
+        } catch (_e) {}
+    }
 
     const eventParams = {
         ...params,
         page_location: sanitizedLocation,
-        page_path: window.location.pathname
+        page_path: window.location?.pathname || ''
     };
 
     if (typeof window.gtag === 'function') {
@@ -84,8 +86,8 @@ if (typeof window !== 'undefined') {
     window.onerror = trackError;
     window.onunhandledrejection = (event) => {
         trackEvent('exception', {
-            'description': `Unhandled Rejection: ${event.reason}`,
-            'fatal': false
+            description: `Unhandled Rejection: ${event.reason}`,
+            fatal: false
         });
     };
 }

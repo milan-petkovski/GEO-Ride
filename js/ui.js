@@ -1,3 +1,8 @@
+/**
+ * @file ui.js
+ * @description HUD UI manager for GEO Ride, controlling settings panels, vehicle selector tabs, map styles, speedometer display, and user interaction synchronization.
+ */
+
 import { state, saveState } from './state.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
@@ -7,6 +12,11 @@ import { initMultiplayer } from './multiplayer.js';
 let activeMap = null;
 let isManualPresetMenuOpen = false;
 
+/**
+ * Synchronizes map panning/zooming interactions based on active HUD panel states.
+ * @param {Object} map - Mapbox GL JS map instance.
+ * @returns {void}
+ */
 function syncMapInteractions(map) {
     if (!map) return;
     const settingsPanel = document.getElementById('settings-panel');
@@ -31,8 +41,6 @@ export function initUI(map) {
     activeMap = map;
     isManualPresetMenuOpen = state.lightPreset !== 'realtime';
 
-
-
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('settings-panel');
     const mpBtn = document.getElementById('mp-btn');
@@ -43,16 +51,16 @@ export function initUI(map) {
 
     // Prevent map interactions while panels are open, BUT let inputs work normally
     const mapPanels = [settingsPanel, mpDropdown];
-    mapPanels.forEach(panel => {
+    mapPanels.forEach((panel) => {
         if (!panel) return;
-        ['wheel', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'dblclick'].forEach(evtType => {
+        ['wheel', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'dblclick'].forEach((evtType) => {
             panel.addEventListener(evtType, (e) => e.stopPropagation(), { passive: false });
         });
     });
 
     settingsBtn.onclick = (e) => {
         if (settingsPanel && settingsPanel.contains(e.target)) return;
-        
+
         e.preventDefault();
         e.stopPropagation();
         if (mpDropdown) mpDropdown.classList.remove('active');
@@ -84,13 +92,23 @@ export function initUI(map) {
 
     document.addEventListener('click', (e) => {
         if (window.innerWidth > 1024) {
-            if (settingsPanel?.classList.contains('active') && !settingsPanel.contains(e.target) && e.target !== settingsBtn && !settingsBtn.contains(e.target)) {
+            if (
+                settingsPanel?.classList.contains('active') &&
+                !settingsPanel.contains(e.target) &&
+                e.target !== settingsBtn &&
+                !settingsBtn.contains(e.target)
+            ) {
                 settingsPanel.classList.remove('active');
                 syncMapInteractions(map);
             }
         }
 
-        if (mpDropdown?.classList.contains('active') && !mpDropdown.contains(e.target) && e.target !== mpBtn && !mpBtn.contains(e.target)) {
+        if (
+            mpDropdown?.classList.contains('active') &&
+            !mpDropdown.contains(e.target) &&
+            e.target !== mpBtn &&
+            !mpBtn.contains(e.target)
+        ) {
             mpDropdown.classList.remove('active');
         }
 
@@ -100,7 +118,7 @@ export function initUI(map) {
     });
 
     // Toggle Handlers
-    document.querySelectorAll('.style-toggle button').forEach(btn => {
+    document.querySelectorAll('.style-toggle button').forEach((btn) => {
         btn.onclick = () => {
             state.mapStyle = btn.dataset.style;
             if (state.mapStyle === 'standard') {
@@ -123,7 +141,7 @@ export function initUI(map) {
         };
     });
 
-    document.querySelectorAll('.light-toggle button').forEach(btn => {
+    document.querySelectorAll('.light-toggle button').forEach((btn) => {
         btn.onclick = () => {
             if (btn.id === 'btn-manual-trigger') {
                 isManualPresetMenuOpen = true;
@@ -150,7 +168,7 @@ export function initUI(map) {
         };
     }
 
-    document.querySelectorAll('.unit-toggle button').forEach(btn => {
+    document.querySelectorAll('.unit-toggle button').forEach((btn) => {
         btn.onclick = () => {
             state.unit = btn.dataset.unit;
             updateToggleStates();
@@ -160,7 +178,7 @@ export function initUI(map) {
         };
     });
 
-    document.querySelectorAll('.vehicle-toggle button').forEach(btn => {
+    document.querySelectorAll('.vehicle-toggle button').forEach((btn) => {
         btn.onclick = () => {
             state.activeVehicle = btn.dataset.vehicle;
             if (state.activeVehicle === 'god') {
@@ -191,7 +209,7 @@ export function initUI(map) {
         };
     });
 
-    document.querySelectorAll('.d3v-toggle button').forEach(btn => {
+    document.querySelectorAll('.d3v-toggle button').forEach((btn) => {
         btn.onclick = () => {
             if (state.activeVehicle === 'god') return;
             state.is3D = btn.dataset.d3v === 'on';
@@ -204,9 +222,10 @@ export function initUI(map) {
         };
     });
 
-    document.querySelectorAll('.d3b-toggle button').forEach(btn => {
+    document.querySelectorAll('.d3b-toggle button').forEach((btn) => {
         btn.onclick = () => {
-            if (state.activeVehicle === 'god' || state.mapStyle === 'standard' || state.mapStyle === 'satellite-v9') return;
+            if (state.activeVehicle === 'god' || state.mapStyle === 'standard' || state.mapStyle === 'satellite-v9')
+                return;
             state.is3DBuildings = btn.dataset.d3b === 'on';
             state.collisionsEnabled = state.is3DBuildings;
             // Record to user preferences
@@ -219,7 +238,7 @@ export function initUI(map) {
         };
     });
 
-    document.querySelectorAll('.collision-toggle button').forEach(btn => {
+    document.querySelectorAll('.collision-toggle button').forEach((btn) => {
         btn.onclick = () => {
             if (state.activeVehicle === 'god') return;
             state.collisionsEnabled = btn.dataset.collision === 'on';
@@ -230,7 +249,7 @@ export function initUI(map) {
         };
     });
 
-    document.querySelectorAll('.god-toggle button').forEach(btn => {
+    document.querySelectorAll('.god-toggle button').forEach((btn) => {
         btn.onclick = () => {
             state.godMode = btn.dataset.god === 'on';
             if (state.godMode) {
@@ -264,7 +283,7 @@ export function initUI(map) {
     });
 
     // Mobile controls toggle click handler
-    document.querySelectorAll('.controls-toggle button').forEach(btn => {
+    document.querySelectorAll('.controls-toggle button').forEach((btn) => {
         btn.onclick = () => {
             state.controlsMode = btn.dataset.controls;
             updateToggleStates();
@@ -281,7 +300,7 @@ export function initUI(map) {
     if (volumeSlider) {
         // Initialize slider visually once
         volumeSlider.value = state.masterVolume !== undefined ? state.masterVolume : 0.5;
-        
+
         volumeSlider.addEventListener('input', (e) => {
             state.masterVolume = parseFloat(e.target.value);
             updateToggleStates();
@@ -292,9 +311,12 @@ export function initUI(map) {
     // Search logic
     async function performSearch(inputField) {
         if (!inputField) return;
-        const query = inputField.value; if (!query) return;
+        const query = inputField.value;
+        if (!query) return;
         try {
-            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`);
+            const response = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`
+            );
             const data = await response.json();
             if (data.features && data.features.length > 0) {
                 const [lng, lat] = data.features[0].center;
@@ -334,10 +356,14 @@ export function initUI(map) {
                     });
                 }, 600); // 600ms delay to see the vehicle shrink and ball grow
                 trackEvent('search_location', { query: query });
-                inputField.value = ''; inputField.blur(); searchBox.classList.remove('expanded');
+                inputField.value = '';
+                inputField.blur();
+                searchBox.classList.remove('expanded');
                 state.isInputFocused = false;
             }
-        } catch (err) { console.error("Search error:", err); }
+        } catch (err) {
+            console.error('Search error:', err);
+        }
     }
 
     // Search Interaction (Desktop)
@@ -440,7 +466,6 @@ export function initUI(map) {
     }
 }
 
-
 export function closeAllPanels() {
     document.getElementById('settings-panel')?.classList.remove('active');
     document.getElementById('mp-dropdown')?.classList.remove('active');
@@ -451,7 +476,9 @@ export function closeAllPanels() {
 }
 
 export function updateToggleStates() {
+    if (typeof document === 'undefined') return;
     const unitLabel = document.getElementById('unit-label');
+
     const isGodVehicle = state.activeVehicle === 'god';
     const isStandard = state.mapStyle === 'standard';
 
@@ -475,13 +502,15 @@ export function updateToggleStates() {
         }
     }
 
-    document.querySelectorAll('.collision-toggle button, .d3v-toggle button, .d3b-toggle button').forEach(b => {
+    document.querySelectorAll('.collision-toggle button, .d3v-toggle button, .d3b-toggle button').forEach((b) => {
         b.classList.remove('active');
         b.classList.remove('disabled-btn');
 
         if (isGodVehicle) {
-            if (b.dataset.collision === 'off' || b.dataset.d3v === 'off' || b.dataset.d3b === 'off') b.classList.add('active');
-            if (b.dataset.collision === 'on' || b.dataset.d3v === 'on' || b.dataset.d3b === 'on') b.classList.add('disabled-btn');
+            if (b.dataset.collision === 'off' || b.dataset.d3v === 'off' || b.dataset.d3b === 'off')
+                b.classList.add('active');
+            if (b.dataset.collision === 'on' || b.dataset.d3v === 'on' || b.dataset.d3b === 'on')
+                b.classList.add('disabled-btn');
         } else if (isStandard && b.dataset.d3b) {
             // For standard style, 3D buildings are always ON and cannot be toggled
             if (b.dataset.d3b === 'on') b.classList.add('active');
@@ -500,12 +529,22 @@ export function updateToggleStates() {
         }
     });
 
-    document.querySelectorAll('.vehicle-toggle button').forEach(b => b.classList.toggle('active', b.dataset.vehicle === state.activeVehicle));
-    document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.toggle('active', b.dataset.unit === state.unit));
-    document.querySelectorAll('.god-toggle button').forEach(b => b.classList.toggle('active', b.dataset.god === (state.godMode ? 'on' : 'off')));
+    document
+        .querySelectorAll('.vehicle-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.vehicle === state.activeVehicle));
+    document
+        .querySelectorAll('.unit-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.unit === state.unit));
+    document
+        .querySelectorAll('.god-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.god === (state.godMode ? 'on' : 'off')));
     if (unitLabel) unitLabel.textContent = state.unit === 'km' ? 'KM/H' : 'MPH';
-    document.querySelectorAll('.style-toggle button').forEach(b => b.classList.toggle('active', b.dataset.style === state.mapStyle));
-    document.querySelectorAll('.controls-toggle button').forEach(b => b.classList.toggle('active', b.dataset.controls === state.controlsMode));
+    document
+        .querySelectorAll('.style-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.style === state.mapStyle));
+    document
+        .querySelectorAll('.controls-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.controls === state.controlsMode));
 
     // Dynamic display of standard lighting preset section
     const lightPresetSection = document.getElementById('light-preset-section');
@@ -527,7 +566,7 @@ export function updateToggleStates() {
     }
 
     // Toggle active state of light preset buttons
-    document.querySelectorAll('.light-toggle button').forEach(b => {
+    document.querySelectorAll('.light-toggle button').forEach((b) => {
         if (b.id === 'btn-realtime') {
             b.classList.toggle('active', state.lightPreset === 'realtime');
         } else if (b.id === 'btn-manual-trigger') {
@@ -554,13 +593,13 @@ export function add3DBuildings(map) {
     }
     if (!map.getLayer('3d-buildings')) {
         map.addLayer({
-            'id': '3d-buildings',
-            'source': 'composite',
+            id: '3d-buildings',
+            source: 'composite',
             'source-layer': 'building',
-            'filter': ['==', 'extrude', 'true'],
-            'type': 'fill-extrusion',
-            'minzoom': 15,
-            'paint': {
+            filter: ['==', 'extrude', 'true'],
+            type: 'fill-extrusion',
+            minzoom: 15,
+            paint: {
                 'fill-extrusion-color': '#222',
                 'fill-extrusion-height': ['get', 'height'],
                 'fill-extrusion-base': ['get', 'min_height'],
@@ -592,22 +631,24 @@ export function applyLightPreset(map) {
     try {
         map.setConfigProperty('basemap', 'lightPreset', targetPreset);
     } catch (e) {
-        console.warn("Could not set lightPreset:", e);
+        console.warn('Could not set lightPreset:', e);
     }
 }
 
 export function triggerDonationPopup() {
-    const isDismissed = localStorage.getItem('geo-ride-donation-dismissed');
+    if (typeof document === 'undefined') return;
+    const isDismissed =
+        typeof localStorage !== 'undefined' ? localStorage.getItem('geo-ride-donation-dismissed') : null;
     if (isDismissed === 'true') return;
 
     const donationPopup = document.getElementById('donation-popup');
+
     if (donationPopup) {
         donationPopup.classList.add('show');
-        
+
         // Auto-hide popup after 20 seconds of inactivity (so it doesn't stay permanently)
         setTimeout(() => {
             donationPopup.classList.remove('show');
         }, 20000);
     }
 }
-
