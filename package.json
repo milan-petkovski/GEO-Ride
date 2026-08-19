@@ -19,7 +19,7 @@
         "@playwright/test": "^1.41.0",
         "esbuild": "^0.28.1",
         "eslint": "^9.20.0",
-        "globals": "^15.15.0",
+        "globals": "^17.11.0",
         "husky": "^9.0.0",
         "lint-staged": "^15.0.0",
         "prettier": "^3.2.0",
