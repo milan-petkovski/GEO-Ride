@@ -1,5 +1,5 @@
-const CACHE_NAME = 'georide-v4';
-const ASSETS = ['/', '/index.html', '/favicon.png', '/manifest.json'];
+const CACHE_NAME = 'georide-v5';
+const ASSETS = ['/', '/index.html', '/play.html', '/favicon.png', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
     self.skipWaiting();

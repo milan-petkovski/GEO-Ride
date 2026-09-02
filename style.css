@@ -382,9 +382,18 @@ header {
     color: var(--text);
     text-transform: uppercase;
     line-height: 0.9;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s ease, opacity 0.2s ease;
     text-shadow:
         0 4px 20px rgba(0, 0, 0, 1),
         0 0 30px var(--primary-glow);
+}
+
+.logo:hover {
+    transform: scale(1.02);
+    opacity: 0.92;
 }
 
 .logo span {
@@ -3130,3 +3139,419 @@ html.geo-reduced-motion kbd {
             0 0 8px rgba(0, 242, 255, 0.2);
     }
 }
+
+/* ==========================================================================
+   PRO UPGRADE SYSTEM & TOAST NOTIFICATIONS
+   ========================================================================== */
+
+/* Pro Header Button in Top HUD */
+.pro-header-btn {
+    background: linear-gradient(135deg, rgba(155, 63, 212, 0.25), rgba(196, 112, 240, 0.38));
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(196, 112, 240, 0.5);
+    border-radius: 999px;
+    height: 66px;
+    padding: 0 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    cursor: pointer !important;
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        0 0 25px rgba(196, 112, 240, 0.35);
+}
+
+.pro-header-btn:hover {
+    transform: translateY(-2px) scale(1.04);
+    background: linear-gradient(135deg, rgba(155, 63, 212, 0.4), rgba(196, 112, 240, 0.6));
+    border-color: #c470f0;
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.6),
+        0 0 35px rgba(196, 112, 240, 0.6);
+}
+
+.pro-header-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: #c470f0;
+    filter: drop-shadow(0 0 6px rgba(196, 112, 240, 0.8));
+    transition: transform 0.3s ease;
+}
+
+.pro-header-btn:hover svg {
+    transform: scale(1.15) rotate(6deg);
+}
+
+/* Pro Modal Backdrop */
+.pro-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 2, 5, 0.85);
+    backdrop-filter: blur(25px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pro-modal-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.pro-modal {
+    background: linear-gradient(160deg, rgba(15, 10, 25, 0.95), rgba(5, 5, 10, 0.98));
+    border: 1px solid rgba(196, 112, 240, 0.4);
+    border-radius: 24px;
+    max-width: 580px;
+    width: 100%;
+    padding: 36px 32px;
+    position: relative;
+    box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.85),
+        0 0 60px rgba(196, 112, 240, 0.18);
+    transform: translateY(20px) scale(0.96);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #fff;
+    text-align: center;
+}
+
+.pro-modal-backdrop.active .pro-modal {
+    transform: translateY(0) scale(1);
+}
+
+.pro-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer !important;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+}
+
+.pro-modal-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.pro-modal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(196, 112, 240, 0.15);
+    border: 1px solid rgba(196, 112, 240, 0.35);
+    border-radius: 999px;
+    padding: 4px 16px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: #c470f0;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.pro-modal-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.3rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.pro-modal-title span {
+    color: #c470f0;
+    text-shadow: 0 0 25px rgba(196, 112, 240, 0.6);
+}
+
+.pro-modal-desc {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 26px;
+    line-height: 1.5;
+}
+
+.pro-modal-perks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    text-align: left;
+    margin-bottom: 26px;
+}
+
+.pro-perk-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.pro-perk-item svg {
+    width: 16px;
+    height: 16px;
+    stroke: #00f2ff;
+    flex-shrink: 0;
+}
+
+.pro-plans-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.pro-plan-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer !important;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.pro-plan-card:hover {
+    border-color: rgba(196, 112, 240, 0.8);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(196, 112, 240, 0.25);
+    background: rgba(196, 112, 240, 0.08);
+}
+
+.pro-plan-card.featured {
+    border-color: rgba(196, 112, 240, 0.5);
+    background: linear-gradient(145deg, rgba(196, 112, 240, 0.1), rgba(255, 255, 255, 0.02));
+}
+
+.pro-plan-pill {
+    position: absolute;
+    top: -10px;
+    background: linear-gradient(135deg, #9b3fd4, #c470f0);
+    color: #fff;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pro-plan-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.pro-plan-price {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.pro-plan-price span {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.pro-plan-cta {
+    margin-top: 12px;
+    width: 100%;
+    background: #00f2ff;
+    color: #020205;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 9px 0;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+}
+
+.pro-plan-card.featured .pro-plan-cta {
+    background: linear-gradient(135deg, #9b3fd4, #c470f0);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(196, 112, 240, 0.4);
+}
+
+.pro-plan-card:hover .pro-plan-cta {
+    filter: brightness(1.15);
+    transform: scale(1.02);
+}
+
+.pro-modal-footer-note {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.5px;
+}
+
+/* Toast Notifications System */
+.toast-container {
+    position: fixed;
+    bottom: 90px;
+    right: 25px;
+    z-index: 99998;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+    max-width: 360px;
+    width: 100%;
+}
+
+.toast-msg {
+    background: rgba(5, 5, 12, 0.94);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(0, 242, 255, 0.25);
+    border-left: 4px solid #00f2ff;
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #fff;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 255, 0.1);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-msg.toast-pro {
+    border-color: rgba(196, 112, 240, 0.4);
+    border-left-color: #c470f0;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(196, 112, 240, 0.2);
+}
+
+.toast-msg.hide {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+}
+
+.toast-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.toast-body {
+    flex: 1;
+}
+
+.toast-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+}
+
+.toast-text {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.toast-action-btn {
+    background: linear-gradient(135deg, #9b3fd4, #c470f0);
+    border: none;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 999px;
+    cursor: pointer !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: filter 0.2s;
+}
+
+.toast-action-btn:hover {
+    filter: brightness(1.2);
+}
+
+.toast-close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 1.1rem;
+    cursor: pointer !important;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.toast-close-btn:hover {
+    color: #fff;
+}
+
+@keyframes toastSlideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .pro-header-btn span {
+        display: none;
+    }
+    .pro-header-btn {
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        justify-content: center;
+    }
+    .pro-modal-perks {
+        grid-template-columns: 1fr;
+    }
+    .pro-plans-grid {
+        grid-template-columns: 1fr;
+    }
+    .toast-container {
+        right: 15px;
+        left: 15px;
+        max-width: none;
+        bottom: 80px;
+    }
+}
+

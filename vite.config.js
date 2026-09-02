@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
@@ -25,6 +26,10 @@ export default defineConfig(({ mode }) => {
             reportCompressedSize: false,
             chunkSizeWarningLimit: 2000,
             rollupOptions: {
+                input: {
+                    main: resolve(import.meta.dirname || process.cwd(), 'index.html'),
+                    play: resolve(import.meta.dirname || process.cwd(), 'play.html')
+                },
                 output: {
                     manualChunks(id) {
                         if (id.includes('mapbox-gl')) return 'mapbox-vendor';

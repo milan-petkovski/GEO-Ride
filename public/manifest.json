@@ -31,8 +31,8 @@
     ],
     "screenshots": [
         {
-            "src": "images/landing.jpg",
-            "sizes": "800x450",
+            "src": "images/wow.jpg",
+            "sizes": "1280x720",
             "type": "image/jpeg",
             "form_factor": "wide",
             "label": "GEO Ride - 3D World Driving Simulator"
@@ -43,7 +43,7 @@
             "name": "Play Now",
             "short_name": "Play",
             "description": "Jump straight into driving",
-            "url": "/?action=play&source=pwa",
+            "url": "/play?source=pwa",
             "icons": [{ "src": "favicon.png", "sizes": "128x128", "type": "image/png" }]
         }
     ]

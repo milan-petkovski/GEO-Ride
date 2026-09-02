@@ -3,7 +3,7 @@
  * @description HUD UI manager for GEO Ride, controlling settings panels, vehicle selector tabs, map styles, speedometer display, and user interaction synchronization.
  */
 
-import { state, saveState } from './state.js';
+import { state, saveState, setProStatus } from './state.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
@@ -20,9 +20,11 @@ let isManualPresetMenuOpen = false;
 function syncMapInteractions(map) {
     if (!map) return;
     const settingsPanel = document.getElementById('settings-panel');
+    const proModal = document.getElementById('pro-modal-backdrop');
     const isSettingsOpen = settingsPanel?.classList.contains('active');
+    const isProModalOpen = proModal?.classList.contains('active');
 
-    if (isSettingsOpen) {
+    if (isSettingsOpen || isProModalOpen) {
         map.dragPan?.disable();
         map.scrollZoom?.disable();
         map.doubleClickZoom?.disable();
@@ -49,11 +51,11 @@ export function initUI(map) {
     const searchInput = document.getElementById('location-search');
     const searchBtn = document.getElementById('search-btn');
 
-    // Prevent map interactions while panels are open, BUT let inputs work normally
-    const mapPanels = [settingsPanel, mpDropdown];
+    // Prevent map interactions while panels/modals are open, BUT let inputs work normally
+    const mapPanels = [settingsPanel, mpDropdown, document.querySelector('.pro-modal')];
     mapPanels.forEach((panel) => {
         if (!panel) return;
-        ['wheel', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'dblclick'].forEach((evtType) => {
+        ['wheel', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'dblclick', 'keydown', 'keyup', 'keypress', 'mousedown'].forEach((evtType) => {
             panel.addEventListener(evtType, (e) => e.stopPropagation(), { passive: false });
         });
     });
@@ -180,12 +182,25 @@ export function initUI(map) {
 
     document.querySelectorAll('.vehicle-toggle button').forEach((btn) => {
         btn.onclick = () => {
-            state.activeVehicle = btn.dataset.vehicle;
+            const requestedVehicle = btn.dataset.vehicle;
+            if (requestedVehicle === 'god' && !state.isPro) {
+                openProModal();
+                showToast('PRO VEHICLE LOCKED', 'God Mode is exclusive to GEO Ride Pro subscribers. Upgrade now to fly at unlimited speed!', {
+                    isPro: true,
+                    actionText: 'Upgrade',
+                    onAction: openProModal
+                });
+                if (haptics) haptics.tap();
+                return;
+            }
+
+            state.activeVehicle = requestedVehicle;
             if (state.activeVehicle === 'god') {
                 state.godMode = true;
                 state.collisionsEnabled = false;
                 state.is3D = false;
                 state.is3DBuildings = false;
+                showToast('GOD MODE ACTIVATED', 'Flying with unlimited speed & zero collisions!', { isPro: true });
             } else {
                 state.godMode = false;
                 state.is3D = state.userPrefs.is3D;
@@ -251,7 +266,19 @@ export function initUI(map) {
 
     document.querySelectorAll('.god-toggle button').forEach((btn) => {
         btn.onclick = () => {
-            state.godMode = btn.dataset.god === 'on';
+            const requestedGod = btn.dataset.god === 'on';
+            if (requestedGod && !state.isPro) {
+                openProModal();
+                showToast('PRO FEATURE LOCKED', 'God Mode requires GEO Ride Pro. Upgrade now to fly with unlimited speed!', {
+                    isPro: true,
+                    actionText: 'Upgrade',
+                    onAction: openProModal
+                });
+                if (haptics) haptics.tap();
+                return;
+            }
+
+            state.godMode = requestedGod;
             if (state.godMode) {
                 state.activeVehicle = 'god';
                 state.collisionsEnabled = false;
@@ -464,12 +491,89 @@ export function initUI(map) {
             if (haptics) haptics.success();
         });
     }
+
+    // Pro Modal Event Listeners
+    const proOpenBtn = document.getElementById('pro-open-btn');
+    const settingsProBtn = document.getElementById('settings-pro-btn');
+    const proModalClose = document.getElementById('pro-modal-close');
+    const proModalBackdrop = document.getElementById('pro-modal-backdrop');
+
+    if (proOpenBtn) {
+        proOpenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openProModal();
+            if (haptics) haptics.tap();
+        });
+    }
+
+    if (settingsProBtn) {
+        settingsProBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openProModal();
+            if (haptics) haptics.tap();
+        });
+    }
+
+    if (proModalClose) {
+        proModalClose.addEventListener('click', () => {
+            closeProModal();
+            if (haptics) haptics.tap();
+        });
+    }
+
+    if (proModalBackdrop) {
+        proModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === proModalBackdrop) {
+                closeProModal();
+            }
+        });
+    }
+
+    document.getElementById('pro-modal-monthly-btn')?.addEventListener('click', () => {
+        trackEvent('pro_checkout_click', { plan: 'monthly', price: 4.99 });
+        if (haptics) haptics.success();
+    });
+
+    document.getElementById('pro-modal-yearly-btn')?.addEventListener('click', () => {
+        trackEvent('pro_checkout_click', { plan: 'yearly', price: 2.99 });
+        if (haptics) haptics.success();
+    });
+
+    // Pro Activation key handler
+    const proKeyInput = document.getElementById('pro-key-input');
+    const proActivateBtn = document.getElementById('pro-activate-btn');
+
+    if (proActivateBtn && proKeyInput) {
+        const handleActivation = () => {
+            const val = proKeyInput.value.trim().toLowerCase();
+            if (!val || val.length < 2) {
+                showToast('KEY REQUIRED', 'Please enter your Fungies Order Email or Pro License Key.');
+                return;
+            }
+
+            setProStatus(true);
+            updateToggleStates();
+            closeProModal();
+            showToast('PRO ACTIVATED!', 'God Mode vehicle and private multiplayer rooms are now unlocked.', { isPro: true });
+            trackEvent('pro_activated_manually', { key_length: val.length });
+            if (haptics) haptics.success();
+        };
+
+        proActivateBtn.addEventListener('click', handleActivation);
+        proKeyInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleActivation();
+        });
+    }
+
+    // Start periodic smart game notifications
+    initGameNotifications();
 }
 
 export function closeAllPanels() {
     document.getElementById('settings-panel')?.classList.remove('active');
     document.getElementById('mp-dropdown')?.classList.remove('active');
     document.querySelector('.search-box')?.classList.remove('expanded');
+    closeProModal();
     state.isInputFocused = false;
     document.getElementById('location-search')?.blur();
     syncMapInteractions(activeMap);
@@ -482,13 +586,42 @@ export function updateToggleStates() {
     const isGodVehicle = state.activeVehicle === 'god';
     const isStandard = state.mapStyle === 'standard';
 
-    // Show/hide God Mode vehicle button in the vehicle-toggle group
+    // Show/hide and style God Mode vehicle button in the vehicle-toggle group
     const vehicleGodBtn = document.getElementById('vehicle-god-btn');
     if (vehicleGodBtn) {
-        if (state.godMode || isGodVehicle) {
-            vehicleGodBtn.style.display = 'block';
-        } else {
-            vehicleGodBtn.style.display = 'none';
+        vehicleGodBtn.style.display = 'block';
+        const badge = vehicleGodBtn.querySelector('.pro-badge-pill');
+        if (badge) {
+            badge.style.display = state.isPro ? 'none' : 'inline-block';
+        }
+    }
+
+    // Reflect Pro HUD status
+    const proOpenBtn = document.getElementById('pro-open-btn');
+    if (proOpenBtn) {
+        if (state.isPro) {
+            proOpenBtn.style.background = 'linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(202, 138, 4, 0.45))';
+            proOpenBtn.style.borderColor = 'rgba(234, 179, 8, 0.6)';
+            proOpenBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                </svg>
+                <span>PRO ACTIVE</span>
+            `;
+        }
+    }
+
+    const settingsProBtn = document.getElementById('settings-pro-btn');
+    if (settingsProBtn) {
+        if (state.isPro) {
+            settingsProBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>PRO STATUS: ACTIVE</span>
+            `;
+            settingsProBtn.style.background = 'linear-gradient(135deg, #15803d, #22c55e)';
+            settingsProBtn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
         }
     }
 
@@ -651,4 +784,137 @@ export function triggerDonationPopup() {
             donationPopup.classList.remove('show');
         }, 20000);
     }
+}
+
+export function openProModal() {
+    if (typeof document === 'undefined') return;
+    const backdrop = document.getElementById('pro-modal-backdrop');
+    if (backdrop) {
+        backdrop.classList.add('active');
+        state.isInputFocused = true;
+        state.keys = {};
+        document.body.classList.remove('hide-cursor');
+        syncMapInteractions(activeMap);
+        const proKeyInput = document.getElementById('pro-key-input');
+        if (proKeyInput) {
+            setTimeout(() => proKeyInput.focus(), 120);
+        }
+        trackEvent('pro_modal_open', { source: 'game_hud' });
+    }
+}
+
+export function closeProModal() {
+    if (typeof document === 'undefined') return;
+    const backdrop = document.getElementById('pro-modal-backdrop');
+    if (backdrop) {
+        backdrop.classList.remove('active');
+        const proKeyInput = document.getElementById('pro-key-input');
+        if (proKeyInput && document.activeElement === proKeyInput) {
+            proKeyInput.blur();
+        }
+        state.isInputFocused = false;
+        state.keys = {};
+        syncMapInteractions(activeMap);
+    }
+}
+
+export function showToast(title, message, options = {}) {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast-msg${options.isPro ? ' toast-pro' : ''}`;
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="${options.isPro ? '#c470f0' : '#00f2ff'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
+                ${options.isPro
+                    ? '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>'
+                    : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'}
+            </svg>
+        </div>
+        <div class="toast-body">
+            <div class="toast-title">${title}</div>
+            <div class="toast-text">${message}</div>
+            ${options.actionText ? `<button class="toast-action-btn">${options.actionText}</button>` : ''}
+        </div>
+        <button class="toast-close-btn" aria-label="Close">&times;</button>
+    `;
+
+    const closeBtn = typeof toast.querySelector === 'function' ? toast.querySelector('.toast-close-btn') : null;
+    const dismiss = () => {
+        toast.classList?.add('hide');
+        setTimeout(() => toast.remove?.(), 350);
+    };
+    if (closeBtn) closeBtn.onclick = dismiss;
+
+    if (options.actionText && options.onAction && typeof toast.querySelector === 'function') {
+        const actionBtn = toast.querySelector('.toast-action-btn');
+        if (actionBtn) {
+            actionBtn.onclick = () => {
+                options.onAction();
+                dismiss();
+            };
+        }
+    }
+
+    if (typeof container.appendChild === 'function') {
+        container.appendChild(toast);
+    }
+
+    const duration = options.duration || 6500;
+    setTimeout(() => {
+        if (toast.parentElement) dismiss();
+    }, duration);
+}
+
+let notificationsInitialized = false;
+export function initGameNotifications() {
+    if (notificationsInitialized || typeof window === 'undefined') return;
+    notificationsInitialized = true;
+
+    // 1. Welcome Toast after 3.5 seconds
+    setTimeout(() => {
+        showToast('WELCOME TO GEO RIDE', 'Type any address or city in Search to teleport anywhere on Earth!');
+    }, 3500);
+
+    // 2. Pro Upgrade prompt after 65 seconds
+    setTimeout(() => {
+        showToast('UNLOCK GEO RIDE PRO', 'Get God Mode ghost vehicle with zero speed limits and private rooms!', {
+            isPro: true,
+            actionText: 'Upgrade',
+            onAction: openProModal
+        });
+    }, 65000);
+
+    // 3. Rotating periodic tips every 140 seconds
+    const tips = [
+        {
+            title: 'MULTIPLAYER READY',
+            msg: 'Share your player code with friends to cruise together in real-time!',
+            options: {}
+        },
+        {
+            title: '4 MAP STYLES',
+            msg: 'Switch between Satellite, Hybrid, 3D Buildings and 2D Streets in Settings.',
+            options: {}
+        },
+        {
+            title: 'GEO RIDE PRO',
+            msg: 'Support development and unlock exclusive Pro multiplayer rooms and God Mode!',
+            options: { isPro: true, actionText: 'See Pro', onAction: openProModal }
+        },
+        {
+            title: 'DRIFT & BURNOUT',
+            msg: 'Hold Spacebar to charge launch control or drift around corners above 35 km/h!',
+            options: {}
+        }
+    ];
+
+    let tipIndex = 0;
+    setInterval(() => {
+        const tip = tips[tipIndex % tips.length];
+        showToast(tip.title, tip.msg, tip.options);
+        tipIndex++;
+    }, 140000);
 }

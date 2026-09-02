@@ -5,7 +5,7 @@
 
 import { state } from './state.js';
 import { VEHICLE_CONFIG } from './config.js';
-import { updateToggleStates } from './ui.js';
+import { updateToggleStates, openProModal, showToast } from './ui.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 
@@ -280,7 +280,19 @@ export function initMultiplayer() {
 
     const handleJoin = (targetCode, _activeBtn) => {
         isManualDisconnect = false;
-        if (targetCode) {
+        if (targetCode && targetCode.trim() !== '') {
+            if (!state.isPro) {
+                if (typeof openProModal === 'function') openProModal();
+                if (typeof showToast === 'function') {
+                    showToast('PRO FEATURE', 'Private multiplayer rooms require GEO Ride Pro. Upgrade now to invite friends and host private rooms!', {
+                        isPro: true,
+                        actionText: 'Upgrade',
+                        onAction: openProModal
+                    });
+                }
+                return;
+            }
+
             if (joinBtn) joinBtn.textContent = 'CONNECTING...';
             if (mobileJoinBtn) mobileJoinBtn.textContent = 'CONNECTING...';
 

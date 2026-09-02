@@ -48,18 +48,23 @@ export function initControls() {
             closeAllPanels();
             return;
         }
+
+        const isProModalOpen = document.getElementById('pro-modal-backdrop')?.classList.contains('active');
+        if (isProModalOpen || state.isInputFocused || document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+            return;
+        }
+
         if (key === 'shift') state.keys['shift'] = true;
         if (key === 'tab') {
             e.preventDefault();
             return;
         }
 
-        if (state.isInputFocused) return;
-
         closeAllPanels();
         document.body.classList.add('hide-cursor');
 
         state.keys[key] = true;
+        state.physicalKeysActive = true;
         updateKbdHUD(key, true);
     });
 
@@ -67,6 +72,12 @@ export function initControls() {
         const key = e.key.toLowerCase();
         state.keys[key] = false;
         if (key === 'shift') state.keys['shift'] = false;
+
+        const drivingKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright', ' '];
+        const anyActive = drivingKeys.some((k) => !!state.keys[k]);
+        if (!anyActive) {
+            state.physicalKeysActive = false;
+        }
 
         if (!state.loopStarted) return;
         if (key === 's' || key === 'arrowdown') state.sKeyReleasedSinceStop = true;
@@ -77,6 +88,7 @@ export function initControls() {
 
     window.addEventListener('blur', () => {
         state.keys = {};
+        state.physicalKeysActive = false;
         document.querySelectorAll('kbd').forEach((k) => k.classList.remove('pressed'));
         state.velocity *= 0.8;
     });
@@ -288,13 +300,9 @@ function initTouchControls() {
 }
 
 function handleDeviceOrientation(e) {
-    if (state.isInputFocused || state.controlsMode !== 'tilt') {
-        state.keys.a = false;
-        state.keys.arrowleft = false;
-        state.keys.d = false;
-        state.keys.arrowright = false;
-        return;
-    }
+    if (state.isInputFocused || state.controlsMode !== 'tilt') return;
+    // Strictly disable tilt on desktop devices or when physical keyboard is being used
+    if (window.innerWidth > 1024 || state.physicalKeysActive) return;
 
     let tilt = 0;
     const isLandscape = window.innerHeight < window.innerWidth;
@@ -324,10 +332,12 @@ function handleDeviceOrientation(e) {
             state.keys.arrowleft = false;
         }
     } else {
-        state.keys.a = false;
-        state.keys.arrowleft = false;
-        state.keys.d = false;
-        state.keys.arrowright = false;
+        if (!state.physicalKeysActive) {
+            state.keys.a = false;
+            state.keys.arrowleft = false;
+            state.keys.d = false;
+            state.keys.arrowright = false;
+        }
     }
 }
 

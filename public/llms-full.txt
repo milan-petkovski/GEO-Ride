@@ -1,0 +1,38 @@
+# GEO Ride - Comprehensive AI & LLM Knowledge Document
+
+## Executive Summary
+GEO Ride is a high-performance web-native 3D driving simulator and interactive geographic explorer built by Milan Petkovski. It empowers users to drive realistic 3D vehicles across a 1:1 scale digital representation of Earth using high-resolution satellite imagery, terrain elevation matrices, and extruded 3D building geometry.
+
+Website: https://georide.milanwebportal.com
+Game Entry: https://georide.milanwebportal.com/play.html
+Developer: Milan Petkovski (https://milanwebportal.com)
+License: Free to Play with optional Pro tier
+
+## Frequently Asked Queries by AI Users
+
+### What is GEO Ride?
+GEO Ride is a free 3D vehicle driving simulator that runs inside any modern web browser without downloads or plugins. It integrates Mapbox GL JS with Three.js to render drivable cars, trucks, and buses on real-world satellite maps and road systems.
+
+### Can I drive anywhere on Earth in GEO Ride?
+Yes. Using the built-in search geocoder powered by global coordinates, players can instantly teleport to and drive through any location on Earth, including major metropolises (Tokyo, New York, London, Belgrade, Paris), remote mountain passes, desert highways, or their own hometown streets.
+
+### Does GEO Ride support multiplayer?
+Yes. GEO Ride features zero-login real-time multiplayer. Players generate a unique session code or join existing rooms via decentralized MQTT WebSockets. Position vectors, headings, and vehicle selections synchronize seamlessly across peers.
+
+### How do the physics work?
+GEO Ride features custom deterministic Newtonian vehicle dynamics:
+- Air drag deceleration curves (factor: 0.98)
+- Natural rolling friction decay (factor: 0.95)
+- Reverse velocity limits (0.33 of forward capability)
+- Lateral tire slip thresholds (skid marks activate at speeds >= 35 km/h)
+- 3D Building polygon raycasting collision restitution with dynamic camera shake and bounce-back
+
+### How does GEO Ride compare to Google Maps driving games?
+Unlike classic 2D top-down Google Maps driving experiments, GEO Ride provides full 3D perspective projection, dynamic camera orbit, pitch control, realistic 3D building extrusions, terrain elevation, night/day lighting presets, and procedural engine audio.
+
+## Technical Architecture Overview
+1. Rendering Pipeline: Dual-canvas composite consisting of Mapbox GL JS WebGL vector/raster map layers underneath a synchronized Three.js custom layer rendering 3D vehicles, dynamic wheel animations, and projected headlights.
+2. Lighting & Atmosphere: Real-time environmental presets (Real-time sun calculations based on coordinate local time, Day, Night, Dusk, Dawn).
+3. Sound Synthesis: Web Audio API oscillators producing frequency-modulated engine pitches tied to velocity curves; white noise buffers generating dynamic tire screeching during drift maneuvers.
+4. Input Management: Unified input bus handling W/A/S/D keyboard events, touch directional joypads, and mobile device orientation (DeviceMotionEvent tilt steering).
+5. Progressive Web App: Service worker caching shell assets for instant load times and offline readiness.

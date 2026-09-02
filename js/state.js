@@ -99,7 +99,8 @@ export const state = {
     teleportStartTime: 0,
     teleportDuration: 3500,
     loopStarted: false,
-    lastSaveTime: 0
+    lastSaveTime: 0,
+    isPro: false
 };
 
 /** @type {Map<string, Set<Function>>} */
@@ -222,7 +223,25 @@ export function loadState() {
         );
 
         state.currentHome = [state.lng, state.lat];
+        state.isPro = typeof localStorage !== 'undefined' ? localStorage.getItem('geo_ride_pro_active') === 'true' : false;
+        if (!state.isPro && state.activeVehicle === 'god') {
+            state.activeVehicle = 'car';
+            state.godMode = false;
+        }
     } catch (e) {
         console.warn('Security Alert: State corruption detected or load failure', e);
     }
+}
+
+/**
+ * Updates Pro subscription status and persists to localStorage.
+ * @param {boolean} active - Pro status flag.
+ * @returns {void}
+ */
+export function setProStatus(active) {
+    state.isPro = !!active;
+    if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('geo_ride_pro_active', state.isPro ? 'true' : 'false');
+    }
+    setStateKey('isPro', state.isPro);
 }

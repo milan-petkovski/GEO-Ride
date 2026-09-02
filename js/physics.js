@@ -105,29 +105,21 @@ export function updatePhysics(dtFinal, map) {
 
         if (isWDown) {
             if (state.velocity < 0) {
+                // Braking while in reverse
                 state.velocity += config.brake * 1.5 * dtFinal;
-                if (state.velocity >= 0) {
-                    state.velocity = 0;
-                    state.stopTime = performance.now();
-                    state.wKeyReleasedSinceStop = false;
-                }
+                if (state.velocity > 0) state.velocity = 0;
             } else {
-                const timeSinceStop = performance.now() - state.stopTime;
-                if (state.wKeyReleasedSinceStop || timeSinceStop > 500) state.velocity += config.power * dtFinal;
-                else state.velocity = 0;
+                // Smooth forward acceleration
+                state.velocity += config.power * dtFinal;
             }
         } else if (isSDown) {
             if (state.velocity > 0) {
+                // Braking while moving forward
                 state.velocity -= config.brake * dtFinal;
-                if (state.velocity <= 0) {
-                    state.velocity = 0;
-                    state.stopTime = performance.now();
-                    state.sKeyReleasedSinceStop = false;
-                }
+                if (state.velocity < 0) state.velocity = 0;
             } else {
-                const timeSinceStop = performance.now() - state.stopTime;
-                if (state.sKeyReleasedSinceStop || timeSinceStop > 500) state.velocity -= config.power * 0.6 * dtFinal;
-                else state.velocity = 0;
+                // Smooth reverse acceleration
+                state.velocity -= config.power * 0.6 * dtFinal;
             }
         } else {
             state.velocity *= Math.pow(state.activeVehicle === 'god' ? 0.999 : AIR_DRAG_FACTOR, dtFinal);

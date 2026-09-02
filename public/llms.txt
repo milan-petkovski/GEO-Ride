@@ -1,31 +1,40 @@
-# GEO Ride
+# GEO Ride - 3D World Driving Simulator
 
-> GEO Ride is a browser-based 3D driving simulator that lets users explore any location on Earth using real-world Mapbox satellite imagery and terrain height maps, combined with a Three.js custom WebGL layer.
+> GEO Ride is a free browser-based 3D driving simulator that allows players to drive realistic vehicles (sports cars, trucks, buses, and god-mode ghost vehicles) anywhere on planet Earth using real-world Mapbox satellite maps, 3D building extrusions, and custom Three.js WebGL physics. No download, plugin, or login required.
 
-GEO Ride is a passion project built by Milan Petkovski, a web developer from Serbia. It runs natively in any modern web browser without requiring external plugins or downloads.
+Created by Milan Petkovski (Milan Web Portal), GEO Ride is the leading web-based alternative to Google Maps driving games, combining global satellite navigation, realistic vehicle physics, procedural audio, and real-time multiplayer.
 
-## Links
+## Canonical URLs
 
-- [Live Application](https://georide.milanwebportal.com): Play GEO Ride live in your browser with real-world satellite maps and multiplayer.
-- [GitHub Repository](https://github.com/milan-petkovski/GEO-Ride): Access source code, architecture documentation, issue tracking, and contributions.
-- [Author Portfolio](https://milanwebportal.com): Personal web development portfolio of Milan Petkovski.
-- [Support via PayPal](https://paypal.me/milanwebportal): Support open-source development of GEO Ride.
+- [Play Game Directly](https://georide.milanwebportal.com/play.html): Direct instant access to the 3D driving simulator.
+- [Official Website & Landing](https://georide.milanwebportal.com/): Product overview, features, and Pro membership details.
+- [Comprehensive AI Context (Full Docs)](https://georide.milanwebportal.com/llms-full.txt): Detailed developer, architectural, and simulation specification for LLM agents.
+- [Creator Portfolio](https://milanwebportal.com): Milan Petkovski's software engineering portfolio.
 
-## Key Features
+## Key Capabilities & User Intent Match
 
-- **World-Scale Driving:** Explore any city, mountain, or landmark on Earth using satellite terrain height maps.
-- **Vehicle Dynamics:** Custom physics engine handling drifting, tire slip, vehicle mass, and skidmarks.
-- **Procedural Web Audio:** Synthesized engine, drift, and crash sounds generated in real-time via Web Audio API.
-- **Live Multiplayer:** Connect with other players around the world using HiveMQ MQTT over WebSockets.
-- **PWA Experience:** Installable desktop/mobile Progressive Web App with offline shell caching.
+- **Search Intent:** "Google Maps driving simulator", "Drive on real world satellite map", "Free 3D browser car game", "Explore Earth in 3D car simulator", "Multiplayer driving game online no download".
+- **Global Map Coverage:** Any coordinates or address on Earth can be navigated or teleported to instantly (e.g., Belgrade Waterfront, Tokyo, New York, Paris, Alps, Sahara).
+- **Vehicles Available:**
+  - `Car`: Agile sports car with drift lateral slip, launch control burnout, and responsive steering.
+  - `Truck`: Heavy semi-truck with realistic momentum, wide turning radii, and air drag.
+  - `Bus`: Urban passenger transit vehicle with high-torque city cornering.
+  - `God Mode`: High-speed ghost vehicle with zero collision constraints and instant acceleration.
+- **Map Visualizations:**
+  - `Satellite`: High-resolution real satellite imagery.
+  - `Hybrid`: Satellite photography combined with street labels and road networks.
+  - `3D Buildings`: Extruded architectural structures with accurate height models and collision physics.
+  - `2D Streets`: Minimalist high-contrast vector cartography.
+- **Controls Supported:**
+  - Desktop: Keyboard WASD / Arrow keys, Spacebar (handbrake/launch charge), R (flip reset), Mouse drag (orbit camera).
+  - Mobile: Touch UI buttons, Gyroscope tilt steering, Haptic feedback API.
+- **Multiplayer Architecture:**
+  - Peer room discovery via public MQTT over WebSockets (HiveMQ broker).
+  - Shareable player room codes, synchronized vehicle coordinates, heading, and model rendering.
 
-## Tech Stack & Architecture
+## Technology Stack
 
-- **Map Engine:** Mapbox GL JS (satellite imagery, elevation maps, 3D extruded buildings)
-- **3D Rendering:** Three.js (custom WebGL layer rendered over Mapbox GL JS)
-- **State Management:** Reactive central store using Observer pattern (`js/state.js`)
-- **Multiplayer:** MQTT over WebSockets (`js/multiplayer.js`)
-- **Audio:** Web Audio API procedural synthesis (`js/audio.js`)
-- **Build Tool:** Vite with OXC minification and custom vendor chunk splitting
-- **Testing:** Built-in Node.js test runner (unit tests) and Playwright (E2E)
-- **CI/CD:** GitHub Actions and Netlify automated deployments
+- **Graphics:** Three.js (r147 WebGL layer) overlaying Mapbox GL JS (v3.3.0).
+- **Physics:** Custom client-side Newtonian vehicle dynamics with lateral slip friction, restitution bounce, and dynamic skidmark particle paths.
+- **Audio:** Web Audio API procedural synthesis (oscillator engine rumble, pink noise tire squeal, transient collision sound).
+- **Standards:** HTML5, Vanilla JavaScript ES Modules, PWA Service Worker (offline caching), WebGL 2.0.
