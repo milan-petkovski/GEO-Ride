@@ -1,179 +1,240 @@
 <div align="center">
   <a href="https://georide.milanwebportal.com">
-    <img src="https://georide.milanwebportal.com/images/landing.jpg" alt="GEO Ride Hero" width="800" style="border-radius: 8px;" />
+    <img src="https://georide.milanwebportal.com/images/wow.jpg" alt="GEO Ride 3D Driving Simulator" width="800" style="border-radius: 12px; box-shadow: 0 12px 36px rgba(0,0,0,0.5);" />
   </a>
-  <h1>GEO Ride - 3D Driving Simulator</h1>
-  <p>An immersive, browser-based 3D driving experience that lets you explore any corner of the Earth using real-world map data.</p>
+  <h1>GEO Ride - 3D Real World Driving Simulator</h1>
+  <p>Drive sports cars, trucks, and buses anywhere on Earth in real-time 3D using real-world satellite maps.</p>
 
   <h2>
-    <a href="https://georide.milanwebportal.com">PLAY GEO RIDE LIVE</a>
+    <a href="https://georide.milanwebportal.com/play">START DRIVING NOW - FREE IN YOUR BROWSER</a>
   </h2>
 
-  <p><b>Performance Tier:</b> Ultra Optimized | 60+ FPS | Smooth Physics | No Plugins Required</p>
+  <p>
+    <b>100% Free</b> &bull; <b>No Plugins</b> &bull; <b>No Downloads</b> &bull; <b>Real-time Multiplayer</b> &bull; <b>60+ FPS WebGL</b>
+  </p>
 
-  <p><b>Tech Stack:</b></p>
-  <a href="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml">
-    <img src="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml/badge.svg?style=for-the-badge" alt="GEO Ride CI Status">
-  </a>
+  <p>
+    <a href="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml">
+      <img src="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml/badge.svg?style=flat-square" alt="CI Status" />
+    </a>
+    <a href="https://georide.milanwebportal.com">
+      <img src="https://img.shields.io/badge/Website-georide.milanwebportal.com-00f2ff?style=flat-square" alt="Website" />
+    </a>
+    <a href="https://github.com/milan-petkovski/GEO-Ride/blob/main/LICENSE">
+      <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
+    </a>
+  </p>
 
-<br><br>
-  <p><b>Supported Browsers:</b></p>
-  <img src="https://allinone.milanwebportal.com/Browser/1.png" width="30" alt="Chrome"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/2.png" width="30" alt="Edge"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/3.png" width="30" alt="Brave"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/4.png" width="30" alt="Opera"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/5.png" width="30" alt="Opera GX"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/6.png" width="30" alt="Vivaldi"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/7.png" width="30" alt="Arc"> &nbsp;
-  <img src="https://allinone.milanwebportal.com/Browser/8.png" width="30" alt="Firefox"> &nbsp;
-
-  <p>Experience realistic driving physics, real-time multiplayer, and world-scale mapping directly in your browser.</p>
+  <p><b>Supported Browsers:</b> Chrome, Edge, Safari, Firefox, Opera, Brave, Arc (Desktop, Tablet &amp; Mobile)</p>
 </div>
 
-<br>
+---
 
-# The Story & Support
+## Quick Navigation
 
-Hi! I am **Milan**, a 19-year-old student and web developer from Serbia. **GEO Ride** was born out of my passion for combining real-world geographical data with interactive 3D graphics. It is a passion project designed to push the boundaries of what the web can do without external plugins, allowing anyone to drive down their home street or explore distant landmarks in 3D.
-
-I am committed to keeping my projects 100% free and open-source. If you enjoy driving around the globe in GEO Ride and want to support my work, you can support me via PayPal.
-
-**[Support my work via PayPal](https://paypal.me/milanwebportal)**
+- [What is GEO Ride?](#what-is-geo-ride)
+- [How to Play &amp; Controls](#how-to-play--controls)
+- [Available Vehicles](#available-vehicles)
+- [Map Modes](#map-modes)
+- [Multiplayer Mode](#multiplayer-mode)
+- [Mobile &amp; PWA Support](#mobile--pwa-support)
+- [Technology &amp; Architecture](#technology--architecture)
+- [Local Development Setup](#local-development-setup)
+- [Author &amp; Support](#author--support)
 
 ---
 
-# Key Features
+## What is GEO Ride?
 
-### World-Scale Driving
+**GEO Ride** is a lightweight, high-performance 3D driving simulator that transforms the entire surface of planet Earth into your personal driving sandbox. Built with **Three.js** and **Mapbox GL JS**, it lets you:
 
-Explore literally anywhere on Earth! Powered by high-resolution satellite imagery and terrain height maps, you can teleport to any major city, cruise along scenic coastlines, or drive through mountainous regions.
-
-### Realistic Drifting & Physics
-
-Enjoy a customized car handling engine built for fun! Slide around corners with realistic tire drifting, watch visual skidmarks appear on the road, and feel the weight of the vehicle adjust dynamically as you drive.
-
-### Launch Control Boost
-
-Charge your burnout! Hold **`Space` + `W`** while standing still to rev up your engine. Release the handbrake to trigger an instant rocket launch, propelling your vehicle forward at maximum acceleration!
-
-### Live Multiplayer
-
-Drive together! Connect with other players around the world in real-time. Share the streets, organize custom cruises, or show off your drifting skills to friends anywhere on the globe.
-
-### Cinematic Orbit Camera & Shake
-
-Feel the speed with a dynamic camera system that shifts angles, heights, and pitch as you accelerate. Experience cinematic screen shakes during building crashes or heavy impacts to feel every collision.
+1. **Drive Anywhere on Earth**: Navigate your home town, world capitals, mountain passes, or coastal highways using high-resolution satellite imagery and extruded 3D buildings.
+2. **Realistic Vehicle Physics**: Enjoy responsive steering, authentic drift physics with visible tire skid marks, weight distribution, and launch control acceleration.
+3. **Instant Multiplayer**: Create private or public rooms and cruise with friends across any continent without creating an account or logging in.
+4. **Zero Install**: Runs entirely client-side in any modern web browser on PC, Mac, iPhone, iPad, and Android.
 
 ---
 
-# Architecture Overview
+## How to Play & Controls
 
-The system follows a reactive modular architecture where `state.js` acts as an event-driven central store and `app.js` orchestrates application initialization, render loops, and component dispatching:
+### Keyboard Controls (Desktop)
 
-```mermaid
-flowchart TD
-    App[app.js - Orchestrator] --> State[state.js - Reactive Central Store]
-    App --> Mapbox[Mapbox GL JS Map Instance]
-    App --> ThreeMgr[js/three-manager.js - Three.js Renderer & Assets]
-    App --> Controls[js/controls.js - Keyboard/Touch/Tilt Inputs]
-    App --> UI[js/ui.js - HUD & Overlay Management]
-    App --> Physics[js/physics.js - Vehicle Dynamics Engine]
-    App --> Multiplayer[js/multiplayer.js - MQTT Real-time Sync]
-    App --> Audio[js/audio.js - Web Audio Engine]
+| Action                 |            Key / Control             | Details                                                   |
+| :--------------------- | :----------------------------------: | :-------------------------------------------------------- |
+| **Drive / Accelerate** |      **`W`** or **`Up Arrow`**       | Accelerates the vehicle forward                           |
+| **Brake / Reverse**    |     **`S`** or **`Down Arrow`**      | Brakes smoothly or engages reverse gear                   |
+| **Steer Left / Right** | **`A` / `D`** or **`Left / Right`**  | Precision wheel steering                                  |
+| **Handbrake / Drift**  |            **`Spacebar`**            | Locks rear tires to initiate drifts and slides            |
+| **Launch Boost**       | Hold **`Space` + `W`**, then release | Revs engine at standstill for rapid launch acceleration   |
+| **Orbit Camera**       |       **`Left-Click + Drag`**        | Rotate and tilt view around your vehicle                  |
+| **Reset Vehicle**      |               **`R`**                | Teleports vehicle back to the nearest safe road           |
+| **Global Reset**       |           **`Shift + R`**            | Returns vehicle to initial spawn location                 |
+| **Search Location**    |          Header Search Box           | Type any city, landmark, or address to teleport instantly |
 
-    Physics --> State
-    Controls --> State
-    Multiplayer --> State
-    State -- Observer Events --> UI
-    State -- Observer Events --> ThreeMgr
-```
+### Mobile Controls (Touch & Tilt)
 
----
-
-# Drivable Vehicle Fleet
-
-Choose from four distinct vehicles, each featuring unique driving characteristics, weights, and handling styles:
-
-- **Sports Car**: Highly agile, fast acceleration, and precise handling. The absolute best choice for drifting around tight city streets.
-- **Heavy Duty Truck**: A massive vehicle with realistic cargo momentum. Features slower acceleration but a highly satisfying, heavy presence.
-- **Transit Bus**: An extended multi-passenger vehicle. Demands careful turning pivots and long wheel-base steering to negotiate sharp corners.
-- **God Mode Speedster**: A special neon-colored vehicle designed for unlimited exploration. Travels at supersonic speeds, clips through buildings, and ignores all collisions!
+- **On-Screen Joypad**: Touch steering on the left side of the screen.
+- **Gas & Brake Pedals**: Dedicated accelerator and brake buttons on the right side.
+- **Gyroscope Tilt Steering**: Toggle device tilt in the Settings panel to steer by tilting your phone.
+- **Haptic Feedback**: Subtle vibration on collisions and gear shifts (supported devices).
 
 ---
 
-# How To Play & Controls
+## Available Vehicles
 
-| Command                | Action                                                  |                     Keyboard Input                     |
-| :--------------------- | :------------------------------------------------------ | :----------------------------------------------------: |
-| **Drive / Reverse**    | Accelerate forward or brake and drive in reverse.       |     **`W` / `S`** or **`Arrow Up` / `Arrow Down`**     |
-| **Steer**              | Turn the wheels left or right.                          |   **`A` / `D`** or **`Arrow Left` / `Arrow Right`**    |
-| **Drift / Handbrake**  | Lock the tires to slide around corners.                 |                     **`Spacebar`**                     |
-| **Launch Boost**       | Charge burnout boost (while stopped at 0 km/h).         | Hold **`Spacebar` + `W`**, then release **`Spacebar`** |
-| **Orbit Camera**       | Look around the vehicle and explore the environment.    |             **`Left-Click` + drag mouse**              |
-| **Checkpoint Respawn** | Instantly respawn the vehicle at the last safe road.    |                        **`R`**                         |
-| **Global Reset**       | Teleport the car back to the starting point (Belgrade). |                   **`Shift` + `R`**                    |
+| Vehicle              |     Class      | Handling Characteristics                                     | Best Used For                      |
+| :------------------- | :------------: | :----------------------------------------------------------- | :--------------------------------- |
+| **Sports Car**       |  Fast & Agile  | High acceleration, tight turning radius, responsive drifting | City street carving and drifting   |
+| **Heavy Duty Truck** |    Momentum    | Heavier chassis, slower acceleration, authentic mass physics | Long-distance scenic road cruising |
+| **Transit Bus**      | Long Wheelbase | Extended body requiring wide cornering arcs and precision    | Technical navigation challenges    |
+| **God Mode**         |   Pro Ghost    | Zero collision detection, supersonic speed, map flight       | Rapid global exploration           |
 
 ---
 
-# Gallery
+## Map Modes
+
+Switch seamlessly between four distinct real-world visual styles in the Settings menu:
 
 <table align="center" width="100%">
-    <tr>
-      <td align="center" colspan="2" width="100%">
-        <img src="https://georide.milanwebportal.com/images/landing.jpg" alt="GEO Ride Landing" />
-        <br />
-        <b>High-Resolution 3D Environment with Real-World Mapping (Landing View)</b>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" width="50%">
-        <img src="https://georide.milanwebportal.com/images/satellite.jpg" alt="Satellite View" />
-        <br />
-        <b>Satellite View Mode</b>
-      </td>
-      <td align="center" width="50%">
-        <img src="https://georide.milanwebportal.com/images/hybrid.jpg" alt="Hybrid View" />
-        <br />
-        <b>Hybrid Map Style</b>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" width="50%">
-        <img src="https://georide.milanwebportal.com/images/3D%20Building.jpg" alt="3D Building View" />
-        <br />
-        <b>3D Building Mode</b>
-      </td>
-      <td align="center" width="50%">
-        <img src="https://georide.milanwebportal.com/images/2D%20Building.jpg" alt="2D Building View" />
-        <br />
-        <b>2D Vector Map Style</b>
-      </td>
-    </tr>
+  <tr>
+    <td align="center" colspan="2" width="100%">
+      <img src="https://georide.milanwebportal.com/images/wow.jpg" alt="GEO Ride 3D World Driving Simulator Gameplay" width="100%" style="border-radius: 8px;" />
+      <br />
+      <b>Real-Time 3D Simulation &amp; World Scale Mapbox Engine (Gameplay View)</b>
+      <br />
+      <i>High-speed driving with dynamic vehicle physics and extruded 3D geometry</i>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="https://georide.milanwebportal.com/images/satellite.jpg" alt="Satellite View" width="100%" />
+      <br />
+      <b>Satellite View</b>
+      <br />
+      <i>Photorealistic satellite imagery of Earth</i>
+    </td>
+    <td align="center" width="50%">
+      <img src="https://georide.milanwebportal.com/images/hybrid.jpg" alt="Hybrid View" width="100%" />
+      <br />
+      <b>Hybrid View</b>
+      <br />
+      <i>Satellite photos combined with road networks and street names</i>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="https://georide.milanwebportal.com/images/3d-buildings.jpg" alt="3D Buildings View" width="100%" />
+      <br />
+      <b>3D Buildings</b>
+      <br />
+      <i>Extruded architectural height models with physical collision detection</i>
+    </td>
+    <td align="center" width="50%">
+      <img src="https://georide.milanwebportal.com/images/2d-streets.jpg" alt="2D Streets View" width="100%" />
+      <br />
+      <b>2D Vector Streets</b>
+      <br />
+      <i>High-contrast clean navigation map tuned for maximum framerates</i>
+    </td>
+  </tr>
 </table>
 
 ---
 
-# Installation & Setup (For Developers)
+## Multiplayer Mode
 
-1. **Clone the repository:**
+GEO Ride features an ultra-low-latency real-time multiplayer engine powered by **MQTT over secure WebSockets**:
+
+1. Click the **Multiplayer** icon in the header.
+2. Click **Copy Code** to share your unique session link or code with friends.
+3. Your friends paste the code into the **Join** box to appear directly on your map in real-time.
+4. Player positions, wheel angles, vehicle types, and skid marks synchronize smoothly at up to 60 updates per second.
+
+---
+
+## Mobile & PWA Support
+
+GEO Ride is a fully compliant **Progressive Web App (PWA)**:
+
+- **Full-Screen Immersion**: Install GEO Ride to your home screen on iOS (Share &rarr; Add to Home Screen) or Android (Install App prompt) for a clean borderless gaming experience.
+- **Adaptive Orientation**: Play comfortably in landscape or portrait, with clear on-screen orientation guidance for mobile players.
+- **Zero iOS Zoom Bug**: All form fields and dialogs use optimized touch sizing to prevent unwanted browser zooming on tap.
+
+---
+
+## Technology & Architecture
+
+```mermaid
+flowchart TD
+    App[app.js - Orchestration Engine] --> State[state.js - Reactive Central Store]
+    App --> Mapbox[Mapbox GL JS v3 - Satellite & Vector Mapping]
+    App --> ThreeMgr[three-manager.js - Three.js 3D Vehicle Renderer]
+    App --> Controls[controls.js - Keyboard, Joypad, Gyro Inputs]
+    App --> Physics[physics.js / physics.worker.js - Vehicle Dynamics]
+    App --> Multiplayer[multiplayer.js - MQTT WebSockets Synchronization]
+    App --> UI[ui.js - Glassmorphic HUD & Telemetry]
+    App --> Audio[audio.js - Web Audio Engine Sound Synthesis]
+
+    Physics --> State
+    Controls --> State
+    Multiplayer --> State
+    State --> UI
+    State --> ThreeMgr
+```
+
+### Core Technologies
+
+- **Rendering**: Three.js (r147) custom WebGL layer integrated into Mapbox GL JS (v3.3.0).
+- **Physics**: Real-time vehicle dynamics with off-thread Web Worker physics calculations.
+- **Audio**: Procedural Web Audio API sound synthesis (engine revs, braking, tire squeal, horn).
+- **Network**: MQTT over secure WebSockets with client-side rate limiting and input sanitization.
+- **Privacy & Compliance**: Google Consent Mode v2 with default denied analytics and an unobtrusive local consent banner.
+- **Security**: Subresource Integrity (SRI) on external CDNs and hardened Content Security Policy.
+
+---
+
+## Local Development Setup
+
+### Prerequisites
+
+- **Node.js**: v20.0.0 or newer
+- **npm**: v10.0.0 or newer
+
+### Steps
+
+1. **Clone the repository**:
+
     ```bash
     git clone https://github.com/milan-petkovski/GEO-Ride.git
     cd GEO-Ride
     ```
-2. **Install dependencies:**
+
+2. **Install dependencies**:
+
     ```bash
     npm install
     ```
-3. **Set up environment variables:**
-   Create a `.env` file in the root directory (see `.env.example`):
-    ```env
-    VITE_MAPBOX_TOKEN=your_mapbox_access_token_here
+
+3. **Configure Mapbox token**:
+   Copy `.env.example` to `.env`:
+
+    ```bash
+    cp .env.example .env
     ```
-4. **Start the development server:**
+
+    Add your valid Mapbox access token to `VITE_MAPBOX_TOKEN`.
+
+    > _Tip: In your Mapbox account dashboard, add URL Restrictions to prevent token misuse._
+
+4. **Start local dev server**:
+
     ```bash
     npm run dev
     ```
-5. **Run tests, linter, and build:**
+
+    Open `http://localhost:5173` in your browser.
+
+5. **Run test suite**:
     ```bash
     npm test
     npm run lint
@@ -182,52 +243,20 @@ Choose from four distinct vehicles, each featuring unique driving characteristic
 
 ---
 
-# Deployment Uputstvo (Netlify)
+## Contributing & Changelog
 
-GEO Ride is optimized for seamless zero-configuration deployment on **Netlify**:
-
-1. **Link Repository**: Connect your GitHub repository to Netlify.
-2. **Build Settings**:
-    - **Build Command**: `npm run build`
-    - **Publish Directory**: `dist`
-3. **Environment Variables**: Set `VITE_MAPBOX_TOKEN` in Netlify Site Settings -> Environment Variables.
-4. **Preview Deployments**: Netlify automatically generates staging preview URLs for every Pull Request.
-5. **Security Headers**: Netlify automatically serves `netlify.toml` which configures Content Security Policy (CSP), HSTS, X-Content-Type-Options, and frame restrictions.
+- Detailed contribution guidelines, code standards, and PR workflows are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
+- Release history and version notes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-# System Architecture & Module Flow
+## Author & Support
 
-```mermaid
-graph TD
-    UI[HUD UI Manager / ui.js] --> State[Central State Engine / state.js]
-    State --> Physics[Physics Worker / physics.worker.js]
-    Physics --> State
-    State --> ThreeManager[Three.js 3D Layer / three-manager.js]
-    State --> Multiplayer[MQTT Sync Engine / multiplayer.js]
-    State --> Analytics[GA4 & Web Vitals / analytics.js]
-    State --> Haptics[Tactile Feedback API / haptics.js]
+Created by **Milan Petkovski** &bull; Web Developer from Serbia.
 
-    Mapbox[Mapbox GL JS 2D Canvas] --> ThreeManager
-    ThreeManager --> Mapbox
-    Multiplayer <--> HiveMQ[HiveMQ MQTT Broker]
-```
+- **Play GEO Ride**: [georide.milanwebportal.com](https://georide.milanwebportal.com)
+- **Portfolio & Projects**: [milanwebportal.com](https://milanwebportal.com)
+- **Contact**: [contact@milanwebportal.com](mailto:contact@milanwebportal.com)
+- **Support the Project**: [Support via PayPal](https://paypal.me/milanwebportal)
 
----
-
-# Security, Testing & CI Architecture
-
-- **Mapbox Domain Restriction**: Always restrict your Mapbox public access token in the Mapbox Account Dashboard under URL Restrictions to your domain (`https://georide.milanwebportal.com/*`).
-- **Inline Script Extraction & CSP**: Standalone script entry points eliminate `'unsafe-inline'` script requirements.
-- **Multiplayer Throttling & Sanitization**: MQTT player payloads undergo strict coordinate range validation, string sanitization against XSS, and client-side message rate limiting (20 msg/s ceiling).
-- **Subresource Integrity & Security Headers**: External fonts and CDNs are protected with strict Content Security Policy directives in `netlify.toml`.
-
----
-
-# Contact & Creator Info
-
-- **Official Project Website:** [georide.milanwebportal.com](https://georide.milanwebportal.com)
-- **Author's Portfolio:** [milanwebportal.com](https://milanwebportal.com)
-- **Email Contact:** [contact@milanwebportal.com](mailto:contact@milanwebportal.com)
-
-**[Support my work via PayPal](https://paypal.me/milanwebportal)**
+_GEO Ride is 100% free and open-source under the MIT License._

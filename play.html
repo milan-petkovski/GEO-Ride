@@ -1,34 +1,25 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
         <!-- Google Tag & Consent Mode -->
         <script src="/js/gtag-init.js"></script>
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-C33HV1QV3S"></script>
 
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
-        <title>GEO Ride: Play 3D Driving Simulator - Drive the World Online Free</title>
-
-        <meta name="title" content="GEO Ride: Play 3D Driving Simulator - Drive the World Online Free" />
+        <title>GEO Ride: Play 3D Driving Simulator Online Free</title>
+        <meta name="title" content="GEO Ride: Play 3D Driving Simulator Online Free" />
         <meta
             name="description"
-            content="Play GEO Ride 3D driving simulator online free. Drive sports cars, trucks, and buses anywhere on Earth with real-world physics, extruded 3D buildings, and live multiplayer. No download required."
-        />
-        <meta
-            name="keywords"
-            content="GEO Ride play, 3D World Simulator, Satellite Map Driving, Real World GPS Game, Mapbox 3D Explorer, Interactive Street Simulator, Global Driving Experience, WebGL Car Physics, Google Maps Driving Alternative, OpenStreetMap Simulator, Drive on Real Map, Virtual Tourism Game, driving game unblocked"
+            content="Play GEO Ride 3D driving simulator online free. Drive cars, trucks, and buses anywhere on Earth with real-world physics and live multiplayer."
         />
         <meta name="author" content="Milan Petkovski" />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
         <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
         <link rel="canonical" href="https://georide.milanwebportal.com/play" />
 
-        <!-- Geographic & Local / Global Positioning (GEO SEO) -->
-        <meta name="geo.region" content="Global" />
-        <meta name="geo.placename" content="Earth" />
-        <meta name="geo.position" content="44.809684;20.449425" />
-        <meta name="ICBM" content="44.809684, 20.449425" />
+        <!-- Geographic & Global Distribution -->
         <meta name="coverage" content="Worldwide" />
         <meta name="distribution" content="Global" />
 
@@ -46,7 +37,7 @@
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://georide.milanwebportal.com/play" />
         <meta property="og:site_name" content="GEO Ride" />
-        <meta property="og:title" content="GEO Ride: Play 3D Driving Simulator - Drive the World Online Free" />
+        <meta property="og:title" content="GEO Ride: Play 3D Driving Simulator Online Free" />
         <meta
             property="og:description"
             content="Play the next-generation 3D driving simulator online in your browser. Drive realistic vehicles across high-fidelity 3D satellite maps of Earth with real-time multiplayer."
@@ -63,7 +54,7 @@
         <meta property="twitter:site" content="@milanwebportal" />
         <meta property="twitter:creator" content="@milanwebportal" />
         <meta property="twitter:url" content="https://georide.milanwebportal.com/play" />
-        <meta property="twitter:title" content="GEO Ride: Play 3D Driving Simulator - Drive the World Online Free" />
+        <meta property="twitter:title" content="GEO Ride: Play 3D Driving Simulator Online Free" />
         <meta
             property="twitter:description"
             content="Experience Earth in 3D. Realistic driving physics on real-world satellite maps. Play free in your browser."
@@ -76,11 +67,11 @@
             {
                 "@context": "https://schema.org",
                 "@type": "WebApplication",
-                "name": "GEO Ride Simulator",
+                "name": "GEO Ride",
                 "alternateName": "GEO Ride 3D Driving Simulator",
                 "url": "https://georide.milanwebportal.com/play",
                 "image": "https://georide.milanwebportal.com/images/wow.jpg",
-                "description": "Next-generation 3D driving simulator built on Mapbox GL JS and Three.js, featuring realistic physical vehicle dynamics, multi-player WebSockets synchronization, and core web vitals performance monitoring.",
+                "description": "Next-generation 3D driving simulator built on Mapbox GL JS and Three.js, featuring realistic physical vehicle dynamics and live WebSockets multiplayer.",
                 "applicationCategory": "GameApplication",
                 "operatingSystem": "All modern Web Browsers (Chrome, Firefox, Safari, Edge)",
                 "genre": "Driving Simulator",
@@ -103,8 +94,20 @@
         <link rel="manifest" href="/manifest.json" />
 
         <!-- Resource Hints (Elite Performance) -->
-        <link rel="preload" href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" as="script" />
-        <link rel="preload" href="https://unpkg.com/three@0.147.0/build/three.min.js" as="script" />
+        <link
+            rel="preload"
+            href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"
+            as="script"
+            integrity="sha384-QhDWlNe46CZbFQWy0V1TD9TYGDGWBqSUyafVPJPqsUSkdANBOblLBczmDJcLlqwL"
+            crossorigin="anonymous"
+        />
+        <link
+            rel="preload"
+            href="https://unpkg.com/three@0.147.0/build/three.min.js"
+            as="script"
+            integrity="sha384-vV17nr/rMaJqmeZkFUzXLpHdQ+ME5QHKdydaqqN+3Ga39RJlNrTatJxHwGV4ml2C"
+            crossorigin="anonymous"
+        />
         <link rel="preload" href="/fonts/outfit-600-latin.woff2" as="font" type="font/woff2" crossorigin />
         <link rel="preload" href="/fonts/rajdhani-700-latin.woff2" as="font" type="font/woff2" crossorigin />
 
@@ -112,64 +115,43 @@
         <link rel="preconnect" href="https://api.mapbox.com" />
         <link rel="stylesheet" href="/fonts/fonts.css" />
 
-        <!-- Mapbox GL JS (Deferred) -->
-        <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" defer></script>
-        <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+        <!-- Mapbox GL JS (Deferred with SRI) -->
+        <script
+            src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"
+            integrity="sha384-QhDWlNe46CZbFQWy0V1TD9TYGDGWBqSUyafVPJPqsUSkdANBOblLBczmDJcLlqwL"
+            crossorigin="anonymous"
+            defer
+        ></script>
+        <link
+            href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css"
+            integrity="sha384-u+wVUwl2ZXoPOrUMU3wYTEFmS6t764q435vp50Tj0SzRboIuzorj6aGCzOsK/YyR"
+            crossorigin="anonymous"
+            rel="stylesheet"
+        />
 
-        <!-- Three.js for 3D Vehicle (Deferred) -->
-        <script src="https://unpkg.com/three@0.147.0/build/three.min.js" defer></script>
-        <!-- Universal Multiplayer (MQTT Engine) -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" defer></script>
+        <!-- Three.js for 3D Vehicle (Deferred with SRI) -->
+        <script
+            src="https://unpkg.com/three@0.147.0/build/three.min.js"
+            integrity="sha384-vV17nr/rMaJqmeZkFUzXLpHdQ+ME5QHKdydaqqN+3Ga39RJlNrTatJxHwGV4ml2C"
+            crossorigin="anonymous"
+            defer
+        ></script>
+        <!-- Universal Multiplayer (MQTT Engine with SRI) -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
+            integrity="sha384-FtgI6XBQHroa6RTQqVE29PsMgDmibchdhIXlikZhRqly3P0ZGnfxior+GiKyxF7/"
+            crossorigin="anonymous"
+            defer
+        ></script>
 
-        <link rel="icon" type="image/png" href="/favicon.png" />
+        <!-- Favicons and Touch Icons -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
         <link rel="stylesheet" href="style.css" />
-        <!-- Structured Data (JSON-LD 2030) -->
-        <script type="application/ld+json">
-            [
-                {
-                    "@context": "https://schema.org",
-                    "@type": "VideoGame",
-                    "name": "GEO Ride",
-                    "url": "https://georide.milanwebportal.com/",
-                    "image": "https://georide.milanwebportal.com/favicon.png",
-                    "description": "Next-gen 3D driving simulator using real-world satellite data. Drive cars, trucks, and buses anywhere on Earth with realistic physics.",
-                    "genre": ["Simulation", "Driving", "Exploration"],
-                    "gamePlatform": "Web Browser",
-                    "author": {
-                        "@type": "Person",
-                        "name": "Milan Petkovski",
-                        "url": "https://milanwebportal.com"
-                    },
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": "4.9",
-                        "reviewCount": "1250"
-                    }
-                },
-                {
-                    "@context": "https://schema.org",
-                    "@type": "FAQPage",
-                    "mainEntity": [
-                        {
-                            "@type": "Question",
-                            "name": "Can I drive on a real world map in 3D?",
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": "Yes! GEO Ride allows you to drive any vehicle across a high-fidelity 3D replica of the real world using advanced Mapbox satellite data."
-                            }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": "Is GEO Ride a multiplayer driving game?",
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": "Yes, GEO Ride features a real-time multiplayer mode where you can join rooms and drive with players globally on a shared map."
-                            }
-                        }
-                    ]
-                }
-            ]
-        </script>
+        <script src="/js/cookie-consent.js" defer></script>
     </head>
 
     <body>
@@ -230,10 +212,56 @@
             >
                 GEO Ride - World Explorer & 3D Simulator
             </h1>
+
+            <!-- Mobile Portrait Hint Banner -->
+            <aside id="portrait-orientation-hint" class="portrait-hint-banner" aria-label="Orientation suggestion">
+                <div class="portrait-hint-content">
+                    <svg
+                        class="portrait-hint-icon"
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        <path d="M20 9l2-2-2-2"></path>
+                        <path d="M22 7h-4"></path>
+                    </svg>
+                    <span>Rotate device to landscape for full screen controls</span>
+                </div>
+                <button
+                    type="button"
+                    id="dismiss-portrait-hint"
+                    class="portrait-hint-dismiss"
+                    aria-label="Dismiss orientation suggestion"
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </aside>
+
             <header>
                 <div class="header-left">
                     <a href="/" class="logo" aria-label="GEO Ride - Back to Home" title="Back to Home"
-                        >GEO <span>Ride</span></a
+                        >GEO <span>RIDE</span></a
                     >
                     <a href="https://milanwebportal.com" target="_blank" class="author-link">BY MILANWEBPORTAL.COM</a>
                 </div>
@@ -1043,7 +1071,7 @@
                             border-radius: 999px;
                             padding: 8px 14px;
                             color: #fff;
-                            font-size: 0.8rem;
+                            font-size: 16px;
                             outline: none;
                             width: 60%;
                             max-width: 260px;

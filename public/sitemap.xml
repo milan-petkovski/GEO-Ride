@@ -1,15 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
    <url>
       <loc>https://georide.milanwebportal.com/</loc>
-      <lastmod>2026-09-02</lastmod>
+      <lastmod>2026-09-03</lastmod>
       <changefreq>daily</changefreq>
       <priority>1.0</priority>
+      <image:image>
+         <image:loc>https://georide.milanwebportal.com/images/wow.jpg</image:loc>
+         <image:title>GEO Ride 3D World Driving Simulator Gameplay</image:title>
+         <image:caption>Drive realistic vehicles anywhere on Earth using satellite maps in your browser.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://georide.milanwebportal.com/images/satellite.jpg</image:loc>
+         <image:title>GEO Ride Satellite 3D Map View</image:title>
+         <image:caption>Real-world high-resolution satellite map driving simulation.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://georide.milanwebportal.com/images/hybrid.jpg</image:loc>
+         <image:title>GEO Ride Hybrid Satellite Road Map</image:title>
+         <image:caption>Satellite imagery with road networks and street names in 3D.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://georide.milanwebportal.com/images/3d-buildings.jpg</image:loc>
+         <image:title>GEO Ride Extruded 3D Buildings</image:title>
+         <image:caption>3D extruded city buildings with accurate heights and collision detection.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://georide.milanwebportal.com/images/2d-streets.jpg</image:loc>
+         <image:title>GEO Ride 2D Vector Street Map</image:title>
+         <image:caption>High performance vector street map driving mode.</image:caption>
+      </image:image>
    </url>
    <url>
       <loc>https://georide.milanwebportal.com/play</loc>
-      <lastmod>2026-09-02</lastmod>
+      <lastmod>2026-09-03</lastmod>
       <changefreq>daily</changefreq>
       <priority>0.9</priority>
+      <image:image>
+         <image:loc>https://georide.milanwebportal.com/images/wow.jpg</image:loc>
+         <image:title>Play GEO Ride Online Driving Game</image:title>
+         <image:caption>Free online 3D simulator with instant driving across Earth.</image:caption>
+      </image:image>
    </url>
 </urlset>

@@ -622,7 +622,6 @@ function initMobileDrawer() {
 function initScrollBehaviors() {
     const navHeader = document.getElementById('nav-header');
     const mobileBottomBar = document.getElementById('mobile-bottom-bar');
-    const heroSection = document.getElementById('hero');
     const backToTopBtn = document.getElementById('back-to-top');
     const progressIndicator = document.getElementById('progress-ring-indicator');
 
@@ -666,21 +665,9 @@ function initScrollBehaviors() {
         });
     }
 
-    // Observe hero to display mobile bottom action bar once scrolled past hero
-    if (mobileBottomBar && heroSection && 'IntersectionObserver' in window) {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        mobileBottomBar.classList.remove('visible');
-                    } else {
-                        mobileBottomBar.classList.add('visible');
-                    }
-                });
-            },
-            { threshold: 0.2 }
-        );
-        observer.observe(heroSection);
+    // Mobile bottom action bar - keep visible on mobile viewports
+    if (mobileBottomBar) {
+        mobileBottomBar.classList.add('visible');
     }
 }
 

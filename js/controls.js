@@ -237,11 +237,50 @@ function initTouchControls() {
         btn.addEventListener('touchcancel', handleEnd, { passive: false });
     };
 
+    const handleResetAction = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (headerReset) headerReset.classList.add('active');
+        if (btnReset) btnReset.classList.add('active');
+        setTimeout(() => {
+            if (headerReset) headerReset.classList.remove('active');
+            if (btnReset) btnReset.classList.remove('active');
+        }, 300);
+        haptics.success();
+        const mapInstance = typeof window !== 'undefined' && window.map ? window.map : null;
+        if (mapInstance) {
+            triggerVehicleReset(false, mapInstance);
+        }
+    };
+
+    if (headerReset) {
+        headerReset.addEventListener('click', handleResetAction);
+        headerReset.addEventListener(
+            'touchend',
+            (e) => {
+                e.preventDefault();
+                handleResetAction(e);
+            },
+            { passive: false }
+        );
+    }
+    if (btnReset) {
+        btnReset.addEventListener('click', handleResetAction);
+        btnReset.addEventListener(
+            'touchend',
+            (e) => {
+                e.preventDefault();
+                handleResetAction(e);
+            },
+            { passive: false }
+        );
+    }
+
     setupTouchBtn(btnGas, 'w', 'arrowup');
     setupTouchBtn(btnBrake, 's', 'arrowdown');
     setupTouchBtn(btnDrift, ' ');
-    setupTouchBtn(btnReset, 'r');
-    setupTouchBtn(headerReset, 'r');
 
     // Drag-to-look touch rotation for mobile device map interactions
     window.addEventListener(

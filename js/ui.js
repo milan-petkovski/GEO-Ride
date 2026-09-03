@@ -132,6 +132,15 @@ export function initUI(map) {
         }
     });
 
+    const dismissPortraitBtn = document.getElementById('dismiss-portrait-hint');
+    if (dismissPortraitBtn) {
+        dismissPortraitBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('portrait-orientation-hint')?.classList.add('dismissed');
+        };
+    }
+
     // Toggle Handlers
     document.querySelectorAll('.style-toggle button').forEach((btn) => {
         btn.onclick = () => {
