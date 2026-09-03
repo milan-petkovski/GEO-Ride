@@ -6,6 +6,7 @@
 import { state } from './state.js';
 import { closeAllPanels } from './ui.js';
 import { haptics } from './haptics.js';
+import { triggerVehicleReset } from './physics.js';
 
 let kbdElements = null;
 
@@ -27,6 +28,11 @@ export function initControls() {
         const key = e.key.toLowerCase();
         if (e.ctrlKey || e.metaKey) return;
 
+        // Track shift state unconditionally whenever any key is pressed with Shift
+        if (e.shiftKey || key === 'shift' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+            state.keys['shift'] = true;
+        }
+
         const drivingKeys = [
             'w',
             'a',
@@ -42,36 +48,72 @@ export function initControls() {
             'escape',
             'tab'
         ];
-        if (!drivingKeys.includes(key)) return;
 
-        if (key === 'escape') {
+        // Also check by physical code to prevent keyboard layout or multi-key conflicts
+        let mappedKey = key;
+        if (e.code === 'KeyW' || e.code === 'ArrowUp') mappedKey = 'w';
+        else if (e.code === 'KeyA' || e.code === 'ArrowLeft') mappedKey = 'a';
+        else if (e.code === 'KeyS' || e.code === 'ArrowDown') mappedKey = 's';
+        else if (e.code === 'KeyD' || e.code === 'ArrowRight') mappedKey = 'd';
+        else if (e.code === 'KeyR') mappedKey = 'r';
+        else if (e.code === 'Space') mappedKey = ' ';
+        else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') mappedKey = 'shift';
+
+        if (!drivingKeys.includes(mappedKey) && !drivingKeys.includes(key)) return;
+
+        if (key === 'escape' || mappedKey === 'escape') {
             closeAllPanels();
             return;
         }
 
         const isProModalOpen = document.getElementById('pro-modal-backdrop')?.classList.contains('active');
-        if (isProModalOpen || state.isInputFocused || document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+        if (
+            isProModalOpen ||
+            state.isInputFocused ||
+            document.activeElement?.tagName === 'INPUT' ||
+            document.activeElement?.tagName === 'TEXTAREA'
+        ) {
             return;
         }
 
-        if (key === 'shift') state.keys['shift'] = true;
         if (key === 'tab') {
             e.preventDefault();
             return;
         }
 
-        closeAllPanels();
+        if (mappedKey === 'r') {
+            const isShiftReset = !!(e.shiftKey || state.keys['shift'] || state.keys['Shift']);
+            if (typeof window !== 'undefined' && window.map) {
+                triggerVehicleReset(isShiftReset, window.map);
+            }
+        }
+
+        // Close panels without calling .blur() (which triggers window.blur and clears state.keys)
+        document.getElementById('settings-panel')?.classList.remove('active');
+        document.getElementById('mp-dropdown')?.classList.remove('active');
+        document.querySelector('.search-box')?.classList.remove('expanded');
         document.body.classList.add('hide-cursor');
 
+        state.keys[mappedKey] = true;
         state.keys[key] = true;
         state.physicalKeysActive = true;
-        updateKbdHUD(key, true);
+        updateKbdHUD(mappedKey, true);
     });
 
     window.addEventListener('keyup', (e) => {
         const key = e.key.toLowerCase();
+        let mappedKey = key;
+        if (e.code === 'KeyW' || e.code === 'ArrowUp') mappedKey = 'w';
+        else if (e.code === 'KeyA' || e.code === 'ArrowLeft') mappedKey = 'a';
+        else if (e.code === 'KeyS' || e.code === 'ArrowDown') mappedKey = 's';
+        else if (e.code === 'KeyD' || e.code === 'ArrowRight') mappedKey = 'd';
+        else if (e.code === 'KeyR') mappedKey = 'r';
+        else if (e.code === 'Space') mappedKey = ' ';
+        else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') mappedKey = 'shift';
+
+        state.keys[mappedKey] = false;
         state.keys[key] = false;
-        if (key === 'shift') state.keys['shift'] = false;
+        if (mappedKey === 'shift' || key === 'shift') state.keys['shift'] = false;
 
         const drivingKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright', ' '];
         const anyActive = drivingKeys.some((k) => !!state.keys[k]);
@@ -431,4 +473,114 @@ function updateOrientationLayout() {
             detail: { isLandscape, isMobile, isTablet }
         })
     );
+}
+
+/**
+ * Polls connected Gamepads (Xbox, PlayStation, standard USB/Bluetooth controllers)
+ * and updates state.keys appropriately.
+ */
+export function pollGamepad() {
+    if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') return;
+    const gamepads = navigator.getGamepads();
+    if (!gamepads) return;
+
+    let activePad = null;
+    for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) {
+            activePad = gamepads[i];
+            break;
+        }
+    }
+    if (!activePad) return;
+
+    const deadzone = 0.15;
+    // Left stick X axis or D-pad left/right
+    const axisX = activePad.axes[0] || 0;
+    const dpadLeft = activePad.buttons[14]?.pressed;
+    const dpadRight = activePad.buttons[15]?.pressed;
+    const dpadUp = activePad.buttons[12]?.pressed;
+    const dpadDown = activePad.buttons[13]?.pressed;
+
+    // Steer left
+    if (axisX < -deadzone || dpadLeft) {
+        state.keys['a'] = true;
+        state.keys['arrowleft'] = true;
+        state.keys['d'] = false;
+        state.keys['arrowright'] = false;
+        updateKbdHUD('a', true);
+        updateKbdHUD('d', false);
+    } else if (axisX > deadzone || dpadRight) {
+        state.keys['d'] = true;
+        state.keys['arrowright'] = true;
+        state.keys['a'] = false;
+        state.keys['arrowleft'] = false;
+        updateKbdHUD('d', true);
+        updateKbdHUD('a', false);
+    } else if (!state.physicalKeysActive) {
+        state.keys['a'] = false;
+        state.keys['arrowleft'] = false;
+        state.keys['d'] = false;
+        state.keys['arrowright'] = false;
+        updateKbdHUD('a', false);
+        updateKbdHUD('d', false);
+    }
+
+    // RT (button 7) or A (button 0) for Gas
+    const rtVal =
+        typeof activePad.buttons[7]?.value === 'number'
+            ? activePad.buttons[7].value
+            : activePad.buttons[7]?.pressed
+              ? 1
+              : 0;
+    const aBtn = activePad.buttons[0]?.pressed;
+    const isGas = rtVal > 0.1 || aBtn || dpadUp;
+
+    if (isGas) {
+        state.keys['w'] = true;
+        state.keys['arrowup'] = true;
+        updateKbdHUD('w', true);
+    } else if (!state.physicalKeysActive) {
+        state.keys['w'] = false;
+        state.keys['arrowup'] = false;
+        updateKbdHUD('w', false);
+    }
+
+    // LT (button 6) or B (button 1) or X (button 2) for Brake / Reverse
+    const ltVal =
+        typeof activePad.buttons[6]?.value === 'number'
+            ? activePad.buttons[6].value
+            : activePad.buttons[6]?.pressed
+              ? 1
+              : 0;
+    const bBtn = activePad.buttons[1]?.pressed || activePad.buttons[2]?.pressed;
+    const isBrake = ltVal > 0.1 || bBtn || dpadDown;
+
+    if (isBrake) {
+        state.keys['s'] = true;
+        state.keys['arrowdown'] = true;
+        updateKbdHUD('s', true);
+    } else if (!state.physicalKeysActive) {
+        state.keys['s'] = false;
+        state.keys['arrowdown'] = false;
+        updateKbdHUD('s', false);
+    }
+
+    // RB (button 5) or Handbrake / Drift (button 3 / Y)
+    const isDrift = activePad.buttons[5]?.pressed || activePad.buttons[3]?.pressed;
+    if (isDrift) {
+        state.keys[' '] = true;
+        updateKbdHUD(' ', true);
+    } else if (!state.physicalKeysActive) {
+        state.keys[' '] = false;
+        updateKbdHUD(' ', false);
+    }
+
+    // Reset button (button 8 / 9: select / start)
+    if (activePad.buttons[8]?.pressed || activePad.buttons[9]?.pressed) {
+        state.keys['r'] = true;
+        updateKbdHUD('r', true);
+    } else if (!state.physicalKeysActive) {
+        state.keys['r'] = false;
+        updateKbdHUD('r', false);
+    }
 }

@@ -8,6 +8,7 @@ import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
 import { initMultiplayer } from './multiplayer.js';
+import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js';
 
 let activeMap = null;
 let isManualPresetMenuOpen = false;
@@ -55,7 +56,19 @@ export function initUI(map) {
     const mapPanels = [settingsPanel, mpDropdown, document.querySelector('.pro-modal')];
     mapPanels.forEach((panel) => {
         if (!panel) return;
-        ['wheel', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'click', 'dblclick', 'keydown', 'keyup', 'keypress', 'mousedown'].forEach((evtType) => {
+        [
+            'wheel',
+            'touchstart',
+            'touchmove',
+            'touchend',
+            'pointerdown',
+            'click',
+            'dblclick',
+            'keydown',
+            'keyup',
+            'keypress',
+            'mousedown'
+        ].forEach((evtType) => {
             panel.addEventListener(evtType, (e) => e.stopPropagation(), { passive: false });
         });
     });
@@ -185,11 +198,15 @@ export function initUI(map) {
             const requestedVehicle = btn.dataset.vehicle;
             if (requestedVehicle === 'god' && !state.isPro) {
                 openProModal();
-                showToast('PRO VEHICLE LOCKED', 'God Mode is exclusive to GEO Ride Pro subscribers. Upgrade now to fly at unlimited speed!', {
-                    isPro: true,
-                    actionText: 'Upgrade',
-                    onAction: openProModal
-                });
+                showToast(
+                    'PRO VEHICLE LOCKED',
+                    'God Mode is exclusive to GEO Ride Pro subscribers. Upgrade now to fly at unlimited speed!',
+                    {
+                        isPro: true,
+                        actionText: 'Upgrade',
+                        onAction: openProModal
+                    }
+                );
                 if (haptics) haptics.tap();
                 return;
             }
@@ -269,11 +286,15 @@ export function initUI(map) {
             const requestedGod = btn.dataset.god === 'on';
             if (requestedGod && !state.isPro) {
                 openProModal();
-                showToast('PRO FEATURE LOCKED', 'God Mode requires GEO Ride Pro. Upgrade now to fly with unlimited speed!', {
-                    isPro: true,
-                    actionText: 'Upgrade',
-                    onAction: openProModal
-                });
+                showToast(
+                    'PRO FEATURE LOCKED',
+                    'God Mode requires GEO Ride Pro. Upgrade now to fly with unlimited speed!',
+                    {
+                        isPro: true,
+                        actionText: 'Upgrade',
+                        onAction: openProModal
+                    }
+                );
                 if (haptics) haptics.tap();
                 return;
             }
@@ -494,20 +515,11 @@ export function initUI(map) {
 
     // Pro Modal Event Listeners
     const proOpenBtn = document.getElementById('pro-open-btn');
-    const settingsProBtn = document.getElementById('settings-pro-btn');
     const proModalClose = document.getElementById('pro-modal-close');
     const proModalBackdrop = document.getElementById('pro-modal-backdrop');
 
     if (proOpenBtn) {
         proOpenBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openProModal();
-            if (haptics) haptics.tap();
-        });
-    }
-
-    if (settingsProBtn) {
-        settingsProBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             openProModal();
             if (haptics) haptics.tap();
@@ -542,21 +554,72 @@ export function initUI(map) {
     // Pro Activation key handler
     const proKeyInput = document.getElementById('pro-key-input');
     const proActivateBtn = document.getElementById('pro-activate-btn');
+    const proStatusEl = document.getElementById('pro-activation-status');
+
+    const showActivationStatus = (msg, type = 'info') => {
+        if (!proStatusEl) return;
+        proStatusEl.style.display = 'flex';
+        let color = '#00f2ff';
+        let icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+
+        if (type === 'success') {
+            color = '#22c55e';
+            icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        } else if (type === 'error') {
+            color = '#ef4444';
+            icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+        } else if (type === 'loading') {
+            color = '#c470f0';
+            icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>`;
+        }
+
+        proStatusEl.style.color = color;
+        proStatusEl.innerHTML = `${icon} <span>${msg}</span>`;
+    };
 
     if (proActivateBtn && proKeyInput) {
-        const handleActivation = () => {
+        const handleActivation = async () => {
             const val = proKeyInput.value.trim().toLowerCase();
-            if (!val || val.length < 2) {
-                showToast('KEY REQUIRED', 'Please enter your Fungies Order Email or Pro License Key.');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!val || !emailRegex.test(val)) {
+                showActivationStatus('Please enter a valid order email address.', 'error');
+                showToast('EMAIL REQUIRED', 'Please enter the email address used during purchase.');
                 return;
             }
 
-            setProStatus(true);
-            updateToggleStates();
-            closeProModal();
-            showToast('PRO ACTIVATED!', 'God Mode vehicle and private multiplayer rooms are now unlocked.', { isPro: true });
-            trackEvent('pro_activated_manually', { key_length: val.length });
-            if (haptics) haptics.success();
+            // Supabase verification via Milan Web Portal
+            proActivateBtn.disabled = true;
+            const originalText = proActivateBtn.textContent;
+            proActivateBtn.textContent = 'CHECKING...';
+            showActivationStatus('Checking subscription status in database...', 'loading');
+
+            try {
+                const res = await checkProStatusByEmail(val);
+                if (res && res.is_pro) {
+                    setProStatus(true);
+                    updateToggleStates();
+                    localStorage.setItem('geo_ride_pro_email', val);
+                    const planTitle = res.plan_name || 'GEO Ride Pro';
+                    showActivationStatus(`Active Plan Found: ${planTitle}! Activated.`, 'success');
+                    showToast('PRO VERIFIED!', `Active plan: ${planTitle}. God Mode unlocked!`, { isPro: true });
+                    trackEvent('pro_activated_manually', { method: 'supabase', plan: res.plan_id });
+                    if (haptics) haptics.success();
+                    setTimeout(() => closeProModal(), 1400);
+                } else {
+                    showActivationStatus('No active Pro plan found for this email address.', 'error');
+                    showToast(
+                        'NO ACTIVE PLAN',
+                        'No active subscription found for this email. Check your receipt or choose a plan below.'
+                    );
+                }
+            } catch (err) {
+                console.error('Pro activation error:', err);
+                showActivationStatus('Connection error. Could not verify subscription.', 'error');
+                showToast('VERIFICATION ERROR', 'Could not reach server to verify email. Please try again.');
+            } finally {
+                proActivateBtn.disabled = false;
+                proActivateBtn.textContent = originalText;
+            }
         };
 
         proActivateBtn.addEventListener('click', handleActivation);
@@ -589,39 +652,52 @@ export function updateToggleStates() {
     // Show/hide and style God Mode vehicle button in the vehicle-toggle group
     const vehicleGodBtn = document.getElementById('vehicle-god-btn');
     if (vehicleGodBtn) {
-        vehicleGodBtn.style.display = 'block';
-        const badge = vehicleGodBtn.querySelector('.pro-badge-pill');
+        vehicleGodBtn.style.display = 'inline-flex';
+        const badge =
+            typeof vehicleGodBtn.querySelector === 'function' ? vehicleGodBtn.querySelector('.pro-badge-pill') : null;
         if (badge) {
-            badge.style.display = state.isPro ? 'none' : 'inline-block';
+            badge.style.display = state.isPro ? 'none' : 'inline-flex';
         }
     }
 
-    // Reflect Pro HUD status
+    // Reflect Pro HUD status via CSS class + structured inner HTML
     const proOpenBtn = document.getElementById('pro-open-btn');
     if (proOpenBtn) {
         if (state.isPro) {
-            proOpenBtn.style.background = 'linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(202, 138, 4, 0.45))';
-            proOpenBtn.style.borderColor = 'rgba(234, 179, 8, 0.6)';
+            proOpenBtn.classList?.add('is-active');
+            proOpenBtn.title = 'GEO Ride Pro Active';
+            proOpenBtn.setAttribute?.('aria-label', 'GEO Ride Pro Active');
             proOpenBtn.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                </svg>
-                <span>PRO ACTIVE</span>
+                <span class="pro-btn-shimmer"></span>
+                <span class="pro-btn-inner">
+                    <svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                    </svg>
+                    <span class="pro-btn-label">ACTIVE</span>
+                </span>
+            `;
+        } else {
+            proOpenBtn.classList?.remove('is-active');
+            proOpenBtn.title = 'Unlock GEO Ride Pro';
+            proOpenBtn.setAttribute?.('aria-label', 'Unlock GEO Ride Pro');
+            proOpenBtn.innerHTML = `
+                <span class="pro-btn-shimmer"></span>
+                <span class="pro-btn-inner">
+                    <svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                    </svg>
+                    <span class="pro-btn-label">PRO</span>
+                </span>
             `;
         }
     }
 
-    const settingsProBtn = document.getElementById('settings-pro-btn');
-    if (settingsProBtn) {
-        if (state.isPro) {
-            settingsProBtn.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                <span>PRO STATUS: ACTIVE</span>
-            `;
-            settingsProBtn.style.background = 'linear-gradient(135deg, #15803d, #22c55e)';
-            settingsProBtn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+    // Show/hide PRO badge on God Mode toggle in Settings
+    const godOnBtn = document.getElementById('god-on-btn');
+    if (godOnBtn) {
+        const badge = typeof godOnBtn.querySelector === 'function' ? godOnBtn.querySelector('.pro-badge-pill') : null;
+        if (badge) {
+            badge.style.display = state.isPro ? 'none' : 'inline-flex';
         }
     }
 
@@ -792,13 +868,54 @@ export function openProModal() {
     if (backdrop) {
         backdrop.classList.add('active');
         state.isInputFocused = true;
-        state.keys = {};
-        document.body.classList.remove('hide-cursor');
+        if (document.body && document.body.classList) {
+            document.body.classList.remove('hide-cursor');
+        }
         syncMapInteractions(activeMap);
         const proKeyInput = document.getElementById('pro-key-input');
-        if (proKeyInput) {
+        const proStatusEl = document.getElementById('pro-activation-status');
+        if (proStatusEl) {
+            if (state.isPro) {
+                const savedEmail = localStorage.getItem('geo_ride_pro_email');
+                proStatusEl.style.display = 'flex';
+                proStatusEl.style.color = '#22c55e';
+                proStatusEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Pro Subscription Active${savedEmail ? ` (${savedEmail})` : ''}</span>`;
+            } else {
+                proStatusEl.style.display = 'none';
+                proStatusEl.innerHTML = '';
+            }
+        }
+        if (proKeyInput && typeof proKeyInput.focus === 'function') {
             setTimeout(() => proKeyInput.focus(), 120);
         }
+
+        // Dynamically fetch and sync latest plans & checkout URLs from Supabase
+        fetchGeoRidePlans()
+            .then((plans) => {
+                if (!plans || !Array.isArray(plans)) return;
+                const monthlyPlan = plans.find((p) => p.plan_id === 'pro_monthly');
+                const yearlyPlan = plans.find((p) => p.plan_id === 'pro_yearly');
+
+                const monthlyBtn = document.getElementById('pro-modal-monthly-btn');
+                if (monthlyBtn && monthlyPlan) {
+                    if (monthlyPlan.checkout_url) monthlyBtn.href = monthlyPlan.checkout_url;
+                    const priceEl = monthlyBtn.querySelector('.pro-plan-price');
+                    if (priceEl && monthlyPlan.price_usd) {
+                        priceEl.innerHTML = `$${monthlyPlan.price_usd.toFixed(2)} <span>/ mo</span>`;
+                    }
+                }
+
+                const yearlyBtn = document.getElementById('pro-modal-yearly-btn');
+                if (yearlyBtn && yearlyPlan) {
+                    if (yearlyPlan.checkout_url) yearlyBtn.href = yearlyPlan.checkout_url;
+                    const priceEl = yearlyBtn.querySelector('.pro-plan-price');
+                    if (priceEl && yearlyPlan.price_usd) {
+                        priceEl.innerHTML = `$${yearlyPlan.price_usd.toFixed(2)} <span>/ mo</span>`;
+                    }
+                }
+            })
+            .catch(() => {});
+
         trackEvent('pro_modal_open', { source: 'game_hud' });
     }
 }
@@ -828,9 +945,11 @@ export function showToast(title, message, options = {}) {
     toast.innerHTML = `
         <div class="toast-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="${options.isPro ? '#c470f0' : '#00f2ff'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
-                ${options.isPro
-                    ? '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>'
-                    : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'}
+                ${
+                    options.isPro
+                        ? '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>'
+                        : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
+                }
             </svg>
         </div>
         <div class="toast-body">
@@ -863,9 +982,10 @@ export function showToast(title, message, options = {}) {
     }
 
     const duration = options.duration || 6500;
-    setTimeout(() => {
+    const toastTimer = setTimeout(() => {
         if (toast.parentElement) dismiss();
     }, duration);
+    if (toastTimer && typeof toastTimer.unref === 'function') toastTimer.unref();
 }
 
 let notificationsInitialized = false;
@@ -874,18 +994,20 @@ export function initGameNotifications() {
     notificationsInitialized = true;
 
     // 1. Welcome Toast after 3.5 seconds
-    setTimeout(() => {
+    const t1 = setTimeout(() => {
         showToast('WELCOME TO GEO RIDE', 'Type any address or city in Search to teleport anywhere on Earth!');
     }, 3500);
+    if (t1 && typeof t1.unref === 'function') t1.unref();
 
     // 2. Pro Upgrade prompt after 65 seconds
-    setTimeout(() => {
+    const t2 = setTimeout(() => {
         showToast('UNLOCK GEO RIDE PRO', 'Get God Mode ghost vehicle with zero speed limits and private rooms!', {
             isPro: true,
             actionText: 'Upgrade',
             onAction: openProModal
         });
     }, 65000);
+    if (t2 && typeof t2.unref === 'function') t2.unref();
 
     // 3. Rotating periodic tips every 140 seconds
     const tips = [
@@ -912,9 +1034,12 @@ export function initGameNotifications() {
     ];
 
     let tipIndex = 0;
-    setInterval(() => {
+    const tipsInterval = setInterval(() => {
         const tip = tips[tipIndex % tips.length];
         showToast(tip.title, tip.msg, tip.options);
         tipIndex++;
     }, 140000);
+    if (tipsInterval && typeof tipsInterval.unref === 'function') {
+        tipsInterval.unref();
+    }
 }

@@ -32,7 +32,13 @@ let cleanupTimer = null;
  */
 export function stopMultiplayerTimers() {
     isManualDisconnect = true;
-    if (typeof window !== 'undefined') window.mpInitialized = false;
+    if (typeof window !== 'undefined') {
+        window.mpInitialized = false;
+        if (window.reconnectTimeout) {
+            clearTimeout(window.reconnectTimeout);
+            window.reconnectTimeout = null;
+        }
+    }
     if (broadcastTimer) {
         clearInterval(broadcastTimer);
         broadcastTimer = null;
@@ -284,11 +290,15 @@ export function initMultiplayer() {
             if (!state.isPro) {
                 if (typeof openProModal === 'function') openProModal();
                 if (typeof showToast === 'function') {
-                    showToast('PRO FEATURE', 'Private multiplayer rooms require GEO Ride Pro. Upgrade now to invite friends and host private rooms!', {
-                        isPro: true,
-                        actionText: 'Upgrade',
-                        onAction: openProModal
-                    });
+                    showToast(
+                        'PRO FEATURE',
+                        'Private multiplayer rooms require GEO Ride Pro. Upgrade now to invite friends and host private rooms!',
+                        {
+                            isPro: true,
+                            actionText: 'Upgrade',
+                            onAction: openProModal
+                        }
+                    );
                 }
                 return;
             }

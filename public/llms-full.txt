@@ -4,7 +4,7 @@
 GEO Ride is a high-performance web-native 3D driving simulator and interactive geographic explorer built by Milan Petkovski. It empowers users to drive realistic 3D vehicles across a 1:1 scale digital representation of Earth using high-resolution satellite imagery, terrain elevation matrices, and extruded 3D building geometry.
 
 Website: https://georide.milanwebportal.com
-Game Entry: https://georide.milanwebportal.com/play.html
+Game Entry: https://georide.milanwebportal.com/play
 Developer: Milan Petkovski (https://milanwebportal.com)
 License: Free to Play with optional Pro tier
 

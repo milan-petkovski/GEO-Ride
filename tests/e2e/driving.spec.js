@@ -210,7 +210,7 @@ test.describe('GEO Ride Driving Simulator', () => {
             return route.continue();
         });
 
-        await page.goto('/');
+        await page.goto('/play.html');
         await page.waitForFunction(() => typeof window.map !== 'undefined', { timeout: 10000 }).catch(() => {});
         await page.evaluate(() => {
             const overlay = document.getElementById('loading-overlay');

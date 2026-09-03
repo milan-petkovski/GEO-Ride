@@ -223,7 +223,8 @@ export function loadState() {
         );
 
         state.currentHome = [state.lng, state.lat];
-        state.isPro = typeof localStorage !== 'undefined' ? localStorage.getItem('geo_ride_pro_active') === 'true' : false;
+        state.isPro =
+            typeof localStorage !== 'undefined' ? localStorage.getItem('geo_ride_pro_active') === 'true' : false;
         if (!state.isPro && state.activeVehicle === 'god') {
             state.activeVehicle = 'car';
             state.godMode = false;

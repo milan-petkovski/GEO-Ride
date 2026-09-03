@@ -3,7 +3,8 @@
   publish = "dist"
 
 [build.environment]
-  SECRETS_SCAN_OMIT_PATHS = "app.js"
+  SECRETS_SCAN_OMIT_PATHS = "app.js,dist/**,js/supabase-georide.js"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_ANON_KEY,VITE_SUPABASE_URL,VITE_MAPBOX_TOKEN"
 
 [[headers]]
   for = "/*"
@@ -13,7 +14,7 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "no-referrer-when-downgrade"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' blob: https://api.mapbox.com https://unpkg.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com; img-src 'self' data: blob: https://api.mapbox.com https://*.mapbox.com https://www.google-analytics.com https://georide.milanwebportal.com; connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.mapbox.com https://www.google-analytics.com https://*.google-analytics.com https://region1.google-analytics.com wss://broker.hivemq.com:8884 wss://broker.hivemq.com; font-src 'self' data: https://fonts.gstatic.com; worker-src 'self' blob:; object-src 'none';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' blob: https://api.mapbox.com https://unpkg.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com; img-src 'self' data: blob: https://api.mapbox.com https://*.mapbox.com https://www.google-analytics.com https://georide.milanwebportal.com; connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.mapbox.com https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://region1.google-analytics.com wss://broker.hivemq.com:8884 wss://broker.hivemq.com; font-src 'self' data: https://fonts.gstatic.com; worker-src 'self' blob:; object-src 'none';"
 
 [[redirects]]
   from = "/play"

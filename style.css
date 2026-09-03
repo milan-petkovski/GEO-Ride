@@ -10,13 +10,17 @@
 }
 
 .hide-cursor,
-.hide-cursor * {
+.hide-cursor *:not(input):not(textarea) {
     cursor: none !important;
 }
 
 input,
-textarea,
-.id-badge {
+input[type='text'],
+input[type='email'],
+input[type='search'],
+input[type='password'],
+textarea {
+    cursor: text !important;
     user-select: text !important;
     -webkit-user-select: text !important;
 }
@@ -335,6 +339,15 @@ kbd,
     cursor: default;
 }
 
+/* Text cursor on actual text inputs */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+textarea {
+    cursor: text !important;
+}
+
 /* Override Mapbox grab cursor */
 .mapboxgl-canvas-container.mapboxgl-interactive {
     cursor: none !important;
@@ -385,7 +398,9 @@ header {
     text-decoration: none;
     cursor: pointer;
     display: inline-block;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
     text-shadow:
         0 4px 20px rgba(0, 0, 0, 1),
         0 0 30px var(--primary-glow);
@@ -410,6 +425,10 @@ header {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     transition: 0.3s;
     margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    line-height: 24px;
 }
 
 /* Header Right Layout */
@@ -734,7 +753,7 @@ kbd.pressed {
     position: fixed !important;
     bottom: 24px;
     right: 3rem;
-    z-index: 100;
+    z-index: 50000;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -1138,6 +1157,7 @@ html.geo-reduced-motion kbd {
 /* Multiplayer Button & Dropdown */
 .multiplayer-wrapper {
     position: relative;
+    z-index: 50001;
 }
 
 .mp-main-btn {
@@ -1182,7 +1202,7 @@ html.geo-reduced-motion kbd {
     border-radius: 20px;
     padding: 20px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    z-index: 10000;
+    z-index: 50001;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -2838,6 +2858,10 @@ html.geo-reduced-motion kbd {
     background: rgba(255, 0, 229, 0.05) !important;
     color: rgba(255, 0, 229, 0.6) !important;
     border: 1px dashed rgba(255, 0, 229, 0.3) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
 }
 
 .toggle-group button[data-vehicle='god']:hover {
@@ -2852,6 +2876,14 @@ html.geo-reduced-motion kbd {
     box-shadow: 0 0 15px rgba(255, 0, 229, 0.8) !important;
     border-style: solid !important;
     border-color: #ff00e5 !important;
+}
+
+.pro-badge-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    vertical-align: middle;
 }
 
 /* Cinematic Location Discovery */
@@ -3144,48 +3176,168 @@ html.geo-reduced-motion kbd {
    PRO UPGRADE SYSTEM & TOAST NOTIFICATIONS
    ========================================================================== */
 
-/* Pro Header Button in Top HUD */
+/* Pro Header Button in Top HUD - Premium Black Edition */
 .pro-header-btn {
-    background: linear-gradient(135deg, rgba(155, 63, 212, 0.25), rgba(196, 112, 240, 0.38));
+    position: relative;
+    overflow: hidden;
+    background: #000000;
     backdrop-filter: blur(40px);
-    border: 1px solid rgba(196, 112, 240, 0.5);
+    border: 1px solid rgba(196, 112, 240, 0.6);
     border-radius: 999px;
     height: 66px;
     padding: 0 22px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0;
     color: #ffffff;
     font-family: 'Rajdhani', sans-serif;
     font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: 2.5px;
     cursor: pointer !important;
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition:
+        transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        box-shadow 0.35s ease,
+        border-color 0.35s ease;
     box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.4),
-        0 0 25px rgba(196, 112, 240, 0.35);
+        0 10px 30px rgba(0, 0, 0, 0.7),
+        0 0 20px rgba(196, 112, 240, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    animation: proButtonPulse 3s ease-in-out infinite;
 }
 
-.pro-header-btn:hover {
-    transform: translateY(-2px) scale(1.04);
-    background: linear-gradient(135deg, rgba(155, 63, 212, 0.4), rgba(196, 112, 240, 0.6));
-    border-color: #c470f0;
-    box-shadow:
-        0 20px 45px rgba(0, 0, 0, 0.6),
-        0 0 35px rgba(196, 112, 240, 0.6);
+/* Shimmer sweep animation */
+.pro-btn-shimmer {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(196, 112, 240, 0.18) 45%,
+        rgba(255, 215, 100, 0.22) 50%,
+        rgba(196, 112, 240, 0.18) 55%,
+        transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: proShimmer 2.8s ease-in-out infinite;
+    pointer-events: none;
 }
 
-.pro-header-btn svg {
+.pro-btn-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1;
+}
+
+.pro-crown-icon {
     width: 20px;
     height: 20px;
     stroke: #c470f0;
-    filter: drop-shadow(0 0 6px rgba(196, 112, 240, 0.8));
-    transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 8px rgba(196, 112, 240, 0.9));
+    transition:
+        transform 0.35s ease,
+        stroke 0.3s ease,
+        filter 0.3s ease;
+    animation: crownGlow 2.5s ease-in-out infinite alternate;
 }
 
-.pro-header-btn:hover svg {
-    transform: scale(1.15) rotate(6deg);
+.pro-btn-label {
+    background: linear-gradient(135deg, #e8b4ff 0%, #c470f0 40%, #ffd764 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+.pro-header-btn:hover {
+    transform: translateY(-3px) scale(1.06);
+    border-color: rgba(196, 112, 240, 0.9);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(196, 112, 240, 0.5),
+        0 0 80px rgba(196, 112, 240, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.pro-header-btn:hover .pro-crown-icon {
+    transform: scale(1.2) rotate(-8deg);
+    filter: drop-shadow(0 0 14px rgba(196, 112, 240, 1));
+}
+
+.pro-header-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* Pro Active state — cyan theme */
+.pro-header-btn.is-active {
+    border-color: rgba(0, 242, 255, 0.5);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 242, 255, 0.2);
+    animation: none;
+}
+
+.pro-header-btn.is-active .pro-btn-shimmer {
+    background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(0, 242, 255, 0.12) 48%,
+        rgba(0, 242, 255, 0.2) 50%,
+        rgba(0, 242, 255, 0.12) 52%,
+        transparent 70%
+    );
+    animation: proShimmer 4s ease-in-out infinite;
+}
+
+.pro-header-btn.is-active .pro-crown-icon {
+    stroke: #00f2ff;
+    filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.8));
+    animation: none;
+}
+
+.pro-header-btn.is-active .pro-btn-label {
+    background: linear-gradient(135deg, #a8f5ff 0%, #00f2ff 60%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@keyframes proShimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes crownGlow {
+    from {
+        filter: drop-shadow(0 0 6px rgba(196, 112, 240, 0.6));
+    }
+    to {
+        filter: drop-shadow(0 0 14px rgba(255, 200, 80, 0.8));
+    }
+}
+
+@keyframes proButtonPulse {
+    0%,
+    100% {
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.7),
+            0 0 20px rgba(196, 112, 240, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    50% {
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.7),
+            0 0 35px rgba(196, 112, 240, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
 }
 
 /* Pro Modal Backdrop */
@@ -3343,7 +3495,9 @@ html.geo-reduced-motion kbd {
 .pro-plan-card:hover {
     border-color: rgba(196, 112, 240, 0.8);
     transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(196, 112, 240, 0.25);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        0 0 25px rgba(196, 112, 240, 0.25);
     background: rgba(196, 112, 240, 0.08);
 }
 
@@ -3355,6 +3509,8 @@ html.geo-reduced-motion kbd {
 .pro-plan-pill {
     position: absolute;
     top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
     background: linear-gradient(135deg, #9b3fd4, #c470f0);
     color: #fff;
     border-radius: 999px;
@@ -3363,6 +3519,7 @@ html.geo-reduced-motion kbd {
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .pro-plan-name {
@@ -3420,111 +3577,147 @@ html.geo-reduced-motion kbd {
     letter-spacing: 0.5px;
 }
 
-/* Toast Notifications System */
+/* Toast Notifications System - Centered directly above controls */
 .toast-container {
     position: fixed;
-    bottom: 90px;
-    right: 25px;
-    z-index: 99998;
+    bottom: 98px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 49000;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    gap: 8px;
     pointer-events: none;
-    max-width: 360px;
-    width: 100%;
+    width: 90vw;
+    max-width: 540px;
 }
 
 .toast-msg {
-    background: rgba(5, 5, 12, 0.94);
-    backdrop-filter: blur(25px);
-    border: 1px solid rgba(0, 242, 255, 0.25);
-    border-left: 4px solid #00f2ff;
-    border-radius: 14px;
-    padding: 14px 18px;
+    background: rgba(8, 8, 14, 0.88);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(0, 242, 255, 0.22);
+    border-radius: 999px;
+    padding: 8px 16px 8px 14px;
     color: #fff;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 255, 0.1);
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.65),
+        0 0 20px rgba(0, 242, 255, 0.08);
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
     pointer-events: auto;
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
-    animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(16px) scale(0.96);
+    animation: toastSlideInCenter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition:
+        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: auto;
+    max-width: 100%;
 }
 
 .toast-msg.toast-pro {
     border-color: rgba(196, 112, 240, 0.4);
-    border-left-color: #c470f0;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(196, 112, 240, 0.2);
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.65),
+        0 0 25px rgba(196, 112, 240, 0.2);
 }
 
 .toast-msg.hide {
     opacity: 0;
-    transform: translateY(15px) scale(0.95);
+    transform: translateY(-10px) scale(0.96);
 }
 
 .toast-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
-    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .toast-body {
     flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
 .toast-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 1px;
-    margin-bottom: 2px;
     text-transform: uppercase;
+    color: #00f2ff;
+    white-space: nowrap;
+}
+
+.toast-pro .toast-title {
+    color: #c470f0;
 }
 
 .toast-text {
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.4;
-    margin-bottom: 8px;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.25;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .toast-action-btn {
     background: linear-gradient(135deg, #9b3fd4, #c470f0);
     border: none;
     color: #fff;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 5px 14px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 12px;
     border-radius: 999px;
     cursor: pointer !important;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    transition: filter 0.2s;
+    transition:
+        filter 0.2s,
+        transform 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .toast-action-btn:hover {
     filter: brightness(1.2);
+    transform: scale(1.04);
 }
 
 .toast-close-btn {
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 1.05rem;
     cursor: pointer !important;
     padding: 0 4px;
     line-height: 1;
     transition: color 0.2s;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .toast-close-btn:hover {
     color: #fff;
 }
 
-@keyframes toastSlideIn {
+@keyframes toastSlideInCenter {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -3532,7 +3725,7 @@ html.geo-reduced-motion kbd {
 }
 
 @media (max-width: 768px) {
-    .pro-header-btn span {
+    .pro-header-btn .pro-btn-label {
         display: none;
     }
     .pro-header-btn {
@@ -3548,10 +3741,18 @@ html.geo-reduced-motion kbd {
         grid-template-columns: 1fr;
     }
     .toast-container {
-        right: 15px;
-        left: 15px;
-        max-width: none;
-        bottom: 80px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 92vw;
+        bottom: 78px;
+    }
+    .toast-msg {
+        flex-wrap: wrap;
+        border-radius: 18px;
+        padding: 8px 12px;
+    }
+    .toast-text {
+        white-space: normal;
     }
 }
-
