@@ -409,6 +409,9 @@ test('initUI binds and executes interactive HUD controls and panels', async () =
     await mockDoc.fonts.ready;
     await new Promise((r) => setTimeout(r, 10));
 
+    const { stopMultiplayerTimers } = await import('../js/multiplayer.js');
+    stopMultiplayerTimers();
+
     globalThis.document = origDoc;
     globalThis.window = origWin;
 });

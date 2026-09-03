@@ -14,9 +14,11 @@ if ('serviceWorker' in navigator) {
     }
 }
 
-import { state, loadState, saveState } from './js/state.js';
-import { initUI, updateToggleStates, add3DBuildings, applyLightPreset, triggerDonationPopup } from './js/ui.js';
-import { initControls } from './js/controls.js';
+import { state, loadState, saveState, setProStatus } from './js/state.js';
+import { INITIAL_ZOOM } from './js/config.js';
+import { initUI, updateToggleStates, add3DBuildings, applyLightPreset, triggerDonationPopup, showToast } from './js/ui.js';
+import { recordPurchase } from './js/supabase-georide.js';
+import { initControls, pollGamepad } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
 import { initMultiplayer, updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
@@ -47,6 +49,46 @@ trackEvent('session_start', {
 // Load initial state
 loadState();
 
+// Automatic Pro activation from Fungies redirect / URL parameters
+// Requires BOTH customerEmail AND orderId to prevent manual URL manipulation
+try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const proParam = urlParams.get('pro');
+    const orderId = urlParams.get('order_id') || urlParams.get('checkout_id');
+    const customerEmail = urlParams.get('email') || urlParams.get('customer_email');
+
+    // Must have both email AND (pro=success/active OR orderId) to prevent ?pro=success spoofing
+    if (customerEmail && (proParam === 'success' || proParam === 'active' || orderId)) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailRegex.test(customerEmail)) {
+            // Optimistically activate Pro immediately for good UX, then verify in background
+            setProStatus(true);
+            updateToggleStates();
+            showToast('PRO ACTIVATED!', 'Thank you for upgrading! God Mode & VIP rooms are unlocked.', { isPro: true });
+            trackEvent('pro_activated_redirect', { order_id: orderId || 'unknown' });
+            localStorage.setItem('geo_ride_pro_email', customerEmail);
+            recordPurchase(customerEmail, 'pro_monthly', orderId);
+
+            // Background verification — revoke if email not found in Supabase
+            import('./js/supabase-georide.js').then(({ checkProStatusByEmail }) => {
+                checkProStatusByEmail(customerEmail).then((res) => {
+                    if (!res || !res.is_pro) {
+                        setProStatus(false);
+                        updateToggleStates();
+                        localStorage.removeItem('geo_ride_pro_email');
+                    }
+                }).catch(() => {});
+            }).catch(() => {});
+        }
+    }
+
+    // Clean query params from address bar regardless
+    if (proParam || orderId) {
+        const cleanPath = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanPath);
+    }
+} catch (_e) {}
+
 // Apply performance classes to document root based on calculated hardware capabilities
 if (state.performance && state.performance.lowEnd) {
     document.documentElement.classList.add('geo-performance-low');
@@ -62,7 +104,7 @@ const map = new mapboxgl.Map({
     container: 'map',
     style: `mapbox://styles/mapbox/${state.mapStyle}`,
     center: [state.lng, state.lat],
-    zoom: 18,
+    zoom: INITIAL_ZOOM,
     pitch: 65,
     bearing: state.bearing,
     interactive: false,
@@ -98,20 +140,20 @@ map.once('idle', () => {
     isMapFullyLoaded = true;
     if (window.setLoadingTarget) window.setLoadingTarget(100);
 });
-// Safety fallback after 3 seconds in case network is slow or offline
+// Swift fallback after 1.2s so the user never gets stuck waiting if satellite tiles are streaming
 setTimeout(() => {
     isMapFullyLoaded = true;
     if (window.setLoadingTarget) window.setLoadingTarget(100);
-}, 3000);
+}, 1200);
 
 /**
  * Finalizes loading sequence, hides loading overlay banner, and launches requestAnimationFrame update loop.
  * @returns {void}
  */
 function finishLoading() {
-    // Wait until Mapbox reports idle AND the smooth percentage animation reaches 100%
-    if (!isMapFullyLoaded || (window.currentLoadingPct !== undefined && window.currentLoadingPct < 100)) {
-        setTimeout(finishLoading, 50);
+    // Wait until Mapbox reports idle or fallback triggered AND the smooth percentage animation reaches 100%
+    if (!isMapFullyLoaded || (window.currentLoadingPct !== undefined && window.currentLoadingPct < 99)) {
+        setTimeout(finishLoading, 30);
         return;
     }
     if (window.loadingSimInterval) clearInterval(window.loadingSimInterval);
@@ -181,6 +223,7 @@ function update(time) {
     const dtFinal = isNaN(rawDt) ? 1 : Math.min(Math.max(rawDt, 0.6), 1.4);
 
     if (state.loopStarted) {
+        pollGamepad();
         updatePhysics(dtFinal, map);
         updateCamera(dtFinal, map);
         updateOtherPlayers(dtFinal, map);

@@ -22,7 +22,7 @@
         <meta name="author" content="Milan Petkovski" />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
         <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-        <link rel="canonical" href="https://georide.milanwebportal.com/play.html" />
+        <link rel="canonical" href="https://georide.milanwebportal.com/play" />
 
         <!-- Geographic & Local / Global Positioning (GEO SEO) -->
         <meta name="geo.region" content="Global" />
@@ -44,7 +44,7 @@
 
         <!-- Social Graph / Facebook / Discord -->
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://georide.milanwebportal.com/play.html" />
+        <meta property="og:url" content="https://georide.milanwebportal.com/play" />
         <meta property="og:site_name" content="GEO Ride" />
         <meta property="og:title" content="GEO Ride: Play 3D Driving Simulator - Drive the World Online Free" />
         <meta
@@ -62,7 +62,7 @@
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:site" content="@milanwebportal" />
         <meta property="twitter:creator" content="@milanwebportal" />
-        <meta property="twitter:url" content="https://georide.milanwebportal.com/play.html" />
+        <meta property="twitter:url" content="https://georide.milanwebportal.com/play" />
         <meta property="twitter:title" content="GEO Ride: Play 3D Driving Simulator - Drive the World Online Free" />
         <meta
             property="twitter:description"
@@ -78,7 +78,7 @@
                 "@type": "WebApplication",
                 "name": "GEO Ride Simulator",
                 "alternateName": "GEO Ride 3D Driving Simulator",
-                "url": "https://georide.milanwebportal.com/play.html",
+                "url": "https://georide.milanwebportal.com/play",
                 "image": "https://georide.milanwebportal.com/images/wow.jpg",
                 "description": "Next-generation 3D driving simulator built on Mapbox GL JS and Three.js, featuring realistic physical vehicle dynamics, multi-player WebSockets synchronization, and core web vitals performance monitoring.",
                 "applicationCategory": "GameApplication",
@@ -105,21 +105,12 @@
         <!-- Resource Hints (Elite Performance) -->
         <link rel="preload" href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" as="script" />
         <link rel="preload" href="https://unpkg.com/three@0.147.0/build/three.min.js" as="script" />
-        <link
-            rel="preload"
-            href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@600;700&display=swap"
-            as="style"
-        />
+        <link rel="preload" href="/fonts/outfit-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/rajdhani-700-latin.woff2" as="font" type="font/woff2" crossorigin />
 
         <link rel="dns-prefetch" href="https://api.mapbox.com" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://api.mapbox.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@600;700&display=swap"
-            rel="stylesheet"
-        />
+        <link rel="stylesheet" href="/fonts/fonts.css" />
 
         <!-- Mapbox GL JS (Deferred) -->
         <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js" defer></script>
@@ -262,10 +253,13 @@
                     </div>
 
                     <button id="pro-open-btn" class="pro-header-btn" title="Unlock GEO Ride Pro" aria-label="Unlock GEO Ride Pro">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                        </svg>
-                        <span>PRO</span>
+                        <span class="pro-btn-shimmer"></span>
+                        <span class="pro-btn-inner">
+                            <svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                            </svg>
+                            <span class="pro-btn-label">PRO</span>
+                        </span>
                     </button>
 
                     <div class="multiplayer-wrapper">
@@ -522,9 +516,9 @@
                                     <button
                                         data-vehicle="god"
                                         id="vehicle-god-btn"
-                                        style="--glow: #c470f0; color: #c470f0;"
+                                        style="--glow: #c470f0; color: #c470f0; display: inline-flex; align-items: center; justify-content: center; gap: 4px;"
                                     >
-                                        GOD <span class="pro-badge-pill" style="font-size:0.6rem;background:linear-gradient(135deg,#9b3fd4,#c470f0);color:#fff;padding:1px 5px;border-radius:999px;margin-left:3px;vertical-align:middle;">PRO</span>
+                                        <span>GOD</span><span class="pro-badge-pill" style="font-size: 0.58rem; background: linear-gradient(135deg, #9b3fd4, #c470f0); color: #fff; padding: 2px 6px; border-radius: 999px; line-height: 1; display: inline-flex; align-items: center; font-weight: 800; letter-spacing: 0.5px;">PRO</span>
                                     </button>
                                 </div>
                             </div>
@@ -614,7 +608,9 @@
                                 <label style="color: #ff00e5; text-shadow: 0 0 10px #ff00e5">GOD MODE</label>
                                 <div class="toggle-group god-toggle">
                                     <button class="active" data-god="off">OFF</button>
-                                    <button data-god="on" style="--glow: #ff00e5">ON</button>
+                                    <button data-god="on" id="god-on-btn" style="--glow: #ff00e5; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                                        <span>ON</span><span class="pro-badge-pill" style="font-size: 0.58rem; background: linear-gradient(135deg, #9b3fd4, #c470f0); color: #fff; padding: 2px 6px; border-radius: 999px; line-height: 1; display: inline-flex; align-items: center; font-weight: 800; letter-spacing: 0.5px;">PRO</span>
+                                    </button>
                                 </div>
                             </div>
                             <div class="settings-section" id="mobile-controls-toggle-section">
@@ -623,42 +619,6 @@
                                     <button class="active" data-controls="tilt">TILT STEER</button>
                                     <button data-controls="off">OFF</button>
                                 </div>
-                            </div>
-
-                            <!-- Pro Upgrade Card in Settings -->
-                            <div class="settings-section" style="margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 15px;">
-                                <button
-                                    id="settings-pro-btn"
-                                    type="button"
-                                    class="primary-btn"
-                                    style="
-                                        background: linear-gradient(135deg, #9b3fd4, #c470f0);
-                                        border: 1px solid rgba(196, 112, 240, 0.5);
-                                        color: #fff;
-                                        width: 100%;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        gap: 8px;
-                                        font-weight: 800;
-                                        letter-spacing: 1.5px;
-                                        box-shadow: 0 0 20px rgba(196, 112, 240, 0.35);
-                                        cursor: pointer;
-                                    "
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        style="width: 18px; height: 18px;"
-                                    >
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                                    </svg>
-                                    <span>UPGRADE TO PRO</span>
-                                </button>
                             </div>
 
                             <!-- Dedicated Mobile Coffee Section (Mobile Only) -->
@@ -913,9 +873,10 @@
                 <div class="pro-modal-footer-note">Secure checkout powered by Fungies. Instant activation. Cancel anytime.</div>
 
                 <div class="pro-activation-box" style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 8px; justify-content: center; align-items: center;">
-                    <input type="text" id="pro-key-input" placeholder="Enter Pro Key / Order Email..." style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:999px;padding:8px 14px;color:#fff;font-size:0.8rem;outline:none;width:60%;max-width:260px;" />
+                    <input type="text" id="pro-key-input" placeholder="Enter order email..." style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:999px;padding:8px 14px;color:#fff;font-size:0.8rem;outline:none;width:60%;max-width:260px;caret-color:#00f2ff;cursor:text !important;" />
                     <button id="pro-activate-btn" style="background:#00f2ff;border:none;border-radius:999px;padding:8px 16px;color:#020205;font-weight:800;font-size:0.75rem;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:filter 0.2s;">Activate</button>
                 </div>
+                <div id="pro-activation-status" style="min-height: 22px; font-size: 0.78rem; font-weight: 600; margin-top: 8px; transition: all 0.3s ease; display: none; align-items: center; justify-content: center; gap: 6px;"></div>
             </div>
         </div>
 
@@ -923,44 +884,5 @@
         <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
         <script type="module" src="app.js"></script>
-        <!-- 2030 Elite SEO Semantic Layer (Hidden from users, prioritized by AI Crawlers) -->
-        <footer style="display: none" aria-hidden="true">
-            <section>
-                <h2>GEO Ride: The Future of Global 3D Exploration</h2>
-                <p>
-                    GEO Ride is a cutting-edge 3D driving simulator built for the modern web. Leveraging the power of
-                    Mapbox GL JS and Three.js, it offers a realistic driving experience across a digital twin of the
-                    entire planet. Whether you are looking to drive on Google Maps style environments or explore
-                    satellite 3D maps, GEO Ride provides the ultimate sandbox for world exploration.
-                </p>
-                <ul>
-                    <li>3D Car Simulator with Realistic Physics</li>
-                    <li>Truck and Bus Simulator on Real World Roads</li>
-                    <li>Multiplayer Racing and Free Roam across Earth</li>
-                    <li>Interactive Satellite Map Exploration</li>
-                    <li>Educational Tool for Geography and Urban Planning</li>
-                </ul>
-                <p>
-                    Keywords: Driving on real world map, 3D map simulator, best driving simulator web 2030, multiplayer
-                    car game no download, satellite view driving experience, Milan Web Portal innovation.
-                </p>
-                <article>
-                    <h3>Frequently Asked Questions about GEO Ride</h3>
-                    <p>
-                        <strong>Is this a Google Maps driving simulator?</strong> GEO Ride is a powerful alternative
-                        that uses high-fidelity Mapbox satellite data to provide a better 3D driving experience than
-                        standard map tools.
-                    </p>
-                    <p>
-                        <strong>Can I play GEO Ride on mobile?</strong> Yes, GEO Ride is fully optimized for mobile
-                        devices and can be installed as a PWA (Progressive Web App).
-                    </p>
-                    <p>
-                        <strong>Does it have multiplayer?</strong> Absolutely. You can race and explore the world with
-                        friends in real-time.
-                    </p>
-                </article>
-            </section>
-        </footer>
     </body>
 </html>

@@ -6,7 +6,7 @@ Created by Milan Petkovski (Milan Web Portal), GEO Ride is the leading web-based
 
 ## Canonical URLs
 
-- [Play Game Directly](https://georide.milanwebportal.com/play.html): Direct instant access to the 3D driving simulator.
+- [Play Game Directly](https://georide.milanwebportal.com/play): Direct instant access to the 3D driving simulator.
 - [Official Website & Landing](https://georide.milanwebportal.com/): Product overview, features, and Pro membership details.
 - [Comprehensive AI Context (Full Docs)](https://georide.milanwebportal.com/llms-full.txt): Detailed developer, architectural, and simulation specification for LLM agents.
 - [Creator Portfolio](https://milanwebportal.com): Milan Petkovski's software engineering portfolio.

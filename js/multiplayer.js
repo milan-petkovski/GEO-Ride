@@ -32,7 +32,13 @@ let cleanupTimer = null;
  */
 export function stopMultiplayerTimers() {
     isManualDisconnect = true;
-    if (typeof window !== 'undefined') window.mpInitialized = false;
+    if (typeof window !== 'undefined') {
+        window.mpInitialized = false;
+        if (window.reconnectTimeout) {
+            clearTimeout(window.reconnectTimeout);
+            window.reconnectTimeout = null;
+        }
+    }
     if (broadcastTimer) {
         clearInterval(broadcastTimer);
         broadcastTimer = null;

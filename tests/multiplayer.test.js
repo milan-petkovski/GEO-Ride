@@ -262,6 +262,7 @@ test('initMultiplayer initializes MQTT client, handlers, room join and disconnec
     };
 
     try {
+        state.isPro = true;
         state.otherPlayers = {};
         initMultiplayer();
 
@@ -364,6 +365,7 @@ test('initMultiplayer handles connection failure callback gracefully', () => {
     };
 
     try {
+        state.isPro = true;
         initMultiplayer();
         if (mockButtons['join-mp-btn'] && mockButtons['join-mp-btn'].onclick) {
             mockButtons['join-mp-btn'].onclick();
@@ -429,6 +431,7 @@ test('initMultiplayer message arrival, leave events and disconnectMultiplayer cl
     };
 
     try {
+        state.isPro = true;
         initMultiplayer();
         const client = getMqttClient();
         if (mockButtons['join-mp-btn'] && mockButtons['join-mp-btn'].onclick) {
