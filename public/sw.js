@@ -33,6 +33,40 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
+    const isNavigation =
+        e.request.mode === 'navigate' ||
+        (e.request.headers.get('accept') && e.request.headers.get('accept').includes('text/html')) ||
+        url.endsWith('.html') ||
+        url.endsWith('/');
+
+    if (isNavigation) {
+        // Network-First for HTML/navigation to honour Cache-Control: max-age=0, must-revalidate
+        e.respondWith(
+            fetch(e.request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(e.request, responseToCache);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    // Fallback to cache when offline
+                    return caches.match(e.request).then((cachedResponse) => {
+                        if (cachedResponse) return cachedResponse;
+                        if (url.includes('play')) {
+                            return caches.match('/play.html');
+                        }
+                        return caches.match('/index.html') || caches.match('/');
+                    });
+                })
+        );
+        return;
+    }
+
+    // Cache-First for static assets
     e.respondWith(
         caches.match(e.request).then((cachedResponse) => {
             if (cachedResponse) return cachedResponse;
