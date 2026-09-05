@@ -250,6 +250,18 @@ flowchart TD
 
 ---
 
+## ☕ The Story & Support
+
+Hi! I am Milan, a 20-year-old web developer and student from Serbia. I built **GEO Ride** to bring the magic of open-world 3D driving directly into the web browser with zero downloads, zero plugins, and 60+ FPS performance.
+
+If you enjoy driving across the globe in GEO Ride and want to support my late-night coding sessions, you can buy me a coffee!
+
+💖 [Support my work via PayPal](https://paypal.me/milanwebportal)
+
+Every donation means a lot and directly supports Mapbox API quota, high-speed tile CDN costs, and continuous physics updates. Thank you!
+
+---
+
 ## Author & Support
 
 Created by **Milan Petkovski** &bull; Web Developer from Serbia.
