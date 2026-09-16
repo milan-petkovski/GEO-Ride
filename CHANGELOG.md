@@ -7,10 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1](https://github.com/milan-petkovski/GEO-Ride/compare/v1.0.0...v1.0.1) (2026-09-16)
 
-
 ### Bug Fixes
 
-* **ci:** update actions to v4 ([a2093b5](https://github.com/milan-petkovski/GEO-Ride/commit/a2093b5e4678de7b73fbf98fbf5dc60e11845010))
+- **ci:** update actions to v4 ([a2093b5](https://github.com/milan-petkovski/GEO-Ride/commit/a2093b5e4678de7b73fbf98fbf5dc60e11845010))
 
 ## 1.0.0 (2026-09-05)
 
