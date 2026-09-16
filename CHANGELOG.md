@@ -7,10 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.2](https://github.com/milan-petkovski/GEO-Ride/compare/v1.0.1...v1.0.2) (2026-09-16)
 
-
 ### Bug Fixes
 
-* **security:** resolve js-yaml vulnerability ([7678ca2](https://github.com/milan-petkovski/GEO-Ride/commit/7678ca2016f6d434ba8a3b00c843f98588e282dd))
+- **security:** resolve js-yaml vulnerability ([7678ca2](https://github.com/milan-petkovski/GEO-Ride/commit/7678ca2016f6d434ba8a3b00c843f98588e282dd))
 
 ## [1.0.1](https://github.com/milan-petkovski/GEO-Ride/compare/v1.0.0...v1.0.1) (2026-09-16)
 
