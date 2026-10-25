@@ -272,3 +272,7 @@ Created by **Milan Petkovski** &bull; Web Developer from Serbia.
 - **Support the Project**: [Support via PayPal](https://paypal.me/milanwebportal)
 
 _GEO Ride is 100% free and open-source under the MIT License._
+
+---
+
+<p align="center">Made with ❤️ by <b>Milan Web Portal</b></p>
