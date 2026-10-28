@@ -139,6 +139,9 @@ export function setup3DVehicleLayer(map) {
             this.scene.add(this.vehicleGroup);
             this.skidGroup = new THREE.Group();
             this.scene.add(this.skidGroup);
+            this.particleGroup = new THREE.Group();
+            this.scene.add(this.particleGroup);
+            this.smokeParticles = [];
 
             const circleGeom = new THREE.CircleGeometry(3.5, 32);
             const circleMat = new THREE.MeshBasicMaterial({
@@ -532,6 +535,27 @@ export function setup3DVehicleLayer(map) {
                 b.position.set(...pos);
                 this.vehicleGroup.add(b);
             });
+
+            try {
+                // Luminous Forward Headlight Beams
+                this.headlightBeams = [];
+                const beamMat = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.16,
+                    side: THREE.DoubleSide
+                });
+                const beamGeom = new THREE.ConeGeometry(1.2, 8.0, 12);
+                const beamZ = type === 'bus' ? 4.5 : type === 'truck' ? 4.3 : 2.6;
+                const beamSpacing = type === 'bus' ? 0.7 : type === 'truck' ? 0.8 : 0.6;
+                [-beamSpacing, beamSpacing].forEach((xPos) => {
+                    const beam = new THREE.Mesh(beamGeom, beamMat);
+                    beam.rotation.x = Math.PI / 2;
+                    beam.position.set(xPos, 0.45, beamZ + 3.8);
+                    this.vehicleGroup.add(beam);
+                    this.headlightBeams.push(beam);
+                });
+            } catch (_e) {}
         },
         render: function (gl, matrix) {
             const THREE = getThree();
@@ -560,8 +584,9 @@ export function setup3DVehicleLayer(map) {
             if (Math.abs(targetProg - state.teleportProgress) < 0.01) state.teleportProgress = targetProg;
 
             const angleRad = -((state.bearing * Math.PI) / 180) + Math.PI;
-            const targetPitch = -state.velocity * 0.1;
-            const targetRoll = state.steeringAngle * 0.15 * Math.min(Math.abs(state.velocity) * 10, 1);
+            const targetPitch = (state.bodyPitch || 0) + -state.velocity * 0.08;
+            const targetRoll =
+                (state.bodyRoll || 0) + state.steeringAngle * 0.16 * Math.min(Math.abs(state.velocity) * 10, 1);
 
             // Calculate Altitude for Teleport Arc (STARO.js style)
             let altitude = 0;
@@ -571,6 +596,46 @@ export function setup3DVehicleLayer(map) {
                     Math.min(1, (Date.now() - (state.teleportStartTime || 0)) / (state.teleportDuration || 1000))
                 );
                 altitude = Math.sin(progress * Math.PI) * 20;
+            }
+
+            // Smoke particle system during drift & burnout
+            if (this.particleGroup && (state.isDrifting || state.isCharging) && Math.abs(state.velocity) > 0.02) {
+                if (Math.random() < 0.6) {
+                    const THREE = getThree();
+                    if (THREE) {
+                        const pGeom = new THREE.SphereGeometry(0.22, 6, 6);
+                        const pMat = new THREE.MeshBasicMaterial({ color: 0xd8d8d8, transparent: true, opacity: 0.45 });
+                        const p = new THREE.Mesh(pGeom, pMat);
+                        const side = Math.random() > 0.5 ? 0.8 : -0.8;
+                        p.position.set(side, 0.2, -1.8);
+                        p.userData = { life: 1.0 };
+                        this.particleGroup.add(p);
+                        this.smokeParticles.push(p);
+                    }
+                }
+            }
+            if (this.smokeParticles && this.smokeParticles.length > 0) {
+                for (let i = this.smokeParticles.length - 1; i >= 0; i--) {
+                    const p = this.smokeParticles[i];
+                    p.userData.life -= 0.035;
+                    p.scale.multiplyScalar(1.06);
+                    p.material.opacity = Math.max(0, p.userData.life * 0.45);
+                    p.position.y += 0.02;
+                    if (p.userData.life <= 0) {
+                        this.particleGroup.remove(p);
+                        disposeMesh(p);
+                        this.smokeParticles.splice(i, 1);
+                    }
+                }
+            }
+
+            // Headlight dynamic intensity and flash
+            if (this.headlightBeams) {
+                const flashMult = state.headlightFlashActive ? 3.0 : 1.0;
+                this.headlightBeams.forEach((b) => {
+                    b.material.opacity =
+                        (state.lightPreset === 'night' || state.lightPreset === 'dusk' ? 0.24 : 0.12) * flashMult;
+                });
             }
 
             // Positioning & Rotation

@@ -39,5 +39,5 @@ User-agent: Bingbot
 Allow: /
 
 # Sitemaps & AI Context Endpoints
-Sitemap: https://georide.milanwebportal.com/sitemap.xml
-# AI Agents Manifest: https://georide.milanwebportal.com/llms.txt
+Sitemap: https://playgeoride.com/sitemap.xml
+# AI Agents Manifest: https://playgeoride.com/llms.txt

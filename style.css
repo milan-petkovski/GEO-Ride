@@ -3923,3 +3923,406 @@ html.geo-reduced-motion kbd {
         font-size: 16px !important;
     }
 }
+
+/* Famous Spots Header Button */
+.spots-header-btn {
+    background: #000000;
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(0, 242, 255, 0.4);
+    border-radius: 999px;
+    height: 66px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #00f2ff;
+    font-family: var(--font-primary, sans-serif);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 25px rgba(0, 242, 255, 0.12);
+}
+
+.spots-header-btn:hover {
+    border-color: #00f2ff;
+    background: rgba(0, 242, 255, 0.1);
+    box-shadow: 0 12px 30px rgba(0, 242, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.spots-icon {
+    width: 17px;
+    height: 17px;
+    color: #00f2ff;
+}
+
+/* Real-Time Drift HUD Widget */
+.drift-hud {
+    position: absolute;
+    top: 95px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px) scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.drift-hud.active {
+    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: 1;
+}
+
+.drift-hud-content {
+    background: rgba(2, 2, 5, 0.88);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 242, 255, 0.5);
+    border-radius: 999px;
+    padding: 8px 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 250px;
+    max-width: 90vw;
+    width: max-content;
+    box-sizing: border-box;
+    gap: 14px;
+    box-shadow:
+        0 10px 30px rgba(0, 242, 255, 0.25),
+        inset 0 0 15px rgba(0, 242, 255, 0.1);
+}
+
+.drift-badge {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #00f2ff;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.drift-score-ticker {
+    font-family: 'Rajdhani', monospace, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 0 12px #00f2ff;
+    min-width: 95px;
+    width: auto;
+    text-align: right;
+    display: inline-block;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.drift-multiplier-pill {
+    background: linear-gradient(135deg, #ff00e5, #00f2ff);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 1px;
+    min-width: 44px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    animation: driftPulse 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes driftPulse {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 8px #ff00e5);
+    }
+}
+
+/* Famous Spots Modal */
+.spots-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(25px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
+
+.spots-modal-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.spots-modal {
+    background: rgba(10, 10, 16, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 28px;
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(0, 242, 255, 0.15);
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+    transition:
+        transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.3s ease;
+}
+
+.spots-modal-backdrop.active .spots-modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.spots-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 16px;
+}
+
+.spots-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #00f2ff;
+    margin-bottom: 6px;
+}
+
+.spots-modal-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+}
+
+.spots-modal-title span {
+    color: #00f2ff;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+}
+
+.spots-modal-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 4px 0 0 0;
+}
+
+.spots-modal-close {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.spots-modal-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.08);
+}
+
+.spots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.spot-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+
+.spot-card:hover {
+    background: rgba(0, 242, 255, 0.06);
+    border-color: rgba(0, 242, 255, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 242, 255, 0.15);
+}
+
+.spot-card-badge {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #00f2ff;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.spot-card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.spot-card-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.4;
+    margin-bottom: 16px;
+    flex-grow: 1;
+}
+
+.spot-drive-btn {
+    background: rgba(0, 242, 255, 0.12);
+    border: 1px solid rgba(0, 242, 255, 0.35);
+    border-radius: 10px;
+    color: #00f2ff;
+    padding: 8px 14px;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.spot-card:hover .spot-drive-btn {
+    background: #00f2ff;
+    color: #020205;
+}
+
+/* Bottom HUD Actions (Cam & Radio) */
+.bottom-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.cam-toggle-btn {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 8px 16px;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cam-toggle-btn:hover {
+    border-color: #00f2ff;
+    color: #00f2ff;
+    background: rgba(0, 242, 255, 0.1);
+}
+
+.cam-icon {
+    width: 15px;
+    height: 15px;
+}
+
+.radio-widget {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 4px 14px 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+}
+
+.radio-widget.playing {
+    border-color: rgba(0, 242, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.25);
+}
+
+.radio-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00f2ff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.radio-btn:hover {
+    background: #00f2ff;
+    color: #020205;
+}
+
+.radio-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+.radio-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.radio-tag {
+    font-size: 8px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+}
+
+.radio-name {
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+/* Mobile clean-up: Remove spots, radio, and chase cam on phone */
+@media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
+    .spots-header-btn,
+    .bottom-actions,
+    .cam-toggle-btn,
+    .radio-widget {
+        display: none !important;
+    }
+}

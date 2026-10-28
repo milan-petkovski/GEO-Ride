@@ -13,6 +13,150 @@ import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js'
 let activeMap = null;
 let isManualPresetMenuOpen = false;
 
+export const FAMOUS_SPOTS = [
+    {
+        id: 'tokyo',
+        name: 'Tokyo Shuto Expressway',
+        country: 'Japan',
+        desc: 'Futuristic highway above Tokyo Bay with illuminated skyscrapers and high-speed bends.',
+        coords: [139.7563, 35.6329],
+        bearing: 160
+    },
+    {
+        id: 'nurburgring',
+        name: 'Nürburgring Nordschleife',
+        country: 'Germany',
+        desc: 'The Green Hell: world-famous legendary race track through dense forests and elevations.',
+        coords: [6.9475, 50.3341],
+        bearing: 45
+    },
+    {
+        id: 'stelvio',
+        name: 'Stelvio Pass',
+        country: 'Italy',
+        desc: 'Dramatic Alpine switchbacks and climbing hairpins at 2,757m altitude.',
+        coords: [10.4533, 46.5286],
+        bearing: 110
+    },
+    {
+        id: 'monaco',
+        name: 'Monaco GP Circuit',
+        country: 'Monaco',
+        desc: 'Tight harbor streets, famous Casino hairpin, and seaside Formula 1 tunnel.',
+        coords: [7.4206, 43.7347],
+        bearing: 210
+    },
+    {
+        id: 'mulholland',
+        name: 'Mulholland Drive',
+        country: 'Los Angeles, USA',
+        desc: 'Legendary scenic ridge highway overlooking the dazzling lights of Hollywood.',
+        coords: [-118.4485, 34.1278],
+        bearing: 90
+    },
+    {
+        id: 'paris',
+        name: 'Arc de Triomphe',
+        country: 'Paris, France',
+        desc: 'The ultimate giant 12-lane chaotic roundabout leading directly down the Champs-Élysées.',
+        coords: [2.295, 48.8738],
+        bearing: 135
+    },
+    {
+        id: 'belgrade',
+        name: 'Belgrade Waterfront',
+        country: 'Serbia',
+        desc: 'Home base: Modern riverside boulevards and wide urban curves along the Sava.',
+        coords: [20.449425, 44.809684],
+        bearing: 107
+    }
+];
+
+export function teleportToCoordinates(lng, lat, locationName = 'Custom Location', targetBearing = 107) {
+    if (!activeMap || state.isTeleporting) return;
+    state.velocity = 0;
+    state.isTeleporting = true;
+    state.isCameraAnimating = true;
+    state.teleportStartTime = Date.now();
+    state.teleportDuration = 3200;
+    state.teleportStart = [state.lng, state.lat];
+    state.teleportEnd = [lng, lat];
+    setup3DVehicleLayer(activeMap);
+
+    const settingsPanel = document.getElementById('settings-panel');
+    if (settingsPanel) settingsPanel.classList.remove('active');
+    const spotsModal = document.getElementById('spots-modal-backdrop');
+    if (spotsModal) spotsModal.classList.remove('active');
+
+    setTimeout(() => {
+        state.lng = lng;
+        state.lat = lat;
+        state.bearing = targetBearing;
+        state.travelBearing = targetBearing;
+        state.currentHome = [lng, lat];
+        const targetZoom = Math.max(activeMap.getZoom(), 17.5);
+
+        activeMap.flyTo({
+            center: [lng, lat],
+            zoom: targetZoom,
+            pitch: state.cameraMode === 'hood' ? 78 : state.cameraMode === 'wide' ? 52 : 65,
+            bearing: targetBearing,
+            essential: true,
+            duration: state.teleportDuration
+        });
+
+        activeMap.once('moveend', () => {
+            state.isCameraAnimating = false;
+            state.isTeleporting = false;
+            setup3DVehicleLayer(activeMap);
+            saveState();
+            showToast('ARRIVED AT SPOT', locationName);
+            trackEvent('teleport_spot', { location: locationName });
+        });
+    }, 500);
+}
+
+export function updateDriftHUD() {
+    if (typeof document === 'undefined') return;
+    const driftHud = document.getElementById('drift-hud');
+    const driftPointsEl = document.getElementById('drift-points');
+    const driftMultiEl = document.getElementById('drift-multiplier');
+    if (!driftHud || !driftPointsEl) return;
+
+    if (state.isDrifting && state.currentDriftPoints > 3) {
+        driftHud.classList.add('active');
+        driftPointsEl.textContent = '+' + state.currentDriftPoints.toLocaleString();
+        if (driftMultiEl) {
+            driftMultiEl.textContent = 'x' + (state.driftMultiplier || 1);
+            driftMultiEl.className = 'drift-multiplier-pill mult-' + (state.driftMultiplier || 1);
+        }
+    } else if (!state.isDrifting) {
+        driftHud.classList.remove('active');
+    }
+}
+
+let lastSpeedTrapAlertTime = 0;
+let lastSpeedTrapAlertKmh = 120;
+export function checkSpeedTrap(speedKmh) {
+    const now = Date.now();
+    if (speedKmh < 120 || now - lastSpeedTrapAlertTime < 45000) return;
+    if (speedKmh >= lastSpeedTrapAlertKmh + 25) {
+        lastSpeedTrapAlertKmh = Math.floor(speedKmh / 10) * 10;
+        lastSpeedTrapAlertTime = now;
+        showToast('SPEED RADAR', `Top speed logged: ${speedKmh} KM/H!`, { isPro: true, duration: 4000 });
+        if (haptics) haptics.impact('medium');
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.onDriftComplete = (banked, multiplier) => {
+        import('./audio.js').then(({ playDriftBankSound }) => playDriftBankSound(state.masterVolume));
+        showToast('DRIFT BANKED!', `+${banked.toLocaleString()} PTS (x${multiplier})`, { isPro: true });
+        const totalScoreEl = document.getElementById('total-drift-score');
+        if (totalScoreEl) totalScoreEl.textContent = (state.driftScore || 0).toLocaleString();
+    };
+}
+
 /**
  * Synchronizes map panning/zooming interactions based on active HUD panel states.
  * @param {Object} map - Mapbox GL JS map instance.
@@ -22,10 +166,12 @@ function syncMapInteractions(map) {
     if (!map) return;
     const settingsPanel = document.getElementById('settings-panel');
     const proModal = document.getElementById('pro-modal-backdrop');
+    const spotsModal = document.getElementById('spots-modal-backdrop');
     const isSettingsOpen = settingsPanel?.classList.contains('active');
     const isProModalOpen = proModal?.classList.contains('active');
+    const isSpotsOpen = spotsModal?.classList.contains('active');
 
-    if (isSettingsOpen || isProModalOpen) {
+    if (isSettingsOpen || isProModalOpen || isSpotsOpen) {
         map.dragPan?.disable();
         map.scrollZoom?.disable();
         map.doubleClickZoom?.disable();
@@ -365,18 +511,31 @@ export function initUI(map) {
         });
     }
 
+    // In-memory location search cache to prevent redundant Mapbox Geocoding API calls
+    const locationSearchCache = new Map();
+
     // Search logic
     async function performSearch(inputField) {
         if (!inputField) return;
-        const query = inputField.value;
-        if (!query) return;
+        const query = (inputField.value || '').trim();
+        if (query.length < 2) return;
         try {
-            const response = await fetch(
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`
-            );
-            const data = await response.json();
-            if (data.features && data.features.length > 0) {
-                const [lng, lat] = data.features[0].center;
+            const cacheKey = query.toLowerCase();
+            let coords = locationSearchCache.get(cacheKey);
+
+            if (!coords) {
+                const response = await fetch(
+                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?types=place,locality,address,poi&limit=3&access_token=${mapboxgl.accessToken}`
+                );
+                const data = await response.json();
+                if (data.features && data.features.length > 0) {
+                    coords = data.features[0].center;
+                    locationSearchCache.set(cacheKey, coords);
+                }
+            }
+
+            if (coords && Array.isArray(coords) && coords.length >= 2) {
+                const [lng, lat] = coords;
                 // START TELEPORT ANIMATION (STARO.js style)
                 if (state.isTeleporting) return;
                 state.velocity = 0;
@@ -389,7 +548,7 @@ export function initUI(map) {
                 setup3DVehicleLayer(map);
 
                 // Auto-close settings dashboard on mobile or desktop if open
-                settingsPanel.classList.remove('active');
+                if (settingsPanel) settingsPanel.classList.remove('active');
 
                 // Give it a moment to animate the shrinking/ball expansion at the start
                 setTimeout(() => {
@@ -559,6 +718,100 @@ export function initUI(map) {
         trackEvent('pro_checkout_click', { plan: 'yearly', price: 2.99 });
         if (haptics) haptics.success();
     });
+
+    // Famous Spots Modal Listeners
+    const spotsBtn = document.getElementById('spots-btn');
+    const spotsBackdrop = document.getElementById('spots-modal-backdrop');
+    const spotsClose = document.getElementById('spots-modal-close');
+
+    if (spotsBtn && spotsBackdrop) {
+        spotsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            spotsBackdrop.classList.add('active');
+            syncMapInteractions(map);
+            if (haptics) haptics.tap();
+        });
+    }
+
+    if (spotsClose && spotsBackdrop) {
+        spotsClose.addEventListener('click', () => {
+            spotsBackdrop.classList.remove('active');
+            syncMapInteractions(map);
+            if (haptics) haptics.tap();
+        });
+    }
+
+    if (spotsBackdrop) {
+        spotsBackdrop.addEventListener('click', (e) => {
+            if (e.target === spotsBackdrop) {
+                spotsBackdrop.classList.remove('active');
+                syncMapInteractions(map);
+            }
+        });
+
+        // Wire spot cards
+        if (typeof spotsBackdrop.querySelectorAll === 'function') {
+            spotsBackdrop.querySelectorAll('.spot-card').forEach((card) => {
+                if (typeof card.addEventListener === 'function') {
+                    card.addEventListener('click', () => {
+                        const spotId = card.getAttribute?.('data-spot-id');
+                        const spot = FAMOUS_SPOTS.find((s) => s.id === spotId);
+                        if (spot) {
+                            teleportToCoordinates(spot.coords[0], spot.coords[1], spot.name, spot.bearing);
+                            if (haptics) haptics.success();
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    // Camera Mode Toggle Button Listener
+    const cameraToggleBtn = document.getElementById('camera-toggle-btn');
+    if (cameraToggleBtn) {
+        cameraToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            import('./controls.js').then(({ cycleCameraMode }) => cycleCameraMode());
+        });
+    }
+
+    // Radio HUD Widget Listeners
+    const radioPlayBtn = document.getElementById('radio-play-btn');
+    const radioNextBtn = document.getElementById('radio-next-btn');
+    if (radioPlayBtn) {
+        radioPlayBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            import('./audio.js').then(({ toggleRadio }) => toggleRadio());
+            if (haptics) haptics.tap();
+        });
+    }
+    if (radioNextBtn) {
+        radioNextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            import('./audio.js').then(({ nextRadioStation }) => nextRadioStation());
+            if (haptics) haptics.select();
+        });
+    }
+
+    if (typeof window !== 'undefined') {
+        window.onRadioStateUpdate = (radioState) => {
+            const pill = document.getElementById('radio-widget');
+            const titleEl = document.getElementById('radio-station-title');
+            const playIcon = document.getElementById('radio-play-icon');
+            if (pill) {
+                if (radioState.isActive) pill.classList.add('playing');
+                else pill.classList.remove('playing');
+            }
+            if (titleEl && radioState.station) {
+                titleEl.textContent = radioState.station.name;
+            }
+            if (playIcon) {
+                playIcon.innerHTML = radioState.isActive
+                    ? `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`
+                    : `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+            }
+        };
+    }
 
     // Pro Activation key handler
     const proKeyInput = document.getElementById('pro-key-input');

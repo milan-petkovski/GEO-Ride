@@ -17,7 +17,7 @@
         <meta name="author" content="Milan Petkovski" />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
         <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-        <link rel="canonical" href="https://georide.milanwebportal.com/play" />
+        <link rel="canonical" href="https://playgeoride.com/play" />
 
         <!-- Geographic & Global Distribution -->
         <meta name="coverage" content="Worldwide" />
@@ -35,15 +35,15 @@
 
         <!-- Social Graph / Facebook / Discord -->
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://georide.milanwebportal.com/play" />
+        <meta property="og:url" content="https://playgeoride.com/play" />
         <meta property="og:site_name" content="GEO Ride" />
         <meta property="og:title" content="GEO Ride: Play 3D Driving Simulator Online Free" />
         <meta
             property="og:description"
             content="Play the next-generation 3D driving simulator online in your browser. Drive realistic vehicles across high-fidelity 3D satellite maps of Earth with real-time multiplayer."
         />
-        <meta property="og:image" content="https://georide.milanwebportal.com/images/wow.jpg" />
-        <meta property="og:image:secure_url" content="https://georide.milanwebportal.com/images/wow.jpg" />
+        <meta property="og:image" content="https://playgeoride.com/images/wow.jpg" />
+        <meta property="og:image:secure_url" content="https://playgeoride.com/images/wow.jpg" />
         <meta property="og:image:width" content="1280" />
         <meta property="og:image:height" content="720" />
         <meta property="og:image:alt" content="GEO Ride 3D World Driving Simulator Gameplay" />
@@ -53,13 +53,13 @@
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:site" content="@milanwebportal" />
         <meta property="twitter:creator" content="@milanwebportal" />
-        <meta property="twitter:url" content="https://georide.milanwebportal.com/play" />
+        <meta property="twitter:url" content="https://playgeoride.com/play" />
         <meta property="twitter:title" content="GEO Ride: Play 3D Driving Simulator Online Free" />
         <meta
             property="twitter:description"
             content="Experience Earth in 3D. Realistic driving physics on real-world satellite maps. Play free in your browser."
         />
-        <meta property="twitter:image" content="https://georide.milanwebportal.com/images/wow.jpg" />
+        <meta property="twitter:image" content="https://playgeoride.com/images/wow.jpg" />
         <meta property="twitter:image:alt" content="GEO Ride 3D World Driving Simulator Gameplay" />
 
         <!-- Structured Data / JSON-LD (Schema.org) -->
@@ -69,8 +69,8 @@
                 "@type": "WebApplication",
                 "name": "GEO Ride",
                 "alternateName": "GEO Ride 3D Driving Simulator",
-                "url": "https://georide.milanwebportal.com/play",
-                "image": "https://georide.milanwebportal.com/images/wow.jpg",
+                "url": "https://playgeoride.com/play",
+                "image": "https://playgeoride.com/images/wow.jpg",
                 "description": "Next-generation 3D driving simulator built on Mapbox GL JS and Three.js, featuring realistic physical vehicle dynamics and live WebSockets multiplayer.",
                 "applicationCategory": "GameApplication",
                 "operatingSystem": "All modern Web Browsers (Chrome, Firefox, Safari, Edge)",
@@ -281,6 +281,28 @@
                         </button>
                         <input type="text" id="location-search" placeholder="Search location..." />
                     </div>
+
+                    <button
+                        id="spots-btn"
+                        class="spots-header-btn"
+                        title="Famous Driving Spots"
+                        aria-label="Famous Driving Spots"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="spots-icon"
+                        >
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                            ></polygon>
+                        </svg>
+                        <span class="spots-btn-label">SPOTS</span>
+                    </button>
 
                     <button
                         id="pro-open-btn"
@@ -816,6 +838,73 @@
                         <span>DRIFT</span>
                     </div>
                 </div>
+
+                <div class="bottom-actions">
+                    <button
+                        id="camera-toggle-btn"
+                        class="cam-toggle-btn"
+                        title="Toggle Camera View (C)"
+                        aria-label="Toggle Camera View"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="cam-icon"
+                        >
+                            <path
+                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                            ></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span id="cam-mode-label">CHASE</span>
+                    </button>
+
+                    <div id="radio-widget" class="radio-widget" title="Web Radio (M)">
+                        <button id="radio-play-btn" class="radio-btn" aria-label="Play / Pause Radio">
+                            <svg
+                                id="radio-play-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                        <div class="radio-text">
+                            <span class="radio-tag">RADIO</span>
+                            <span id="radio-station-title" class="radio-name">SYNTHWAVE FM</span>
+                        </div>
+                        <button id="radio-next-btn" class="radio-btn radio-next" aria-label="Next Station">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                                <line x1="19" y1="5" x2="19" y2="19"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Drift HUD Widget -->
+            <div id="drift-hud" class="drift-hud" aria-live="polite">
+                <div class="drift-hud-content">
+                    <span class="drift-badge">DRIFT</span>
+                    <span id="drift-points" class="drift-score-ticker">+0</span>
+                    <span id="drift-multiplier" class="drift-multiplier-pill">x1</span>
+                </div>
             </div>
 
             <!-- Premium Interactive Touch Controls for Mobile/Tablet Devices -->
@@ -1112,6 +1201,123 @@
                         gap: 6px;
                     "
                 ></div>
+            </div>
+        </div>
+
+        <!-- Famous Driving Spots Modal -->
+        <div
+            id="spots-modal-backdrop"
+            class="spots-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="spots-modal-title"
+        >
+            <div class="spots-modal">
+                <div class="spots-modal-header">
+                    <div class="spots-header-titles">
+                        <div class="spots-badge">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                style="
+                                    width: 13px;
+                                    height: 13px;
+                                    display: inline-block;
+                                    vertical-align: middle;
+                                    margin-right: 4px;
+                                "
+                            >
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                                ></path>
+                            </svg>
+                            GLOBAL DESTINATIONS
+                        </div>
+                        <h2 id="spots-modal-title" class="spots-modal-title">Famous <span>Driving Spots</span></h2>
+                        <p class="spots-modal-subtitle">
+                            1-Click Teleport to the most legendary roads and circuits on Earth
+                        </p>
+                    </div>
+                    <button id="spots-modal-close" class="spots-modal-close" aria-label="Close modal">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="width: 18px; height: 18px"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="spots-grid">
+                    <div class="spot-card" data-spot-id="tokyo">
+                        <div class="spot-card-badge">JAPAN</div>
+                        <div class="spot-card-title">Tokyo Shuto Expressway</div>
+                        <p class="spot-card-desc">
+                            Futuristic multi-layer skyway above Tokyo Bay with illuminated skyscrapers and high-speed
+                            bends.
+                        </p>
+                        <button class="spot-drive-btn">DRIVE SPOT</button>
+                    </div>
+                    <div class="spot-card" data-spot-id="nurburgring">
+                        <div class="spot-card-badge">GERMANY</div>
+                        <div class="spot-card-title">Nürburgring Nordschleife</div>
+                        <p class="spot-card-desc">
+                            The Green Hell: world-famous 20.8 km legendary circuit carved into the Eifel mountains.
+                        </p>
+                        <button class="spot-drive-btn">DRIVE SPOT</button>
+                    </div>
+                    <div class="spot-card" data-spot-id="stelvio">
+                        <div class="spot-card-badge">ITALY</div>
+                        <div class="spot-card-title">Stelvio Pass</div>
+                        <p class="spot-card-desc">
+                            Dramatic Alpine pass with 48 numbered hairpins reaching an altitude of 2,757 meters.
+                        </p>
+                        <button class="spot-drive-btn">DRIVE SPOT</button>
+                    </div>
+                    <div class="spot-card" data-spot-id="monaco">
+                        <div class="spot-card-badge">MONACO</div>
+                        <div class="spot-card-title">Monaco GP Circuit</div>
+                        <p class="spot-card-desc">
+                            Drive the ultra-tight marina chicane, Casino Square, and the echoing coastal tunnel.
+                        </p>
+                        <button class="spot-drive-btn">DRIVE SPOT</button>
+                    </div>
+                    <div class="spot-card" data-spot-id="mulholland">
+                        <div class="spot-card-badge">USA</div>
+                        <div class="spot-card-title">Mulholland Drive</div>
+                        <p class="spot-card-desc">
+                            Iconic ridgeline winding road high above Los Angeles and the San Fernando Valley.
+                        </p>
+                        <button class="spot-drive-btn">DRIVE SPOT</button>
+                    </div>
+                    <div class="spot-card" data-spot-id="paris">
+                        <div class="spot-card-badge">FRANCE</div>
+                        <div class="spot-card-title">Arc de Triomphe</div>
+                        <p class="spot-card-desc">
+                            The ultimate 12-avenue roundabout circle leading into the Champs-Élysées.
+                        </p>
+                        <button class="spot-drive-btn">DRIVE SPOT</button>
+                    </div>
+                    <div class="spot-card" data-spot-id="belgrade">
+                        <div class="spot-card-badge">SERBIA</div>
+                        <div class="spot-card-title">Belgrade Waterfront</div>
+                        <p class="spot-card-desc">
+                            Wide riverside esplanades and modern architecture right beside the Sava river.
+                        </p>
+                        <button class="spot-drive-btn">DRIVE SPOT</button>
+                    </div>
+                </div>
             </div>
         </div>
 

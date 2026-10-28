@@ -169,3 +169,139 @@ export function playCrashSound(intensity, masterVolume = 0.5) {
     osc.start();
     osc.stop(ctx.currentTime + 0.3);
 }
+
+/**
+ * Procedural dual-tone car horn sound synthesis.
+ * @param {number} [masterVolume=0.5] - Volume scalar.
+ * @returns {void}
+ */
+export function playHornSound(masterVolume = 0.5) {
+    if (!isInitialized || !ctx || masterVolume <= 0) return;
+    const now = ctx.currentTime;
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(370, now); // F#4
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(466, now); // A#4
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1200, now);
+
+    const targetVol = 0.15 * masterVolume;
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(targetVol, now + 0.04);
+    gain.gain.setValueAtTime(targetVol, now + 0.22);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.33);
+    osc2.stop(now + 0.33);
+}
+
+/**
+ * Upbeat chime celebrating banked drift points.
+ * @param {number} [masterVolume=0.5] - Volume scalar.
+ * @returns {void}
+ */
+export function playDriftBankSound(masterVolume = 0.5) {
+    if (!isInitialized || !ctx || masterVolume <= 0) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, now); // D5
+    osc.frequency.setValueAtTime(880.0, now + 0.08); // A5
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.12 * masterVolume, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.36);
+}
+
+// In-Game Web Radio Stations
+export const RADIO_STATIONS = [
+    { id: 'synthwave', name: 'SYNTHWAVE FM', genre: 'Retro / Cyber', url: 'https://stream.nightride.fm/nightride.mp3' },
+    {
+        id: 'chillsynth',
+        name: 'CHILL LO-FI',
+        genre: 'Ambient / Cruising',
+        url: 'https://stream.nightride.fm/chillsynth.mp3'
+    },
+    { id: 'phonk', name: 'TOKYO PHONK', genre: 'High Drift Energy', url: 'https://stream.nightride.fm/r/phonk.mp3' }
+];
+
+let radioAudio = null;
+let currentStationIndex = 0;
+let isRadioActive = false;
+
+export function getRadioState() {
+    return {
+        isActive: isRadioActive,
+        station: RADIO_STATIONS[currentStationIndex],
+        stationIndex: currentStationIndex
+    };
+}
+
+export function toggleRadio(forcePlay = null) {
+    if (typeof window === 'undefined') return;
+    if (!radioAudio) {
+        radioAudio = new Audio();
+        radioAudio.crossOrigin = 'anonymous';
+    }
+
+    const nextActive = forcePlay !== null ? forcePlay : !isRadioActive;
+    if (nextActive) {
+        radioAudio.src = RADIO_STATIONS[currentStationIndex].url;
+        radioAudio.volume = Math.max(
+            0.1,
+            Math.min(1.0, typeof window !== 'undefined' && window.state ? window.state.masterVolume : 0.5)
+        );
+        radioAudio
+            .play()
+            .then(() => {
+                isRadioActive = true;
+                if (window.onRadioStateUpdate) window.onRadioStateUpdate(getRadioState());
+            })
+            .catch(() => {
+                isRadioActive = false;
+                if (window.onRadioStateUpdate) window.onRadioStateUpdate(getRadioState());
+            });
+    } else {
+        radioAudio.pause();
+        isRadioActive = false;
+        if (window.onRadioStateUpdate) window.onRadioStateUpdate(getRadioState());
+    }
+}
+
+export function nextRadioStation() {
+    currentStationIndex = (currentStationIndex + 1) % RADIO_STATIONS.length;
+    if (isRadioActive) {
+        toggleRadio(true);
+    } else {
+        if (typeof window !== 'undefined' && window.onRadioStateUpdate) {
+            window.onRadioStateUpdate(getRadioState());
+        }
+    }
+}
+
+export function setRadioVolume(vol) {
+    if (radioAudio) {
+        radioAudio.volume = Math.max(0, Math.min(1, vol));
+    }
+}

@@ -5,7 +5,7 @@ import { trackEvent, trackError, initConsentMode, trackWebVitals } from '../js/a
 test('analytics dataLayer initializes and tracks custom events with sanitized location metadata', () => {
     globalThis.window = globalThis.window || {};
     globalThis.window.dataLayer = [];
-    globalThis.window.location = { href: 'https://georide.milanwebportal.com/map?token=secret#section' };
+    globalThis.window.location = { href: 'https://playgeoride.com/map?token=secret#section' };
 
     trackEvent('vehicle_select', { vehicle: 'cyber' });
 
@@ -14,7 +14,7 @@ test('analytics dataLayer initializes and tracks custom events with sanitized lo
 
     assert.strictEqual(lastEvent.event, 'vehicle_select');
     assert.strictEqual(lastEvent.vehicle, 'cyber');
-    assert.strictEqual(lastEvent.page_location, 'https://georide.milanwebportal.com/map');
+    assert.strictEqual(lastEvent.page_location, 'https://playgeoride.com/map');
 });
 
 test('analytics trackError formats JavaScript runtime error events cleanly', () => {

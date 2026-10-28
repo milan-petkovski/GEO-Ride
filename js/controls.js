@@ -4,9 +4,34 @@
  */
 
 import { state } from './state.js';
-import { closeAllPanels } from './ui.js';
+import { closeAllPanels, showToast } from './ui.js';
 import { haptics } from './haptics.js';
 import { triggerVehicleReset } from './physics.js';
+import { playHornSound } from './audio.js';
+
+export function cycleCameraMode() {
+    const modes = ['chase', 'hood', 'wide'];
+    const currentIdx = modes.indexOf(state.cameraMode || 'chase');
+    const nextMode = modes[(currentIdx + 1) % modes.length];
+    state.cameraMode = nextMode;
+    const labels = { chase: 'CHASE CAM', hood: 'HOOD CAM', wide: 'WIDE VIEW' };
+    showToast('CAMERA', labels[nextMode]);
+    if (haptics) haptics.select();
+    const camLabel = document.getElementById('cam-mode-label');
+    if (camLabel) camLabel.textContent = nextMode.toUpperCase();
+}
+
+export function triggerHorn() {
+    playHornSound(state.masterVolume);
+    if (haptics) haptics.impact('medium');
+}
+
+export function triggerHeadlightFlash() {
+    state.headlightFlashActive = true;
+    setTimeout(() => {
+        state.headlightFlashActive = false;
+    }, 180);
+}
 
 let kbdElements = null;
 
@@ -40,6 +65,10 @@ export function initControls() {
             'd',
             ' ',
             'r',
+            'c',
+            'h',
+            'f',
+            'm',
             'arrowup',
             'arrowdown',
             'arrowleft',
@@ -56,6 +85,10 @@ export function initControls() {
         else if (e.code === 'KeyS' || e.code === 'ArrowDown') mappedKey = 's';
         else if (e.code === 'KeyD' || e.code === 'ArrowRight') mappedKey = 'd';
         else if (e.code === 'KeyR') mappedKey = 'r';
+        else if (e.code === 'KeyC') mappedKey = 'c';
+        else if (e.code === 'KeyH') mappedKey = 'h';
+        else if (e.code === 'KeyF') mappedKey = 'f';
+        else if (e.code === 'KeyM') mappedKey = 'm';
         else if (e.code === 'Space') mappedKey = ' ';
         else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') mappedKey = 'shift';
 
@@ -86,6 +119,24 @@ export function initControls() {
             if (typeof window !== 'undefined' && window.map) {
                 triggerVehicleReset(isShiftReset, window.map);
             }
+        }
+
+        if (mappedKey === 'c') {
+            cycleCameraMode();
+            return;
+        }
+
+        if (mappedKey === 'h') {
+            triggerHorn();
+        }
+
+        if (mappedKey === 'f') {
+            triggerHeadlightFlash();
+        }
+
+        if (mappedKey === 'm') {
+            import('./audio.js').then(({ toggleRadio }) => toggleRadio());
+            return;
         }
 
         // Close panels without calling .blur() (which triggers window.blur and clears state.keys)

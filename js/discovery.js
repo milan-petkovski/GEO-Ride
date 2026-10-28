@@ -1,11 +1,47 @@
 /**
  * @file discovery.js
- * @description Location discovery engine performing reverse-geocoding requests to Mapbox Place API and triggering cinematic HUD location banners when entering new cities.
+ * @description Location discovery engine performing throttled, cached reverse-geocoding requests to Mapbox Places API and triggering cinematic HUD location banners when entering new cities.
  */
 
 let lastDiscoveredCity = null;
 let lastCheckTime = 0;
+let lastCheckedLng = null;
+let lastCheckedLat = null;
 let isDiscovering = false;
+
+/** @type {Map<string, {cityName: string, countryName: string}>} */
+export const discoveryCache = new Map();
+
+/**
+ * Resets discovery cache and state trackers (useful for tests and resets).
+ */
+export function clearDiscoveryCache() {
+    discoveryCache.clear();
+    lastDiscoveredCity = null;
+    lastCheckTime = 0;
+    lastCheckedLng = null;
+    lastCheckedLat = null;
+    isDiscovering = false;
+}
+
+/**
+ * Calculates approximate great-circle distance between two coordinates in kilometers.
+ * @param {number} lat1
+ * @param {number} lon1
+ * @param {number} lat2
+ * @param {number} lon2
+ * @returns {number} Distance in kilometers
+ */
+export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
 
 /**
  * Extracts normalized city and country names from Mapbox Geocoding API feature payloads.
@@ -28,38 +64,64 @@ export function parseGeocodingFeature(place) {
 }
 
 /**
- * Checks current geographic coordinates via Mapbox Reverse Geocoding and displays location discovery cinematic UI.
+ * Checks current geographic coordinates via cached Mapbox Reverse Geocoding and displays location discovery cinematic UI.
+ * Enforces a minimum 5km movement threshold and 2-minute throttling window to minimize API usage.
  * @param {number} lng - Current longitude coordinate.
  * @param {number} lat - Current latitude coordinate.
- * @param {boolean} [force=false] - Force check bypassing throttling interval.
+ * @param {boolean} [force=false] - Force check bypassing throttling interval and distance thresholds.
  * @returns {void}
  */
 export function checkDiscovery(lng, lat, force = false) {
     // Only proceed if mapbox token is available and we aren't already checking
     if (!window.mapboxgl || !window.mapboxgl.accessToken || isDiscovering) return;
+    if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat)) return;
+
+    const gridKey = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+
+    // 1. Fast path: Check memory grid cache
+    if (discoveryCache.has(gridKey)) {
+        const cached = discoveryCache.get(gridKey);
+        if (cached && cached.cityName && cached.cityName !== lastDiscoveredCity) {
+            lastDiscoveredCity = cached.cityName;
+            showDiscoveryCinematic(cached.cityName, cached.countryName);
+        }
+        return;
+    }
 
     const now = Date.now();
-    // Only check every 10 seconds normally, unless forced (e.g. after teleport)
-    if (!force && now - lastCheckTime < 10000) return;
+
+    // 2. Throttling: Enforce 2 minutes (120,000ms) between network calls unless forced
+    if (!force && now - lastCheckTime < 120000) return;
+
+    // 3. Distance check: Only check if vehicle moved at least 5km from last checked point
+    if (!force && lastCheckedLng !== null && lastCheckedLat !== null) {
+        const distKm = calculateDistanceKm(lastCheckedLat, lastCheckedLng, lat, lng);
+        if (distKm < 5.0) return;
+    }
 
     lastCheckTime = now;
+    lastCheckedLng = lng;
+    lastCheckedLat = lat;
     isDiscovering = true;
 
-    // Reverse geocode to find the current city/locality
+    // Reverse geocode to find the current city/locality (limit=1 for minimal payload)
     fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place,locality&access_token=${window.mapboxgl.accessToken}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place,locality&limit=1&access_token=${window.mapboxgl.accessToken}`
     )
         .then((res) => res.json())
         .then((data) => {
             isDiscovering = false;
             if (data.features && data.features.length > 0) {
                 const { cityName, countryName } = parseGeocodingFeature(data.features[0]);
+                discoveryCache.set(gridKey, { cityName, countryName });
 
                 // If it's a new city we haven't discovered yet during this session
                 if (cityName && cityName !== lastDiscoveredCity) {
                     lastDiscoveredCity = cityName;
                     showDiscoveryCinematic(cityName, countryName);
                 }
+            } else {
+                discoveryCache.set(gridKey, { cityName: '', countryName: '' });
             }
         })
         .catch((err) => {

@@ -1,6 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseGeocodingFeature, checkDiscovery, showDiscoveryCinematic } from '../js/discovery.js';
+import {
+    parseGeocodingFeature,
+    checkDiscovery,
+    showDiscoveryCinematic,
+    calculateDistanceKm,
+    discoveryCache,
+    clearDiscoveryCache
+} from '../js/discovery.js';
+
+test('calculateDistanceKm - computes approximate distance accurately', () => {
+    // Distance between same coordinates is 0
+    const zeroDist = calculateDistanceKm(44.81, 20.46, 44.81, 20.46);
+    assert.strictEqual(Math.round(zeroDist), 0);
+
+    // Belgrade (44.8176, 20.4633) to Novi Sad (45.2671, 19.8335) ~ 70km
+    const bgToNs = calculateDistanceKm(44.8176, 20.4633, 45.2671, 19.8335);
+    assert.ok(bgToNs > 65 && bgToNs < 80);
+});
 
 test('parseGeocodingFeature - extracts city and country correctly', () => {
     const mockFeature = {
@@ -80,6 +97,25 @@ test('checkDiscovery fetches reverse geocoding API and triggers cinematic', asyn
 
     assert.strictEqual(fetchedUrl.includes('mapbox.places/2.35,48.85.json'), true);
     assert.strictEqual(fetchedUrl.includes('access_token=test_mapbox_token'), true);
+
+    // Cache hit test: Calling same coordinates should NOT trigger fetch again
+    fetchedUrl = null;
+    checkDiscovery(2.35, 48.85, true);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.strictEqual(fetchedUrl, null); // Fetched is null because it was served from discoveryCache!
+
+    // Distance/Time throttle test: Moving less than 5km without force should NOT trigger fetch
+    clearDiscoveryCache();
+    fetchedUrl = null;
+    checkDiscovery(10.0, 50.0, true); // First forced check sets lastChecked coordinates
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.ok(fetchedUrl !== null);
+
+    // Small movement (0.001 deg ~ 100m) without force should be skipped
+    fetchedUrl = null;
+    checkDiscovery(10.001, 50.001, false);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.strictEqual(fetchedUrl, null);
 
     globalThis.fetch = origFetch;
     globalThis.window = origWindow;

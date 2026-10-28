@@ -191,6 +191,62 @@ export function updatePhysics(dtFinal, map) {
         const diff = state.bearing - state.travelBearing;
         state.travelBearing += diff * slipGrip * dtFinal;
 
+        // Drift scoring & combo mechanics
+        const slipAngle = Math.abs(diff);
+        const isActivelyDrifting =
+            isDrifting && slipAngle > 2.5 && Math.abs(state.velocity) > 0.04 && state.activeVehicle !== 'god';
+        if (isActivelyDrifting) {
+            state.isDrifting = true;
+            state.lastDriftTime = Date.now();
+
+            // Balanced point gain: ~10 to 25 pts/sec during standard drift
+            const driftGainRate = 0.06;
+            state.driftPointAccumulator =
+                (state.driftPointAccumulator || 0) + slipAngle * Math.abs(state.velocity) * driftGainRate * dtFinal;
+            if (state.driftPointAccumulator >= 1) {
+                const gained = Math.floor(state.driftPointAccumulator);
+                state.currentDriftPoints = (state.currentDriftPoints || 0) + gained;
+                state.driftPointAccumulator -= gained;
+            }
+
+            // Continuous drift duration tracker in seconds (dtFinal / 60)
+            state.driftComboDuration = (state.driftComboDuration || 0) + dtFinal / 60;
+        } else if ((state.driftComboDuration || 0) > 0) {
+            // Gradual combo decay when not drifting: decays 0.75s per second of driving straight
+            state.driftComboDuration = Math.max(0, state.driftComboDuration - (dtFinal / 60) * 0.75);
+        }
+
+        // Multiplier progression: requires ~15 minutes of drifting to achieve x10
+        const dur = state.driftComboDuration || 0;
+        if (dur >= 900)
+            state.driftMultiplier = 10; // ~15.0+ min
+        else if (dur >= 810)
+            state.driftMultiplier = 9; // ~13.5 min
+        else if (dur >= 720)
+            state.driftMultiplier = 8; // ~12.0 min
+        else if (dur >= 600)
+            state.driftMultiplier = 7; // ~10.0 min
+        else if (dur >= 480)
+            state.driftMultiplier = 6; // ~8.0 min
+        else if (dur >= 360)
+            state.driftMultiplier = 5; // ~6.0 min
+        else if (dur >= 240)
+            state.driftMultiplier = 4; // ~4.0 min
+        else if (dur >= 140)
+            state.driftMultiplier = 3; // ~2.3 min
+        else if (dur >= 60)
+            state.driftMultiplier = 2; // ~1.0 min
+        else state.driftMultiplier = 1; // 0 - 60 seconds
+
+        // Dynamic Suspension Physics (Body Dive, Squat, and Centrifugal Roll)
+        const accelInput = (isWDown ? 1 : 0) - (isSDown ? 1 : 0);
+        const targetPitchInertia = accelInput * 0.04 - state.velocity * 0.02;
+        state.bodyPitch = (state.bodyPitch || 0) + (targetPitchInertia - (state.bodyPitch || 0)) * 0.15 * dtFinal;
+
+        const lateralG = state.steeringAngle * (state.velocity * 10);
+        const targetRollInertia = -lateralG * 0.14;
+        state.bodyRoll = (state.bodyRoll || 0) + (targetRollInertia - (state.bodyRoll || 0)) * 0.12 * dtFinal;
+
         const rad = state.travelBearing * (Math.PI / 180);
         const latRad = state.lat * (Math.PI / 180);
         const projectionFactor = 1 / Math.cos(latRad);
@@ -245,6 +301,13 @@ export function updatePhysics(dtFinal, map) {
                             state.lng += Math.sin(rad) * bounceDirection * 0.00002;
                             state.lat += Math.cos(rad) * bounceDirection * 0.00002;
                             state.crashShake = Math.min(10, state.crashShake + Math.abs(state.velocity) * 1000);
+
+                            // Collision resets unbanked drift points and penalizes combo duration
+                            if (state.isDrifting) {
+                                state.currentDriftPoints = 0;
+                                state.driftComboDuration = Math.max(0, (state.driftComboDuration || 0) * 0.5);
+                                state.isDrifting = false;
+                            }
 
                             // Haptic feedback for collision
                             const collisionIntensity = Math.abs(state.velocity) > 0.5 ? 'strong' : 'medium';
@@ -305,6 +368,25 @@ export function updatePhysics(dtFinal, map) {
             state.lat = nextLat;
         }
     }
+
+    // Drift finish & banking (2.2s combo chaining grace period)
+    if (state.isDrifting && Date.now() - (state.lastDriftTime || 0) > 2200) {
+        if (state.currentDriftPoints > 5) {
+            const earned = Math.floor(state.currentDriftPoints * (state.driftMultiplier || 1));
+            state.driftScore = (state.driftScore || 0) + earned;
+            if (typeof window !== 'undefined' && typeof window.onDriftComplete === 'function') {
+                window.onDriftComplete(earned, state.driftMultiplier || 1);
+            }
+        }
+        state.isDrifting = false;
+        state.currentDriftPoints = 0;
+    }
+
+    // Top speed tracking
+    const currentKmh = Math.floor(Math.abs(state.velocity) * 600);
+    if (currentKmh > (state.topSpeedRecord || 0)) {
+        state.topSpeedRecord = currentKmh;
+    }
 }
 
 /**
@@ -318,12 +400,18 @@ export function updateCamera(dtFinal, map) {
     const timeSinceLastMove = Date.now() - state.lastCameraManualMove;
     const shouldAutoReturn =
         !state.isDragging && (timeSinceLastMove > 5000 || (isDrivingNow && timeSinceLastMove > 1000));
+    const mode = state.cameraMode || 'chase';
 
     if (shouldAutoReturn) {
-        state.mouseRotation += (0 - state.mouseRotation) * 0.05 * dtFinal;
-        let maxPitch = 70;
+        state.mouseRotation += (0 - state.mouseRotation) * (mode === 'hood' ? 0.15 : 0.05) * dtFinal;
+        let maxPitch = 72;
         if (state.activeVehicle === 'truck' || state.activeVehicle === 'bus') maxPitch = 68;
-        const targetPitch = Math.min(65 + state.chargeLevel * 10 + Math.abs(state.velocity) * 12, maxPitch);
+        let targetPitch = Math.min(65 + state.chargeLevel * 10 + Math.abs(state.velocity) * 12, maxPitch);
+        if (mode === 'hood') {
+            targetPitch = 78;
+        } else if (mode === 'wide') {
+            targetPitch = 52;
+        }
         state.currentPitch += (targetPitch - state.currentPitch) * 0.08 * dtFinal;
     }
 
@@ -332,8 +420,9 @@ export function updateCamera(dtFinal, map) {
     while (diff < -180) diff += 360;
     while (diff > 180) diff -= 360;
 
+    const camLag = mode === 'hood' ? 0.28 : mode === 'wide' ? 0.08 : 0.12;
     if (Math.abs(diff) > 0.01 || Math.abs(state.velocity) > 0.001 || state.isDragging) {
-        state.camBearing += diff * 0.12 * dtFinal;
+        state.camBearing += diff * camLag * dtFinal;
     } else {
         state.camBearing = targetCamBearing;
     }

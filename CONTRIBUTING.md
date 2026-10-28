@@ -83,7 +83,7 @@ geo-ride/
 
     Provide your valid Mapbox Access Token in `.env`.
 
-    > **Security Reminder**: Mapbox public tokens (`pk.*`) are bundled into client code. Ensure you configure **URL Restrictions** in your Mapbox Dashboard (e.g. `https://georide.milanwebportal.com/*`, `http://localhost:*`) to prevent unauthorized usage.
+    > **Security Reminder**: Mapbox public tokens (`pk.*`) are bundled into client code. Ensure you configure **URL Restrictions** in your Mapbox Dashboard (e.g. `https://playgeoride.com/*`, `http://localhost:*`) to prevent unauthorized usage.
 
 4. **Start Development Server**:
     ```bash

@@ -100,7 +100,21 @@ export const state = {
     teleportDuration: 3500,
     loopStarted: false,
     lastSaveTime: 0,
-    isPro: false
+    isPro: false,
+    cameraMode: 'chase', // 'chase', 'hood', 'wide'
+    driftScore: 0,
+    currentDriftPoints: 0,
+    driftMultiplier: 1,
+    driftComboDuration: 0,
+    driftPointAccumulator: 0,
+    isDrifting: false,
+    lastDriftTime: 0,
+    bodyRoll: 0,
+    bodyPitch: 0,
+    headlightFlashActive: false,
+    radioPlaying: false,
+    radioStationIndex: 0,
+    topSpeedRecord: 0
 };
 
 /** @type {Map<string, Set<Function>>} */
@@ -163,7 +177,10 @@ export function saveState() {
             lightPreset: state.lightPreset,
             controlsMode: state.controlsMode,
             masterVolume: state.masterVolume,
-            userPrefs: state.userPrefs
+            userPrefs: state.userPrefs,
+            cameraMode: state.cameraMode,
+            topSpeedRecord: state.topSpeedRecord,
+            driftScore: state.driftScore
         };
         localStorage.setItem('geo_ride_state', JSON.stringify(dataToSave));
     } catch (e) {
@@ -221,6 +238,9 @@ export function loadState() {
                 ? Math.max(0, Math.min(1, parsed.masterVolume))
                 : 0.5
         );
+        setStateKey('cameraMode', validateStr(parsed.cameraMode, ['chase', 'hood', 'wide'], 'chase'));
+        setStateKey('topSpeedRecord', validateNum(parsed.topSpeedRecord, 0));
+        setStateKey('driftScore', validateNum(parsed.driftScore, 0));
 
         state.currentHome = [state.lng, state.lat];
         state.isPro =

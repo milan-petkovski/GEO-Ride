@@ -450,3 +450,45 @@ test('requestOffthreadTrajectory - handles null worker gracefully without throwi
         requestOffthreadTrajectory(1.0);
     });
 });
+
+test('drift mechanics - points accumulation, combo duration, multiplier progression, and banking', () => {
+    resetTestState();
+    const mockMap = createMockMap();
+
+    // Initial state
+    assert.strictEqual(state.currentDriftPoints, 0);
+    assert.strictEqual(state.driftMultiplier, 1);
+    assert.strictEqual(state.driftComboDuration, 0);
+
+    // Simulate active drift frame
+    state.keys = { ' ': true, a: true };
+    state.velocity = 0.15;
+    state.bearing = 30;
+    state.travelBearing = 0; // slip angle = 30 > 2.5
+    state.activeVehicle = 'car';
+
+    updatePhysics(1.0, mockMap);
+    assert.strictEqual(state.isDrifting, true);
+    assert.ok(state.driftPointAccumulator > 0 || state.currentDriftPoints > 0);
+    assert.ok(state.driftComboDuration > 0);
+    assert.strictEqual(state.driftMultiplier, 1); // < 60 seconds
+
+    // Test multiplier scaling based on combo duration
+    state.driftComboDuration = 65; // ~1 minute
+    updatePhysics(1.0, mockMap);
+    assert.strictEqual(state.driftMultiplier, 2);
+
+    state.driftComboDuration = 910; // ~15+ minutes
+    updatePhysics(1.0, mockMap);
+    assert.strictEqual(state.driftMultiplier, 10);
+
+    // Test banking after 2200ms grace period
+    state.currentDriftPoints = 120;
+    state.lastDriftTime = Date.now() - 3000; // 3 seconds ago (> 2200ms)
+    state.keys = {}; // Stop drifting
+    updatePhysics(1.0, mockMap);
+
+    assert.strictEqual(state.isDrifting, false);
+    assert.strictEqual(state.currentDriftPoints, 0);
+    assert.strictEqual(state.driftScore, 1200); // 120 * x10
+});

@@ -22,7 +22,9 @@ import {
     add3DBuildings,
     applyLightPreset,
     triggerDonationPopup,
-    showToast
+    showToast,
+    updateDriftHUD,
+    checkSpeedTrap
 } from './js/ui.js';
 import { recordPurchase } from './js/supabase-georide.js';
 import { initControls, pollGamepad } from './js/controls.js';
@@ -248,6 +250,9 @@ function update(time) {
         // Update dynamic 3D audio engine
         updateAudio(state);
 
+        // Update real-time drift score HUD
+        updateDriftHUD();
+
         // Marker Sync
         const vehicleMarker = getVehicleMarker();
         if (vehicleMarker) {
@@ -276,6 +281,7 @@ function update(time) {
             document.getElementById('speed').textContent =
                 (speedVal > 0 && state.velocity < -0.0001 ? '-' : '') + speedVal;
             state.lastHUDUpdateSpeed = speedVal;
+            if (speedVal >= 100) checkSpeedTrap(speedVal);
         }
     }
 

@@ -1,12 +1,12 @@
 <div align="center">
-  <a href="https://georide.milanwebportal.com">
-    <img src="https://georide.milanwebportal.com/images/wow.jpg" alt="GEO Ride 3D Driving Simulator" width="800" style="border-radius: 12px; box-shadow: 0 12px 36px rgba(0,0,0,0.5);" />
+  <a href="https://playgeoride.com">
+    <img src="https://playgeoride.com/images/wow.jpg" alt="GEO Ride 3D Driving Simulator" width="800" style="border-radius: 12px; box-shadow: 0 12px 36px rgba(0,0,0,0.5);" />
   </a>
   <h1>GEO Ride - 3D Real World Driving Simulator</h1>
   <p>Drive sports cars, trucks, and buses anywhere on Earth in real-time 3D using real-world satellite maps.</p>
 
   <h2>
-    <a href="https://georide.milanwebportal.com/play">START DRIVING NOW - FREE IN YOUR BROWSER</a>
+    <a href="https://playgeoride.com/play">START DRIVING NOW - FREE IN YOUR BROWSER</a>
   </h2>
 
   <p>
@@ -17,8 +17,8 @@
     <a href="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml">
       <img src="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml/badge.svg?style=flat-square" alt="CI Status" />
     </a>
-    <a href="https://georide.milanwebportal.com">
-      <img src="https://img.shields.io/badge/Website-georide.milanwebportal.com-00f2ff?style=flat-square" alt="Website" />
+    <a href="https://playgeoride.com">
+      <img src="https://img.shields.io/badge/Website-playgeoride.com-00f2ff?style=flat-square" alt="Website" />
     </a>
     <a href="https://github.com/milan-petkovski/GEO-Ride/blob/main/LICENSE">
       <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
@@ -98,7 +98,7 @@ Switch seamlessly between four distinct real-world visual styles in the Settings
 <table align="center" width="100%">
   <tr>
     <td align="center" colspan="2" width="100%">
-      <img src="https://georide.milanwebportal.com/images/wow.jpg" alt="GEO Ride 3D World Driving Simulator Gameplay" width="100%" style="border-radius: 8px;" />
+      <img src="https://playgeoride.com/images/wow.jpg" alt="GEO Ride 3D World Driving Simulator Gameplay" width="100%" style="border-radius: 8px;" />
       <br />
       <b>Real-Time 3D Simulation &amp; World Scale Mapbox Engine (Gameplay View)</b>
       <br />
@@ -107,14 +107,14 @@ Switch seamlessly between four distinct real-world visual styles in the Settings
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="https://georide.milanwebportal.com/images/satellite.jpg" alt="Satellite View" width="100%" />
+      <img src="https://playgeoride.com/images/satellite.jpg" alt="Satellite View" width="100%" />
       <br />
       <b>Satellite View</b>
       <br />
       <i>Photorealistic satellite imagery of Earth</i>
     </td>
     <td align="center" width="50%">
-      <img src="https://georide.milanwebportal.com/images/hybrid.jpg" alt="Hybrid View" width="100%" />
+      <img src="https://playgeoride.com/images/hybrid.jpg" alt="Hybrid View" width="100%" />
       <br />
       <b>Hybrid View</b>
       <br />
@@ -123,14 +123,14 @@ Switch seamlessly between four distinct real-world visual styles in the Settings
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="https://georide.milanwebportal.com/images/3d-buildings.jpg" alt="3D Buildings View" width="100%" />
+      <img src="https://playgeoride.com/images/3d-buildings.jpg" alt="3D Buildings View" width="100%" />
       <br />
       <b>3D Buildings</b>
       <br />
       <i>Extruded architectural height models with physical collision detection</i>
     </td>
     <td align="center" width="50%">
-      <img src="https://georide.milanwebportal.com/images/2d-streets.jpg" alt="2D Streets View" width="100%" />
+      <img src="https://playgeoride.com/images/2d-streets.jpg" alt="2D Streets View" width="100%" />
       <br />
       <b>2D Vector Streets</b>
       <br />
@@ -266,7 +266,7 @@ Every donation means a lot and directly supports Mapbox API quota, high-speed ti
 
 Created by **Milan Petkovski** &bull; Web Developer from Serbia.
 
-- **Play GEO Ride**: [georide.milanwebportal.com](https://georide.milanwebportal.com)
+- **Play GEO Ride**: [playgeoride.com](https://playgeoride.com)
 - **Portfolio & Projects**: [milanwebportal.com](https://milanwebportal.com)
 - **Contact**: [contact@milanwebportal.com](mailto:contact@milanwebportal.com)
 - **Support the Project**: [Support via PayPal](https://paypal.me/milanwebportal)
