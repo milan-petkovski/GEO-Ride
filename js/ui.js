@@ -3,17 +3,19 @@
  * @description HUD UI manager for GEO Ride, controlling settings panels, vehicle selector tabs, map styles, speedometer display, and user interaction synchronization.
  */
 
-import { state, saveState, setProStatus } from './state.js';
+import { state, saveState, loadState, setProStatus } from './state.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getThreeLayer } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
 import { initMultiplayer } from './multiplayer.js';
 import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js';
-import { INITIAL_CENTER } from './config.js';
+import { INITIAL_CENTER, VEHICLE_CONFIG } from './config.js';
 import { toggleRadio, nextRadioStation, setRadioStation } from './audio.js';
+import { showDiscoveryCinematic } from './discovery.js';
 
 let activeMap = null;
 let isManualPresetMenuOpen = false;
+let lastSettingsTab = null;
 
 export const FAMOUS_SPOTS = [
     {
@@ -171,7 +173,13 @@ export const FAMOUS_SPOTS = [
     }
 ];
 
-export function teleportToCoordinates(lng, lat, locationName = 'Custom Location', targetBearing = 107) {
+export function teleportToCoordinates(
+    lng,
+    lat,
+    locationName = 'Custom Location',
+    targetBearing = 107,
+    countryName = ''
+) {
     if (!activeMap || state.isTeleporting) return;
     state.velocity = 0;
     state.isTeleporting = true;
@@ -210,8 +218,17 @@ export function teleportToCoordinates(lng, lat, locationName = 'Custom Location'
             state.isTeleporting = false;
             setup3DVehicleLayer(activeMap);
             saveState();
-            showToast('ARRIVED AT SPOT', locationName);
             trackEvent('teleport_spot', { location: locationName });
+
+            // Always display the arrived location cinematic overlay!
+            let city = locationName;
+            let country = countryName || '';
+            if (!country && locationName.includes(',')) {
+                const parts = locationName.split(',').map((s) => s.trim());
+                city = parts[0];
+                country = parts.slice(1).join(', ');
+            }
+            showDiscoveryCinematic(city.toUpperCase(), country.toUpperCase(), 'ARRIVED AT');
         });
     }, 500);
 }
@@ -235,15 +252,90 @@ export function updateDriftHUD() {
     }
 }
 
+let speedRunPeak = 0;
+let speedRunStartTime = 0;
+let speedRunStableFrames = 0;
 let lastSpeedTrapAlertTime = 0;
-let lastSpeedTrapAlertKmh = 120;
-export function checkSpeedTrap(speedKmh) {
+let lastAlertedSpeed = 0;
+
+export function checkSpeedTrap(speedVal) {
+    if (typeof document === 'undefined') return;
+    const unit = state.unit === 'mi' ? 'MPH' : 'KM/H';
+    const minTriggerSpeed = state.unit === 'mi' ? 75 : 120;
     const now = Date.now();
-    if (speedKmh < 120 || now - lastSpeedTrapAlertTime < 45000) return;
-    if (speedKmh >= lastSpeedTrapAlertKmh + 25) {
-        lastSpeedTrapAlertKmh = Math.floor(speedKmh / 10) * 10;
+
+    // If driving below high-speed threshold, reset the active speed burst tracker
+    if (speedVal < minTriggerSpeed) {
+        speedRunPeak = 0;
+        speedRunStableFrames = 0;
+        speedRunStartTime = 0;
+        return;
+    }
+
+    // Vehicle top speed calculation
+    const rawMaxSpeed = VEHICLE_CONFIG[state.activeVehicle]?.maxSpeed || 0.4167;
+    let maxVehicleSpeed = Math.floor(rawMaxSpeed * 600);
+    if (state.unit === 'mi') maxVehicleSpeed = Math.floor(maxVehicleSpeed * 0.621371);
+    const isAtTopSpeed = speedVal >= maxVehicleSpeed - 1;
+
+    // Track peak speed of current high-speed run
+    if (speedVal > speedRunPeak) {
+        speedRunPeak = speedVal;
+        speedRunStableFrames = 0;
+        if (!speedRunStartTime) speedRunStartTime = now;
+    } else if (speedVal === speedRunPeak) {
+        speedRunStableFrames++;
+    }
+
+    // If an active SPEED RADAR toast is already visible on screen,
+    // and the player accelerates even faster, update the toast immediately in real time!
+    const existingRadarToast = document.querySelector('#toast-container .toast-msg.toast-radar:not(.hide)');
+    if (existingRadarToast && speedVal > lastAlertedSpeed) {
+        lastAlertedSpeed = speedVal;
+        let radarMsg = `${speedVal} ${unit}`;
+        if (isAtTopSpeed) {
+            radarMsg += ' • MAX SPEED';
+        } else if (speedVal >= (state.topSpeedRecord || 0)) {
+            radarMsg += ' • NEW RECORD';
+        }
+        showToast('SPEED RADAR', radarMsg, { duration: 2800 });
+        return;
+    }
+
+    // Cooldown check (15 seconds between separate speed radar triggers unless beating current top speed)
+    if (now - lastSpeedTrapAlertTime < 15000 && speedVal <= lastAlertedSpeed) {
+        return;
+    }
+
+    // Trigger conditions:
+    // 1. Car reaches max vehicle speed (e.g. 250 KM/H) and holds for 8+ frames (~130ms)
+    // 2. High speed stabilized for 30+ frames (~500ms)
+    // 3. Player peaked and started decelerating (dropped 4+ below peak)
+    const reachedMax = isAtTopSpeed && speedRunStableFrames >= 8;
+    const stabilized = speedRunStableFrames >= 30;
+    const deceleratingFromPeak = speedRunPeak >= minTriggerSpeed + 15 && speedVal <= speedRunPeak - 4;
+
+    if (reachedMax || stabilized || deceleratingFromPeak) {
+        const clockedSpeed = reachedMax ? speedVal : speedRunPeak;
+
+        // Prevent duplicate alerts for the exact same clocked speed in quick succession
+        if (clockedSpeed <= lastAlertedSpeed && now - lastSpeedTrapAlertTime < 20000) {
+            return;
+        }
+
+        lastAlertedSpeed = clockedSpeed;
         lastSpeedTrapAlertTime = now;
-        showToast('SPEED RADAR', `Top speed logged: ${speedKmh} KM/H!`, { isPro: true, duration: 4000 });
+        speedRunPeak = speedVal;
+        speedRunStableFrames = 0;
+
+        let radarMsg = `${clockedSpeed} ${unit}`;
+        if (clockedSpeed >= maxVehicleSpeed - 1) {
+            radarMsg += ' • MAX SPEED';
+        } else if (clockedSpeed >= (state.topSpeedRecord || 0)) {
+            radarMsg += ' • NEW RECORD';
+        }
+
+        showToast('SPEED RADAR', radarMsg, { duration: 2800 });
         if (haptics) haptics.impact('medium');
     }
 }
@@ -251,7 +343,7 @@ export function checkSpeedTrap(speedKmh) {
 if (typeof window !== 'undefined') {
     window.onDriftComplete = (banked, multiplier) => {
         import('./audio.js').then(({ playDriftBankSound }) => playDriftBankSound(state.masterVolume));
-        showToast('DRIFT BANKED!', `+${banked.toLocaleString()} PTS (x${multiplier})`, { isPro: true });
+        showToast('DRIFT BANKED', `+${banked.toLocaleString()} PTS (x${multiplier})`, { duration: 2200 });
         const totalScoreEl = document.getElementById('total-drift-score');
         if (totalScoreEl) totalScoreEl.textContent = (state.driftScore || 0).toLocaleString();
     };
@@ -412,11 +504,19 @@ export function initUI(map) {
                 p.classList.toggle('active', on);
                 p.hidden = !on;
             });
+            const searchBar = settingsPanel.querySelector('.sx-searchbar');
+            if (searchBar) {
+                searchBar.hidden = ['places', 'about', 'changelog'].includes(name);
+            }
             const body = settingsPanel.querySelector('.sx-body');
             if (body) body.scrollTop = 0;
         };
         tabButtons.forEach((btn, idx) => {
             btn.addEventListener('click', () => {
+                if (searchInput && searchInput.value) {
+                    searchInput.value = '';
+                    runSettingsSearch('');
+                }
                 activateTab(btn.dataset.sxTab);
                 btn.scrollIntoView?.({ block: 'nearest', inline: 'center', behavior: 'smooth' });
                 if (haptics) haptics.select();
@@ -425,14 +525,78 @@ export function initUI(map) {
                 const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
                 if (!(e.key in keys)) return;
                 e.preventDefault();
+                if (searchInput && searchInput.value) {
+                    searchInput.value = '';
+                    runSettingsSearch('');
+                }
                 const next = tabButtons[(idx + keys[e.key] + tabButtons.length) % tabButtons.length];
                 activateTab(next.dataset.sxTab, true);
             });
         });
 
+        // Settings search (filters cards across the main option tabs)
+        const searchInput = document.getElementById('settings-search');
+        const searchEmpty = document.getElementById('settings-search-empty');
+        const SEARCHABLE = ['general', 'driving', 'controls', 'map', 'multiplayer'];
+        const runSettingsSearch = (raw) => {
+            const q = raw.trim().toLowerCase();
+            if (!q) {
+                tabPanes.forEach((p) => {
+                    p.classList.remove('sx-search-match');
+                    Array.from(p.children).forEach((c) => (c.style.display = ''));
+                });
+                const current = tabButtons.find((b) => b.classList.contains('active'));
+                activateTab(current ? current.dataset.sxTab : 'general');
+                if (searchEmpty) searchEmpty.hidden = true;
+                return;
+            }
+            let total = 0;
+            tabPanes.forEach((p) => {
+                if (!SEARCHABLE.includes(p.dataset.sxPane)) {
+                    p.hidden = true;
+                    p.classList.remove('sx-search-match');
+                    return;
+                }
+                let matches = 0;
+                Array.from(p.children).forEach((card) => {
+                    const hit = (card.textContent || '').toLowerCase().includes(q);
+                    card.style.display = hit ? '' : 'none';
+                    if (hit) matches++;
+                });
+                p.hidden = matches === 0;
+                p.classList.toggle('sx-search-match', matches > 0);
+                total += matches;
+            });
+            if (searchEmpty) searchEmpty.hidden = total > 0;
+        };
+        searchInput?.addEventListener('input', () => runSettingsSearch(searchInput.value));
+        searchInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && searchInput.value) {
+                e.stopPropagation();
+                searchInput.value = '';
+                runSettingsSearch('');
+            }
+        });
+
         // Shortcuts to other tabs & modals inside Settings
+        document.getElementById('settings-head-pro-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            lastSettingsTab = settingsPanel.querySelector('.sx-tab.active')?.dataset.sxTab || null;
+            setSettingsOpen(false);
+            openProModal();
+            if (haptics) haptics.tap();
+        });
         document.getElementById('settings-pro-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
+            lastSettingsTab = settingsPanel.querySelector('.sx-tab.active')?.dataset.sxTab || null;
+            setSettingsOpen(false);
+            openProModal();
+            if (haptics) haptics.tap();
+        });
+
+        document.getElementById('sx-sidebar-pro-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            lastSettingsTab = settingsPanel.querySelector('.sx-tab.active')?.dataset.sxTab || null;
             setSettingsOpen(false);
             openProModal();
             if (haptics) haptics.tap();
@@ -452,6 +616,18 @@ export function initUI(map) {
         document.getElementById('settings-changelog-btn')?.addEventListener('click', handleOpenChangelog);
         document.getElementById('settings-changelog-pill')?.addEventListener('click', handleOpenChangelog);
 
+        // Auto-sync changelog version into header pill from latest entry
+        const syncLatestChangelogVersion = () => {
+            if (typeof settingsPanel?.querySelector !== 'function') return;
+            const latestEl = settingsPanel.querySelector('.changelog-entry .changelog-version');
+            if (latestEl) {
+                const latestText = latestEl.textContent.trim();
+                const pill = document.getElementById('settings-changelog-pill');
+                if (pill) pill.textContent = `${latestText} • CHANGELOG`;
+            }
+        };
+        syncLatestChangelogVersion();
+
         // Spot cards in Settings places tab (teleport & auto-close settings)
         if (hasQuery) {
             settingsPanel.querySelectorAll('.spot-card').forEach((card) => {
@@ -460,7 +636,7 @@ export function initUI(map) {
                     const spot = FAMOUS_SPOTS.find((s) => s.id === spotId);
                     if (spot) {
                         setSettingsOpen(false);
-                        teleportToCoordinates(spot.coords[0], spot.coords[1], spot.name, spot.bearing);
+                        teleportToCoordinates(spot.coords[0], spot.coords[1], spot.name, spot.bearing, spot.country);
                         if (haptics) haptics.success();
                     }
                 });
@@ -475,12 +651,30 @@ export function initUI(map) {
     });
 
     const dismissPortraitBtn = document.getElementById('dismiss-portrait-hint');
+    const portraitHintBanner = document.getElementById('portrait-orientation-hint');
+    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('geo_portrait_hint_dismissed') === 'true') {
+        document.body.classList.add('portrait-hint-dismissed');
+        portraitHintBanner?.classList.add('dismissed');
+        portraitHintBanner?.style.setProperty('display', 'none', 'important');
+    }
     if (dismissPortraitBtn) {
-        dismissPortraitBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            document.getElementById('portrait-orientation-hint')?.classList.add('dismissed');
+        const dismissHint = (e) => {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            document.body.classList.add('portrait-hint-dismissed');
+            if (portraitHintBanner) {
+                portraitHintBanner.classList.add('dismissed');
+                portraitHintBanner.style.setProperty('display', 'none', 'important');
+                try {
+                    sessionStorage.setItem('geo_portrait_hint_dismissed', 'true');
+                } catch (_) {}
+            }
         };
+        dismissPortraitBtn.addEventListener('click', dismissHint);
+        dismissPortraitBtn.addEventListener('pointerdown', dismissHint);
+        dismissPortraitBtn.addEventListener('touchend', dismissHint);
     }
 
     // Toggle Handlers
@@ -548,16 +742,11 @@ export function initUI(map) {
         btn.onclick = () => {
             const requestedVehicle = btn.dataset.vehicle;
             if (requestedVehicle === 'god' && !state.isPro) {
+                lastSettingsTab = document.querySelector('#settings-panel .sx-tab.active')?.dataset.sxTab || 'driving';
+                const panel = document.getElementById('settings-panel');
+                if (panel) panel.classList.remove('active');
+                state.isSettingsOpen = false;
                 openProModal();
-                showToast(
-                    'PRO VEHICLE LOCKED',
-                    'God Mode is exclusive to GEO Ride Pro subscribers. Upgrade now to fly at unlimited speed!',
-                    {
-                        isPro: true,
-                        actionText: 'Upgrade',
-                        onAction: openProModal
-                    }
-                );
                 if (haptics) haptics.tap();
                 return;
             }
@@ -637,15 +826,6 @@ export function initUI(map) {
             const requestedGod = btn.dataset.god === 'on';
             if (requestedGod && !state.isPro) {
                 openProModal();
-                showToast(
-                    'PRO FEATURE LOCKED',
-                    'God Mode requires GEO Ride Pro. Upgrade now to fly with unlimited speed!',
-                    {
-                        isPro: true,
-                        actionText: 'Upgrade',
-                        onAction: openProModal
-                    }
-                );
                 if (haptics) haptics.tap();
                 return;
             }
@@ -787,6 +967,72 @@ export function initUI(map) {
         };
     });
 
+    // Crash camera shake toggle
+    document.querySelectorAll('.camshake-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.cameraShakeEnabled = btn.dataset.camshake === 'on';
+            if (!state.cameraShakeEnabled) state.crashShake = 0;
+            updateToggleStates();
+            saveState();
+            haptics.select();
+        };
+    });
+
+    // FPS counter toggle
+    document.querySelectorAll('.fps-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.showFps = btn.dataset.fps === 'on';
+            applyFpsCounter();
+            updateToggleStates();
+            saveState();
+            haptics.select();
+        };
+    });
+    applyFpsCounter();
+
+    // Export / import settings backup
+    const exportBtn = document.getElementById('settings-export-btn');
+    const importBtn = document.getElementById('settings-import-btn');
+    const importFile = document.getElementById('settings-import-file');
+    const requireProForBackup = () => {
+        if (state.isPro) return true;
+        lastSettingsTab = document.querySelector('#settings-panel .sx-tab.active')?.dataset.sxTab || 'general';
+        const panel = document.getElementById('settings-panel');
+        if (panel) panel.classList.remove('active');
+        state.isSettingsOpen = false;
+        openProModal();
+        if (haptics) haptics.tap();
+        return false;
+    };
+    if (exportBtn) {
+        exportBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!requireProForBackup()) return;
+            exportSettings();
+            haptics.success();
+        };
+    }
+    if (importBtn && importFile) {
+        importBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!requireProForBackup()) return;
+            importFile.click();
+        };
+        importFile.onchange = async () => {
+            const file = importFile.files && importFile.files[0];
+            importFile.value = '';
+            if (!file || !state.isPro) return;
+            try {
+                await importSettings(await file.text(), map);
+                haptics.success();
+            } catch {
+                showToast('IMPORT FAILED', 'Selected file is not a valid GEO Ride settings backup.');
+            }
+        };
+    }
+
     // Camera perspective toggle (Chase / Hood / Wide)
     document.querySelectorAll('.camera-mode-toggle button').forEach((btn) => {
         btn.onclick = () => {
@@ -823,8 +1069,7 @@ export function initUI(map) {
             e.preventDefault();
             e.stopPropagation();
             setSettingsOpen(false);
-            teleportToCoordinates(INITIAL_CENTER[0], INITIAL_CENTER[1], 'Belgrade Waterfront', 107);
-            showToast('RESPAWN', 'Returned to Belgrade Waterfront spawn.');
+            teleportToCoordinates(INITIAL_CENTER[0], INITIAL_CENTER[1], 'Belgrade Waterfront', 107, 'Serbia');
             haptics.success();
         };
     }
@@ -879,21 +1124,32 @@ export function initUI(map) {
         if (query.length < 2) return;
         try {
             const cacheKey = query.toLowerCase();
-            let coords = locationSearchCache.get(cacheKey);
+            let cachedResult = locationSearchCache.get(cacheKey);
 
-            if (!coords) {
+            if (!cachedResult) {
                 const response = await fetch(
                     `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?types=place,locality,address,poi&limit=3&access_token=${mapboxgl.accessToken}`
                 );
                 const data = await response.json();
                 if (data.features && data.features.length > 0) {
-                    coords = data.features[0].center;
-                    locationSearchCache.set(cacheKey, coords);
+                    const feat = data.features[0];
+                    const countryCtx = feat.context?.find((c) => c && c.id && c.id.startsWith('country'));
+                    cachedResult = {
+                        coords: feat.center,
+                        city: feat.text || query,
+                        country: countryCtx?.text || ''
+                    };
+                    locationSearchCache.set(cacheKey, cachedResult);
                 }
             }
 
-            if (coords && Array.isArray(coords) && coords.length >= 2) {
-                const [lng, lat] = coords;
+            if (
+                cachedResult &&
+                cachedResult.coords &&
+                Array.isArray(cachedResult.coords) &&
+                cachedResult.coords.length >= 2
+            ) {
+                const [lng, lat] = cachedResult.coords;
                 // START TELEPORT ANIMATION (STARO.js style)
                 if (state.isTeleporting) return;
                 state.velocity = 0;
@@ -930,6 +1186,11 @@ export function initUI(map) {
                         setup3DVehicleLayer(map);
                         saveState();
                         trackEvent('teleport_complete', { location: query });
+                        showDiscoveryCinematic(
+                            (cachedResult.city || query).toUpperCase(),
+                            (cachedResult.country || '').toUpperCase(),
+                            'ARRIVED AT'
+                        );
                     });
                 }, 600); // 600ms delay to see the vehicle shrink and ball grow
                 trackEvent('search_location', { query: query });
@@ -1049,6 +1310,7 @@ export function initUI(map) {
     if (proOpenBtn) {
         proOpenBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            lastSettingsTab = null;
             openProModal();
             if (haptics) haptics.tap();
         });
@@ -1073,8 +1335,10 @@ export function initUI(map) {
     if (proBackBtn) {
         proBackBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            const returnTab = lastSettingsTab || 'general';
+            lastSettingsTab = null;
             closeProModal();
-            openSettings('about');
+            openSettings(returnTab);
             if (haptics) haptics.tap();
         });
     }
@@ -1138,7 +1402,13 @@ export function initUI(map) {
                         const spotId = card.getAttribute?.('data-spot-id');
                         const spot = FAMOUS_SPOTS.find((s) => s.id === spotId);
                         if (spot) {
-                            teleportToCoordinates(spot.coords[0], spot.coords[1], spot.name, spot.bearing);
+                            teleportToCoordinates(
+                                spot.coords[0],
+                                spot.coords[1],
+                                spot.name,
+                                spot.bearing,
+                                spot.country
+                            );
                             if (haptics) haptics.success();
                         }
                     });
@@ -1420,7 +1690,7 @@ export function updateToggleStates() {
                     <svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
                     </svg>
-                    <span class="pro-btn-label">PRO</span>
+                    <span class="pro-btn-label">GO PRO</span>
                 </span>
             `;
         }
@@ -1558,6 +1828,36 @@ export function updateToggleStates() {
     document
         .querySelectorAll('.hud-toggle button')
         .forEach((b) => b.classList.toggle('active', b.dataset.hud === (state.hudVisibility || 'full')));
+    const headProBtn = document.getElementById('settings-head-pro-btn');
+    if (headProBtn) headProBtn.hidden = !!state.isPro;
+    document.querySelectorAll('[data-pro-lock]').forEach((el) => {
+        el.hidden = !!state.isPro;
+    });
+
+    const exportBtnEl = document.getElementById('settings-export-btn');
+    const importBtnEl = document.getElementById('settings-import-btn');
+    if (exportBtnEl && importBtnEl) {
+        if (!state.isPro) {
+            exportBtnEl.classList?.add?.('pro-locked-btn');
+            importBtnEl.classList?.add?.('pro-locked-btn');
+            if (typeof exportBtnEl.setAttribute === 'function') exportBtnEl.setAttribute('aria-disabled', 'true');
+            if (typeof importBtnEl.setAttribute === 'function') importBtnEl.setAttribute('aria-disabled', 'true');
+        } else {
+            exportBtnEl.classList?.remove?.('pro-locked-btn');
+            importBtnEl.classList?.remove?.('pro-locked-btn');
+            if (typeof exportBtnEl.removeAttribute === 'function') exportBtnEl.removeAttribute('aria-disabled');
+            if (typeof importBtnEl.removeAttribute === 'function') importBtnEl.removeAttribute('aria-disabled');
+        }
+    }
+
+    document
+        .querySelectorAll('.camshake-toggle button')
+        .forEach((b) =>
+            b.classList.toggle('active', b.dataset.camshake === (state.cameraShakeEnabled !== false ? 'on' : 'off'))
+        );
+    document
+        .querySelectorAll('.fps-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.fps === (state.showFps ? 'on' : 'off')));
 
     // Camera perspective toggle buttons and description
     document
@@ -1610,6 +1910,116 @@ export function applyMapLabels(map) {
             }
         });
     } catch {}
+}
+
+let fpsRafId = 0;
+
+/**
+ * Shows or hides the live FPS counter overlay according to state.showFps.
+ * @returns {void}
+ */
+export function applyFpsCounter() {
+    if (typeof document === 'undefined' || typeof requestAnimationFrame !== 'function') return;
+    let el = document.getElementById('fps-counter');
+    if (!state.showFps) {
+        if (fpsRafId) cancelAnimationFrame(fpsRafId);
+        fpsRafId = 0;
+        if (el) el.remove();
+        return;
+    }
+    if (fpsRafId) return;
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'fps-counter';
+        el.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(el);
+    }
+    let frames = 0;
+    let last = performance.now();
+    const tick = (now) => {
+        frames++;
+        if (now - last >= 500) {
+            el.textContent = `${Math.round((frames * 1000) / (now - last))} FPS`;
+            frames = 0;
+            last = now;
+        }
+        fpsRafId = requestAnimationFrame(tick);
+    };
+    fpsRafId = requestAnimationFrame(tick);
+}
+
+const EXPORTABLE_KEYS = [
+    'unit',
+    'collisionsEnabled',
+    'is3D',
+    'is3DBuildings',
+    'mapStyle',
+    'lightPreset',
+    'controlsMode',
+    'masterVolume',
+    'cameraMode',
+    'hapticsEnabled',
+    'skidMarksEnabled',
+    'bodyRollEnabled',
+    'driftAssist',
+    'underglowColor',
+    'tiltSensitivity',
+    'cameraFovMode',
+    'cameraAutoCenter',
+    'graphicsQuality',
+    'mapLabels',
+    'hudVisibility',
+    'cameraShakeEnabled',
+    'showFps',
+    'playerName'
+];
+
+/**
+ * Downloads current preferences as a JSON backup file.
+ * @returns {void}
+ */
+export function exportSettings() {
+    const data = { app: 'geo-ride', version: 1, settings: {} };
+    EXPORTABLE_KEYS.forEach((k) => {
+        data.settings[k] = state[k];
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'geo-ride-settings.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('SETTINGS EXPORTED', 'Backup saved as geo-ride-settings.json.');
+}
+
+/**
+ * Imports preferences from a JSON backup, validating through the standard state loader.
+ * @param {string} text - Raw JSON file contents.
+ * @param {Object} map - Active map instance.
+ * @returns {Promise<void>}
+ */
+export async function importSettings(text, map) {
+    const parsed = JSON.parse(text);
+    if (!parsed || parsed.app !== 'geo-ride' || typeof parsed.settings !== 'object') {
+        throw new Error('Invalid backup');
+    }
+    const current = JSON.parse(localStorage.getItem('geo_ride_state') || '{}');
+    const merged = { ...current };
+    EXPORTABLE_KEYS.forEach((k) => {
+        if (k in parsed.settings) merged[k] = parsed.settings[k];
+    });
+    localStorage.setItem('geo_ride_state', JSON.stringify(merged));
+    loadState();
+    updateToggleStates();
+    applyFpsCounter();
+    applyHudVisibility();
+    applyGraphicsQuality(map);
+    if (map) applyMapLabels(map);
+    saveState();
+    showToast('SETTINGS IMPORTED', 'Preferences restored from backup.');
 }
 
 export function applyHudVisibility() {
@@ -1671,10 +2081,14 @@ export function resetUserPreferences(map) {
     state.graphicsQuality = 'ultra';
     state.mapLabels = true;
     state.hudVisibility = 'full';
+    state.cameraShakeEnabled = true;
+    state.showFps = false;
+    state.underglowColor = 'cyan';
     state.controlsMode = 'tilt';
     state.activeVehicle = 'car';
     state.godMode = false;
     updateToggleStates();
+    applyFpsCounter();
     applyHudVisibility();
     applyGraphicsQuality(map);
     if (map) applyMapLabels(map);
@@ -1834,111 +2248,141 @@ export function closeProModal() {
     }
 }
 
+let activeToastTimeout = null;
+
 export function showToast(title, message, options = {}) {
     if (typeof document === 'undefined') return;
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    const lowerTitle = (title || '').toLowerCase();
+    let iconType = 'info';
+    let variantClass = '';
+
+    if (options.isPro || lowerTitle.includes('pro') || lowerTitle.includes('god mode')) {
+        iconType = 'pro';
+        variantClass = 'toast-pro';
+    } else if (lowerTitle.includes('camera')) {
+        iconType = 'camera';
+        variantClass = 'toast-camera';
+    } else if (lowerTitle.includes('radar') || lowerTitle.includes('speed')) {
+        iconType = 'radar';
+        variantClass = 'toast-radar';
+    } else if (lowerTitle.includes('drift')) {
+        iconType = 'drift';
+        variantClass = 'toast-drift';
+    } else if (lowerTitle.includes('setting') || lowerTitle.includes('export') || lowerTitle.includes('import')) {
+        iconType = 'check';
+        variantClass = 'toast-success';
+    } else if (
+        lowerTitle.includes('lost') ||
+        lowerTitle.includes('full') ||
+        lowerTitle.includes('error') ||
+        lowerTitle.includes('busy') ||
+        lowerTitle.includes('failed')
+    ) {
+        iconType = 'alert';
+        variantClass = 'toast-alert';
+    }
+
+    // Fast-path: If an active toast with the same title exists (e.g. rapid camera cycling),
+    // update its message in-place with a subtle pulse and refresh timer!
+    const existing = container.querySelector('.toast-msg:not(.hide)');
+    if (existing && existing.dataset.toastTitle === title) {
+        const textEl = existing.querySelector('.toast-text');
+        if (textEl) textEl.textContent = message || '';
+        existing.classList.remove('toast-pulse');
+        void existing.offsetWidth; // trigger reflow
+        existing.classList.add('toast-pulse');
+
+        if (activeToastTimeout) clearTimeout(activeToastTimeout);
+        const duration = options.duration || (iconType === 'camera' ? 1800 : 2500);
+        activeToastTimeout = setTimeout(() => {
+            if (existing && existing.parentElement) {
+                existing.classList.add('hide');
+                setTimeout(() => existing.remove(), 260);
+            }
+        }, duration);
+        return;
+    }
+
+    // Single active toast limit: dismiss older toasts gracefully so the screen stays clean
+    const oldToasts = container.querySelectorAll('.toast-msg:not(.hide)');
+    oldToasts.forEach((t) => {
+        t.classList.add('hide');
+        setTimeout(() => t.remove(), 260);
+    });
+
+    let iconSvg = '';
+    if (iconType === 'pro') {
+        iconSvg = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>`;
+    } else if (iconType === 'camera') {
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+    } else if (iconType === 'radar') {
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2"/><circle cx="12" cy="12" r="2"/></svg>`;
+    } else if (iconType === 'drift') {
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M17.5 12.5c-.8-1.5-2.2-2.5-3.5-3.8-1.3-1.3-2.1-2.9-1.9-4.7C9.3 5.4 7 8 7 11.2c0 1.2.4 2.3 1.1 3.2.7.9 1.6 1.6 2.7 1.9-.3-.8-.3-1.6 0-2.4.4-.9 1.1-1.6 2-2 0 1.4.6 2.6 1.6 3.4 1 1 1.6 2.2 1.6 3.7.8-.8 1.4-1.8 1.6-2.9.2-1.2 0-2.4-.1-3.6z"/></svg>`;
+    } else if (iconType === 'check') {
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    } else if (iconType === 'alert') {
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    } else {
+        iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="8"/></svg>`;
+    }
+
     const toast = document.createElement('div');
-    toast.className = `toast-msg${options.isPro ? ' toast-pro' : ''}`;
+    toast.className = `toast-msg ${variantClass}`.trim();
+    toast.dataset.toastTitle = title;
     toast.innerHTML = `
-        <div class="toast-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="${options.isPro ? '#c470f0' : '#00f2ff'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
-                ${
-                    options.isPro
-                        ? '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>'
-                        : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
-                }
-            </svg>
-        </div>
+        <div class="toast-icon">${iconSvg}</div>
         <div class="toast-body">
-            <div class="toast-title">${title}</div>
-            <div class="toast-text">${message}</div>
-            ${options.actionText ? `<button class="toast-action-btn">${options.actionText}</button>` : ''}
+            <span class="toast-title">${title}</span>
+            ${message ? `<span class="toast-sep">•</span><span class="toast-text">${message}</span>` : ''}
         </div>
-        <button class="toast-close-btn" aria-label="Close">&times;</button>
+        ${options.actionText ? `<button class="toast-action-btn">${options.actionText}</button>` : ''}
+        <button class="toast-close-btn" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
     `;
 
-    const closeBtn = typeof toast.querySelector === 'function' ? toast.querySelector('.toast-close-btn') : null;
+    const closeBtn = toast.querySelector('.toast-close-btn');
     const dismiss = () => {
-        toast.classList?.add('hide');
-        setTimeout(() => toast.remove?.(), 350);
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 260);
     };
-    if (closeBtn) closeBtn.onclick = dismiss;
+    if (closeBtn) {
+        closeBtn.onclick = (e) => {
+            e.stopPropagation();
+            dismiss();
+        };
+    }
 
-    if (options.actionText && options.onAction && typeof toast.querySelector === 'function') {
+    if (options.actionText && options.onAction) {
         const actionBtn = toast.querySelector('.toast-action-btn');
         if (actionBtn) {
-            actionBtn.onclick = () => {
+            actionBtn.onclick = (e) => {
+                e.stopPropagation();
                 options.onAction();
                 dismiss();
             };
         }
     }
 
-    if (typeof container.appendChild === 'function') {
-        container.appendChild(toast);
-    }
+    container.appendChild(toast);
 
-    const duration = options.duration || 6500;
-    const toastTimer = setTimeout(() => {
+    const defaultDuration = iconType === 'camera' ? 1800 : iconType === 'alert' ? 3400 : 2500;
+    const duration = options.duration || defaultDuration;
+
+    if (activeToastTimeout) clearTimeout(activeToastTimeout);
+    activeToastTimeout = setTimeout(() => {
         if (toast.parentElement) dismiss();
     }, duration);
-    if (toastTimer && typeof toastTimer.unref === 'function') toastTimer.unref();
 }
 
 let notificationsInitialized = false;
 export function initGameNotifications() {
     if (notificationsInitialized || typeof window === 'undefined') return;
     notificationsInitialized = true;
-
-    // 1. Welcome Toast after 3.5 seconds
-    const t1 = setTimeout(() => {
-        showToast('WELCOME TO GEO RIDE', 'Type any address or city in Search to teleport anywhere on Earth!');
-    }, 3500);
-    if (t1 && typeof t1.unref === 'function') t1.unref();
-
-    // 2. Pro Upgrade prompt after 65 seconds
-    const t2 = setTimeout(() => {
-        showToast('UNLOCK GEO RIDE PRO', 'Get God Mode ghost vehicle with zero speed limits and private rooms!', {
-            isPro: true,
-            actionText: 'Upgrade',
-            onAction: openProModal
-        });
-    }, 65000);
-    if (t2 && typeof t2.unref === 'function') t2.unref();
-
-    // 3. Rotating periodic tips every 140 seconds
-    const tips = [
-        {
-            title: 'MULTIPLAYER READY',
-            msg: 'Share your player code with friends to cruise together in real-time!',
-            options: {}
-        },
-        {
-            title: '4 MAP STYLES',
-            msg: 'Switch between Satellite, Hybrid, 3D Buildings and 2D Streets in Settings.',
-            options: {}
-        },
-        {
-            title: 'GEO RIDE PRO',
-            msg: 'Support development and unlock exclusive Pro multiplayer rooms and God Mode!',
-            options: { isPro: true, actionText: 'See Pro', onAction: openProModal }
-        },
-        {
-            title: 'DRIFT & BURNOUT',
-            msg: 'Hold Spacebar to charge launch control or drift around corners above 35 km/h!',
-            options: {}
-        }
-    ];
-
-    let tipIndex = 0;
-    const tipsInterval = setInterval(() => {
-        const tip = tips[tipIndex % tips.length];
-        showToast(tip.title, tip.msg, tip.options);
-        tipIndex++;
-    }, 140000);
-    if (tipsInterval && typeof tipsInterval.unref === 'function') {
-        tipsInterval.unref();
-    }
+    // Unsolicited spam loops and unsolicited marketing timers are permanently disabled
+    // to keep the driving experience focused, clean, and distraction-free.
 }

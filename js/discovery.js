@@ -134,27 +134,35 @@ export function checkDiscovery(lng, lat, force = false) {
  * Renders location discovery banner overlay in HUD.
  * @param {string} city - Name of discovered city.
  * @param {string} country - Name of country.
+ * @param {string} [subtitle='ARRIVED AT'] - Subtitle label above city name.
  * @returns {void}
  */
-export function showDiscoveryCinematic(city, country) {
+export function showDiscoveryCinematic(city, country, subtitle = 'ARRIVED AT') {
     if (typeof document === 'undefined') return;
     const overlay = document.getElementById('location-discovery');
 
     const titleEl = document.getElementById('discovery-title');
     const countryEl = document.getElementById('discovery-country');
+    const subtitleEl =
+        typeof overlay?.querySelector === 'function' ? overlay.querySelector('.discovery-subtitle') : null;
 
     if (!overlay || !titleEl) return;
 
+    if (subtitleEl && subtitle) {
+        subtitleEl.textContent = subtitle;
+    }
     titleEl.textContent = city;
     if (countryEl) {
         countryEl.textContent = country;
         countryEl.style.display = country ? 'block' : 'none';
     }
 
+    overlay.classList.remove('hidden');
     overlay.classList.add('show');
 
-    // Auto-hide the cinematic after 3 seconds
-    setTimeout(() => {
+    // Auto-hide the cinematic after 3.5 seconds
+    if (overlay._hideTimeout) clearTimeout(overlay._hideTimeout);
+    overlay._hideTimeout = setTimeout(() => {
         overlay.classList.remove('show');
-    }, 3000);
+    }, 3500);
 }

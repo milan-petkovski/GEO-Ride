@@ -103,6 +103,9 @@ export function triggerVehicleReset(isShiftReset, map) {
         state.isTeleporting = false;
         setup3DVehicleLayer(map);
         saveState();
+        import('./discovery.js').then(({ showDiscoveryCinematic }) => {
+            showDiscoveryCinematic('BELGRADE WATERFRONT', 'SERBIA', 'ARRIVED AT');
+        });
     });
 }
 
@@ -437,8 +440,9 @@ export function updateCamera(dtFinal, map) {
         state.camBearing = targetCamBearing;
     }
 
-    const shakeX = (Math.random() - 0.5) * state.crashShake;
-    const shakeY = (Math.random() - 0.5) * state.crashShake;
+    const shakeScale = state.cameraShakeEnabled === false ? 0 : 1;
+    const shakeX = (Math.random() - 0.5) * state.crashShake * shakeScale;
+    const shakeY = (Math.random() - 0.5) * state.crashShake * shakeScale;
 
     if (state.isCameraAnimating) {
         const center = map.getCenter();

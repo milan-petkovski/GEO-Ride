@@ -545,34 +545,18 @@ function updateOrientationLayout() {
     document.documentElement.setAttribute('data-device-type', isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop');
 
     // Adjust UI layout based on orientation
+    const uiContainer = document.querySelector('.ui-container');
+    const speedContainer = document.querySelector('.speed-container');
+    if (uiContainer) uiContainer.style.padding = '';
+    if (speedContainer) speedContainer.style.bottom = '';
+
     if (isMobile) {
         // Mobile/Tablet specific layout adjustments
-        const uiContainer = document.querySelector('.ui-container');
         const touchControls = document.getElementById('touch-controls');
-        const speedContainer = document.querySelector('.speed-container');
-
-        if (uiContainer) {
-            if (isLandscape) {
-                // Landscape: reduce padding for more space
-                uiContainer.style.padding = '0.8rem 1rem 0.8rem 1rem';
-            } else {
-                // Portrait: normal padding
-                uiContainer.style.padding = '1.2rem';
-            }
-        }
 
         // Ensure touch controls are visible if enabled
         if (touchControls && state.controlsMode !== 'off') {
             touchControls.style.display = 'flex';
-        }
-
-        // Adjust speedometer position for landscape
-        if (speedContainer) {
-            if (isLandscape) {
-                speedContainer.style.bottom = '10px';
-            } else {
-                speedContainer.style.bottom = '25px';
-            }
         }
 
         // Close any open panels on orientation change if not typing

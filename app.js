@@ -283,13 +283,14 @@ function update(time) {
         // HUD Update (Only if speed changed)
         let speedVal = Math.floor(Math.abs(state.velocity) * 600);
         if (state.unit === 'mi') speedVal = Math.floor(speedVal * 0.621371);
+        if (speedVal > 9999) speedVal = 9999;
 
         if (speedVal !== state.lastHUDUpdateSpeed) {
             document.getElementById('speed').textContent =
                 (speedVal > 0 && state.velocity < -0.0001 ? '-' : '') + speedVal;
             state.lastHUDUpdateSpeed = speedVal;
-            if (speedVal >= 100) checkSpeedTrap(speedVal);
         }
+        checkSpeedTrap(speedVal);
     }
 
     requestAnimationFrame(update);

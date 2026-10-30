@@ -126,6 +126,8 @@ export const state = {
     graphicsQuality: 'ultra', // 'ultra' | 'balanced' | 'eco'
     mapLabels: true,
     hudVisibility: 'full', // 'full' | 'hidden'
+    cameraShakeEnabled: true,
+    showFps: false,
     isSettingsOpen: false,
     playerName: 'Pilot',
     totalDistanceKm: 0
@@ -206,6 +208,8 @@ export function saveState() {
             graphicsQuality: state.graphicsQuality,
             mapLabels: state.mapLabels,
             hudVisibility: state.hudVisibility,
+            cameraShakeEnabled: state.cameraShakeEnabled,
+            showFps: state.showFps,
             playerName: state.playerName,
             totalDistanceKm: state.totalDistanceKm
         };
@@ -283,6 +287,8 @@ export function loadState() {
         setStateKey('mapLabels', validateBool(parsed.mapLabels, true));
         const rawHud = parsed.hudVisibility === 'minimal' ? 'hidden' : parsed.hudVisibility;
         setStateKey('hudVisibility', validateStr(rawHud, ['full', 'hidden'], 'full'));
+        setStateKey('cameraShakeEnabled', validateBool(parsed.cameraShakeEnabled, true));
+        setStateKey('showFps', validateBool(parsed.showFps, false));
         setStateKey(
             'playerName',
             typeof parsed.playerName === 'string' && parsed.playerName.trim()

@@ -240,14 +240,21 @@
                     id="dismiss-portrait-hint"
                     class="portrait-hint-dismiss"
                     aria-label="Dismiss orientation suggestion"
+                    onclick="
+                        document.body.classList.add('portrait-hint-dismissed');
+                        document.getElementById('portrait-orientation-hint')?.classList.add('dismissed');
+                        document
+                            .getElementById('portrait-orientation-hint')
+                            ?.style.setProperty('display', 'none', 'important');
+                    "
                 >
                     <svg
                         viewBox="0 0 24 24"
-                        width="16"
-                        height="16"
+                        width="18"
+                        height="18"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        stroke-width="2.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         aria-hidden="true"
@@ -303,7 +310,7 @@
                             >
                                 <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
                             </svg>
-                            <span class="pro-btn-label">PRO</span>
+                            <span class="pro-btn-label">GO PRO</span>
                         </span>
                     </button>
 
@@ -373,9 +380,9 @@
 
             <div class="bottom-ui">
                 <div class="copyright-notice">
-                    Copyright &copy; 2026&nbsp;<a href="https://milanwebportal.com" target="_blank" rel="noopener"
-                        >milanwebportal.com</a
-                    >.&nbsp;All rights reserved.
+                    Copyright &copy; 2026
+                    <a href="https://milanwebportal.com" target="_blank" rel="noopener">milanwebportal.com</a>. All
+                    rights reserved.
                 </div>
                 <div class="speed-container">
                     <div id="speed">0</div>
@@ -462,26 +469,52 @@
                             </button>
                         </div>
                     </div>
-                    <button
-                        id="settings-close-btn"
-                        class="sx-close"
-                        type="button"
-                        title="Close Settings"
-                        aria-label="Close Settings"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
+                    <div class="sx-head-actions">
+                        <button
+                            id="settings-head-pro-btn"
+                            class="pro-header-btn sx-head-pro"
+                            type="button"
+                            title="Upgrade to Pro"
+                            aria-label="Upgrade to Pro"
                         >
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+                            <span class="pro-btn-shimmer"></span>
+                            <span class="pro-btn-inner">
+                                <svg
+                                    class="pro-crown-icon"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                                </svg>
+                                <span class="pro-btn-label">GO PRO</span>
+                            </span>
+                        </button>
+                        <button
+                            id="settings-close-btn"
+                            class="sx-close"
+                            type="button"
+                            title="Close Settings"
+                            aria-label="Close Settings"
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <nav class="sx-tabs" role="tablist" aria-label="Settings sections">
@@ -640,10 +673,46 @@
                             </svg>
                             <span>CHANGELOG</span>
                         </button>
+                        <button
+                            id="sx-sidebar-pro-btn"
+                            class="sx-tab sx-tab-pro"
+                            type="button"
+                            aria-label="Unlock GEO Ride Pro"
+                        >
+                            <svg
+                                class="sx-tab-pro-crown"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                            </svg>
+                            <span>GO PRO</span>
+                            <span class="sx-tab-pro-badge">PRO</span>
+                        </button>
                     </div>
                 </nav>
 
                 <div class="sx-body">
+                    <div class="sx-searchbar">
+                        <input
+                            type="search"
+                            id="settings-search"
+                            class="sx-input"
+                            placeholder="Search settings..."
+                            aria-label="Search settings"
+                            autocomplete="off"
+                            autocapitalize="off"
+                            spellcheck="false"
+                        />
+                    </div>
+                    <p id="settings-search-empty" class="sx-hint sx-search-empty" hidden>
+                        No settings match your search.
+                    </p>
                     <!-- GENERAL -->
                     <section class="sx-pane active" role="tabpanel" data-sx-pane="general">
                         <div class="sx-card sx-span-2">
@@ -807,6 +876,21 @@
                         </div>
 
                         <div class="sx-card sx-span-2">
+                            <div class="sx-label sx-label-split">
+                                <span>BACKUP SETTINGS</span><span class="sx-pro-tag" data-pro-lock>PRO</span>
+                            </div>
+                            <div class="sx-search-row">
+                                <button id="settings-export-btn" class="sx-btn sx-btn-ghost" type="button">
+                                    <span>EXPORT TO FILE</span>
+                                </button>
+                                <button id="settings-import-btn" class="sx-btn sx-btn-ghost" type="button">
+                                    <span>IMPORT FROM FILE</span>
+                                </button>
+                                <input id="settings-import-file" type="file" accept="application/json,.json" hidden />
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
                             <span class="sx-label">FACTORY RESET</span>
                             <button id="settings-reset-prefs-btn" class="sx-btn sx-btn-danger" type="button">
                                 <svg
@@ -835,7 +919,20 @@
                                 <button data-vehicle="bus" type="button">BUS</button>
                                 <button data-vehicle="truck" type="button">TRUCK</button>
                                 <button data-vehicle="god" id="vehicle-god-btn" type="button" class="sx-god-btn">
-                                    <span>GOD</span><span class="pro-badge-pill">PRO</span>
+                                    <svg
+                                        class="god-crown-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                                    </svg>
+                                    <span>GOD</span>
+                                    <span class="pro-badge-pill">PRO</span>
                                 </button>
                             </div>
                         </div>
@@ -849,20 +946,18 @@
                         </div>
 
                         <div class="sx-card">
-                            <span class="sx-label sx-label-god">GOD FLIGHT MODE</span>
-                            <div class="toggle-group god-toggle">
-                                <button class="active" data-god="off" type="button">OFF</button>
-                                <button data-god="on" id="god-on-btn" type="button" class="sx-god-btn">
-                                    <span>ON</span><span class="pro-badge-pill">PRO</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="sx-card">
                             <span class="sx-label">SUSPENSION BODY ROLL</span>
                             <div class="toggle-group bodyroll-toggle">
                                 <button class="active" data-bodyroll="on" type="button">SMOOTH</button>
                                 <button data-bodyroll="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">CRASH CAMERA SHAKE</span>
+                            <div class="toggle-group camshake-toggle">
+                                <button class="active" data-camshake="on" type="button">ON</button>
+                                <button data-camshake="off" type="button">OFF</button>
                             </div>
                         </div>
 
@@ -1565,6 +1660,14 @@
                                 <button data-hud="hidden" type="button">HIDDEN UI</button>
                             </div>
                         </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">FPS COUNTER</span>
+                            <div class="toggle-group fps-toggle">
+                                <button class="active" data-fps="off" type="button">OFF</button>
+                                <button data-fps="on" type="button">ON</button>
+                            </div>
+                        </div>
                     </section>
 
                     <!-- MULTIPLAYER -->
@@ -1575,6 +1678,10 @@
                                 <span id="mp-status-dot" class="status-dot" aria-hidden="true"></span>
                             </div>
                             <div id="mp-connection-status" class="sx-mp-status">NOT CONNECTED</div>
+                            <div class="sx-cap-row">
+                                <span class="sx-cap-chip">FREE: UP TO 5 PLAYERS</span>
+                                <span class="sx-cap-chip sx-cap-pro">PRO: UP TO 10 PLAYERS</span>
+                            </div>
                         </div>
 
                         <div class="sx-card">
@@ -1647,7 +1754,7 @@
                             <span class="sx-label">PLAYERS IN ROOM</span>
                             <div id="mp-players-list" class="mp-players-list sx-players" style="display: none"></div>
                             <p class="sx-hint">
-                                Leave the code empty to join the public room. Free rooms hold up to 10 players.
+                                Leave the code empty to join the public room. Free rooms hold up to 5 players.
                             </p>
                         </div>
                     </section>
@@ -1680,7 +1787,9 @@
                                     </div>
                                     <div class="sx-meta-item">
                                         <span class="sx-meta-k">KEY PROJECTS</span>
-                                        <span class="sx-meta-v">GEO Ride &bull; GymGO &bull; All In One</span>
+                                        <span class="sx-meta-v"
+                                            >All In One &bull; KickALL &bull; GEO Ride &bull; Gym GO</span
+                                        >
                                     </div>
                                     <div class="sx-meta-item">
                                         <span class="sx-meta-k">CONTACT &amp; BUSINESS</span>
@@ -1746,10 +1855,14 @@
                             </div>
                         </div>
 
-                        <div class="sx-card">
-                            <span class="sx-label">GEO RIDE PRO</span>
+                        <div class="sx-card sx-pro-showcase-card">
+                            <div class="sx-label sx-label-split">
+                                <span>GEO RIDE PRO</span>
+                                <span class="sx-pro-tag">PRO</span>
+                            </div>
                             <button id="settings-pro-btn" class="sx-btn sx-btn-pro" type="button">
                                 <svg
+                                    class="god-crown-icon"
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
@@ -1801,7 +1914,7 @@
                                 <article class="changelog-entry">
                                     <div class="changelog-entry-head">
                                         <div class="changelog-tags">
-                                            <span class="changelog-version">v1.3.0</span>
+                                            <span class="changelog-version">v1.2.0</span>
                                             <span class="changelog-tag-latest">LATEST</span>
                                         </div>
                                         <time class="changelog-date">Current Release</time>
@@ -1845,7 +1958,7 @@
                                 <article class="changelog-entry">
                                     <div class="changelog-entry-head">
                                         <div class="changelog-tags">
-                                            <span class="changelog-version">v1.2.0</span>
+                                            <span class="changelog-version">v1.1.0</span>
                                         </div>
                                         <time class="changelog-date">June 2026</time>
                                     </div>
@@ -1897,9 +2010,9 @@
                     </section>
                 </div>
                 <div class="sx-foot">
-                    Copyright &copy; 2026&nbsp;<a href="https://milanwebportal.com" target="_blank" rel="noopener"
-                        >milanwebportal.com</a
-                    >.&nbsp;All rights reserved.
+                    Copyright &copy; 2026
+                    <a href="https://milanwebportal.com" target="_blank" rel="noopener">milanwebportal.com</a>. All
+                    rights reserved.
                 </div>
             </div>
         </div>
@@ -2012,27 +2125,19 @@
                         </svg>
                     </button>
                 </div>
-                <div class="pro-modal-badge">
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        style="
-                            width: 14px;
-                            height: 14px;
-                            display: inline-block;
-                            vertical-align: middle;
-                            margin-right: 4px;
-                        "
-                    >
-                        <path
-                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                        ></path>
-                    </svg>
-                    GEO Ride Pro
+                <div class="pro-hero" aria-hidden="true">
+                    <div class="pro-hero-orb">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                        </svg>
+                    </div>
                 </div>
                 <h2 id="pro-modal-title" class="pro-modal-title">Unlock <span>God Mode</span> &amp; More</h2>
                 <p class="pro-modal-desc">
@@ -2105,9 +2210,7 @@
                     >
                         <div class="pro-plan-name">Monthly</div>
                         <div class="pro-plan-price">$4.99 <span>/ mo</span></div>
-                        <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5)">
-                            Billed monthly, cancel anytime
-                        </div>
+                        <div class="pro-plan-note">Billed monthly, cancel anytime</div>
                         <div class="pro-plan-cta">Subscribe Monthly</div>
                     </a>
 
@@ -2121,7 +2224,7 @@
                         <div class="pro-plan-pill">Save 40%</div>
                         <div class="pro-plan-name">Annual</div>
                         <div class="pro-plan-price">$2.99 <span>/ mo</span></div>
-                        <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5)">$35.88 billed yearly</div>
+                        <div class="pro-plan-note">$35.88 billed yearly</div>
                         <div class="pro-plan-cta">Subscribe Annual</div>
                     </a>
                 </div>
@@ -2130,54 +2233,20 @@
                     Secure checkout powered by Fungies. Instant activation. Cancel anytime.
                 </div>
 
-                <div
-                    class="pro-activation-box"
-                    style="
-                        margin-top: 18px;
-                        padding-top: 14px;
-                        border-top: 1px solid rgba(255, 255, 255, 0.08);
-                        display: flex;
-                        gap: 8px;
-                        justify-content: center;
-                        align-items: center;
-                    "
-                >
+                <div class="pro-activation-head">
+                    <span class="pro-activation-title">Already subscribed or new device?</span>
+                    <span class="pro-activation-sub">Enter the email you purchased with to activate Pro here.</span>
+                </div>
+                <div class="pro-activation-box">
                     <input
-                        type="text"
+                        type="email"
                         id="pro-key-input"
-                        placeholder="Enter order email..."
-                        style="
-                            background: rgba(255, 255, 255, 0.05);
-                            border: 1px solid rgba(255, 255, 255, 0.15);
-                            border-radius: 999px;
-                            padding: 8px 14px;
-                            color: #fff;
-                            font-size: 16px;
-                            outline: none;
-                            width: 60%;
-                            max-width: 260px;
-                            caret-color: #00f2ff;
-                            cursor: text !important;
-                        "
+                        class="pro-activation-input"
+                        placeholder="Order email address"
+                        autocomplete="email"
+                        inputmode="email"
                     />
-                    <button
-                        id="pro-activate-btn"
-                        style="
-                            background: #00f2ff;
-                            border: none;
-                            border-radius: 999px;
-                            padding: 8px 16px;
-                            color: #020205;
-                            font-weight: 800;
-                            font-size: 0.75rem;
-                            cursor: pointer;
-                            letter-spacing: 1px;
-                            text-transform: uppercase;
-                            transition: filter 0.2s;
-                        "
-                    >
-                        Activate
-                    </button>
+                    <button id="pro-activate-btn" class="pro-activation-btn" type="button">Activate</button>
                 </div>
                 <div
                     id="pro-activation-status"

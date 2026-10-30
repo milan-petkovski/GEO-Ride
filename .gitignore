@@ -48,6 +48,7 @@ Desktop.ini
 /coverage
 /test-results
 /playwright-report
+scratch/
 .lighthouseci/
 
 # Cache and Temp
