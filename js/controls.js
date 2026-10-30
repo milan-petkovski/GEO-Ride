@@ -9,16 +9,41 @@ import { haptics } from './haptics.js';
 import { triggerVehicleReset } from './physics.js';
 import { playHornSound } from './audio.js';
 
+export const CAMERA_DESCRIPTIONS = {
+    chase: 'Dynamic 3rd-person chase camera with drift compensation and speed tilt.',
+    hood: 'Immersive bumper/hood first-person perspective for extreme sense of speed.',
+    wide: 'High-angle cinematic overhead perspective with expanded peripheral vision.'
+};
+
+export function updateCameraUi(mode = state.cameraMode) {
+    const targetMode = mode || 'chase';
+    const camLabel = document.getElementById('cam-mode-label');
+    if (camLabel) camLabel.textContent = targetMode.toUpperCase();
+    if (typeof document !== 'undefined' && typeof document.querySelectorAll === 'function') {
+        document.querySelectorAll('.camera-mode-toggle button').forEach((btn) => {
+            btn.classList?.toggle('active', btn.dataset?.camera === targetMode);
+        });
+        const descEl = document.getElementById('camera-mode-desc');
+        if (descEl && CAMERA_DESCRIPTIONS[targetMode]) {
+            descEl.textContent = CAMERA_DESCRIPTIONS[targetMode];
+        }
+    }
+}
+
+export function setCameraMode(mode) {
+    if (!['chase', 'hood', 'wide'].includes(mode)) return;
+    state.cameraMode = mode;
+    const labels = { chase: 'CHASE CAM', hood: 'HOOD CAM', wide: 'WIDE VIEW' };
+    showToast('CAMERA', labels[mode]);
+    if (haptics) haptics.select();
+    updateCameraUi(mode);
+}
+
 export function cycleCameraMode() {
     const modes = ['chase', 'hood', 'wide'];
     const currentIdx = modes.indexOf(state.cameraMode || 'chase');
     const nextMode = modes[(currentIdx + 1) % modes.length];
-    state.cameraMode = nextMode;
-    const labels = { chase: 'CHASE CAM', hood: 'HOOD CAM', wide: 'WIDE VIEW' };
-    showToast('CAMERA', labels[nextMode]);
-    if (haptics) haptics.select();
-    const camLabel = document.getElementById('cam-mode-label');
-    if (camLabel) camLabel.textContent = nextMode.toUpperCase();
+    setCameraMode(nextMode);
 }
 
 export function triggerHorn() {
@@ -100,8 +125,14 @@ export function initControls() {
         }
 
         const isProModalOpen = document.getElementById('pro-modal-backdrop')?.classList.contains('active');
+        const isSettingsOpen = document.getElementById('settings-panel')?.classList.contains('active');
+        const isSpotsOpen = document.getElementById('spots-modal-backdrop')?.classList.contains('active');
+        const isChangelogOpen = document.getElementById('changelog-modal-backdrop')?.classList.contains('active');
         if (
             isProModalOpen ||
+            isSettingsOpen ||
+            isSpotsOpen ||
+            isChangelogOpen ||
             state.isInputFocused ||
             document.activeElement?.tagName === 'INPUT' ||
             document.activeElement?.tagName === 'TEXTAREA'
@@ -140,8 +171,6 @@ export function initControls() {
         }
 
         // Close panels without calling .blur() (which triggers window.blur and clears state.keys)
-        document.getElementById('settings-panel')?.classList.remove('active');
-        document.getElementById('mp-dropdown')?.classList.remove('active');
         document.querySelector('.search-box')?.classList.remove('expanded');
         document.body.classList.add('hide-cursor');
 
@@ -191,11 +220,7 @@ export function initControls() {
             document.body.classList.add('hide-cursor');
         }
         if (e.button === 0 && !state.isInputFocused) {
-            if (
-                e.target.closest('.ui-container') ||
-                e.target.closest('.settings-panel') ||
-                e.target.closest('.mp-dropdown')
-            ) {
+            if (e.target.closest('.ui-container') || e.target.closest('#settings-panel')) {
                 document.body.classList.remove('hide-cursor');
                 return;
             }
@@ -343,8 +368,7 @@ function initTouchControls() {
             if (
                 e.target.closest('.touch-btn') ||
                 e.target.closest('.ui-container') ||
-                e.target.closest('.settings-panel') ||
-                e.target.closest('.mp-dropdown')
+                e.target.closest('#settings-panel')
             ) {
                 return;
             }
@@ -448,8 +472,8 @@ function handleDeviceOrientation(e) {
         tilt = e.gamma;
     }
 
-    // High fidelity deadzone and sensitivity
-    const deadzone = 5;
+    // High fidelity deadzone and sensitivity based on user preference
+    const deadzone = state.tiltSensitivity === 'high' ? 3 : state.tiltSensitivity === 'low' ? 8 : 5;
 
     if (Math.abs(tilt) > deadzone) {
         if (tilt < 0) {

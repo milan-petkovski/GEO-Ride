@@ -239,13 +239,18 @@ export function updatePhysics(dtFinal, map) {
         else state.driftMultiplier = 1; // 0 - 60 seconds
 
         // Dynamic Suspension Physics (Body Dive, Squat, and Centrifugal Roll)
-        const accelInput = (isWDown ? 1 : 0) - (isSDown ? 1 : 0);
-        const targetPitchInertia = accelInput * 0.04 - state.velocity * 0.02;
-        state.bodyPitch = (state.bodyPitch || 0) + (targetPitchInertia - (state.bodyPitch || 0)) * 0.15 * dtFinal;
+        if (state.bodyRollEnabled !== false) {
+            const accelInput = (isWDown ? 1 : 0) - (isSDown ? 1 : 0);
+            const targetPitchInertia = accelInput * 0.04 - state.velocity * 0.02;
+            state.bodyPitch = (state.bodyPitch || 0) + (targetPitchInertia - (state.bodyPitch || 0)) * 0.15 * dtFinal;
 
-        const lateralG = state.steeringAngle * (state.velocity * 10);
-        const targetRollInertia = -lateralG * 0.14;
-        state.bodyRoll = (state.bodyRoll || 0) + (targetRollInertia - (state.bodyRoll || 0)) * 0.12 * dtFinal;
+            const lateralG = state.steeringAngle * (state.velocity * 10);
+            const targetRollInertia = -lateralG * 0.14;
+            state.bodyRoll = (state.bodyRoll || 0) + (targetRollInertia - (state.bodyRoll || 0)) * 0.12 * dtFinal;
+        } else {
+            state.bodyPitch = 0;
+            state.bodyRoll = 0;
+        }
 
         const rad = state.travelBearing * (Math.PI / 180);
         const latRad = state.lat * (Math.PI / 180);
@@ -387,6 +392,9 @@ export function updatePhysics(dtFinal, map) {
     if (currentKmh > (state.topSpeedRecord || 0)) {
         state.topSpeedRecord = currentKmh;
     }
+    if (currentKmh > 1) {
+        state.totalDistanceKm = (state.totalDistanceKm || 0) + (currentKmh * (dtFinal / 60)) / 3600;
+    }
 }
 
 /**
@@ -399,7 +407,9 @@ export function updateCamera(dtFinal, map) {
     const isDrivingNow = Math.abs(state.velocity) > 0.02;
     const timeSinceLastMove = Date.now() - state.lastCameraManualMove;
     const shouldAutoReturn =
-        !state.isDragging && (timeSinceLastMove > 5000 || (isDrivingNow && timeSinceLastMove > 1000));
+        state.cameraAutoCenter !== false &&
+        !state.isDragging &&
+        (timeSinceLastMove > 5000 || (isDrivingNow && timeSinceLastMove > 1000));
     const mode = state.cameraMode || 'chase';
 
     if (shouldAutoReturn) {

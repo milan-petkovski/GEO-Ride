@@ -4,11 +4,13 @@
  */
 
 import { state, saveState, setProStatus } from './state.js';
-import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
+import { setup3DVehicleLayer, setupVehicleMarker, getThreeLayer } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
 import { initMultiplayer } from './multiplayer.js';
 import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js';
+import { INITIAL_CENTER } from './config.js';
+import { toggleRadio, nextRadioStation, setRadioStation } from './audio.js';
 
 let activeMap = null;
 let isManualPresetMenuOpen = false;
@@ -16,57 +18,154 @@ let isManualPresetMenuOpen = false;
 export const FAMOUS_SPOTS = [
     {
         id: 'tokyo',
-        name: 'Tokyo Shuto Expressway',
+        name: 'Tokyo Shuto Expressway (Tokyo Drift)',
         country: 'Japan',
-        desc: 'Futuristic highway above Tokyo Bay with illuminated skyscrapers and high-speed bends.',
+        category: 'city',
+        desc: 'Birthplace of midnight highway racing, Wangan battles, and iconic Tokyo Drift culture.',
         coords: [139.7563, 35.6329],
         bearing: 160
     },
     {
-        id: 'nurburgring',
-        name: 'Nürburgring Nordschleife',
-        country: 'Germany',
-        desc: 'The Green Hell: world-famous legendary race track through dense forests and elevations.',
-        coords: [6.9475, 50.3341],
-        bearing: 45
-    },
-    {
-        id: 'stelvio',
-        name: 'Stelvio Pass',
-        country: 'Italy',
-        desc: 'Dramatic Alpine switchbacks and climbing hairpins at 2,757m altitude.',
-        coords: [10.4533, 46.5286],
-        bearing: 110
-    },
-    {
         id: 'monaco',
-        name: 'Monaco GP Circuit',
+        name: 'Monaco GP Marina Circuit',
         country: 'Monaco',
-        desc: 'Tight harbor streets, famous Casino hairpin, and seaside Formula 1 tunnel.',
+        category: 'circuit',
+        desc: 'The crown jewel of Formula 1: Casino Square, tight superyacht chicanes, and seaside tunnel.',
         coords: [7.4206, 43.7347],
         bearing: 210
     },
     {
+        id: 'nurburgring',
+        name: 'Nürburgring Nordschleife (The Green Hell)',
+        country: 'Germany',
+        category: 'circuit',
+        desc: 'The Green Hell: world-famous 20.8 km proving ground carved into the Eifel mountains.',
+        coords: [6.9475, 50.3341],
+        bearing: 45
+    },
+    {
+        id: 'silverstone',
+        name: 'Silverstone Grand Prix Circuit',
+        country: 'UK',
+        category: 'circuit',
+        desc: 'Home of British motorsport: iconic high-speed sweeps through Maggotts and Becketts.',
+        coords: [-1.0169, 52.0786],
+        bearing: 45
+    },
+    {
+        id: 'spa',
+        name: 'Circuit de Spa-Francorchamps (Eau Rouge)',
+        country: 'Belgium',
+        category: 'circuit',
+        desc: 'Legendary Ardennes circuit featuring the breathtaking uphill compression of Eau Rouge.',
+        coords: [5.9714, 50.4372],
+        bearing: 120
+    },
+    {
+        id: 'lagunaseca',
+        name: 'Laguna Seca Raceway (The Corkscrew)',
+        country: 'California, USA',
+        category: 'circuit',
+        desc: 'Home of the Corkscrew: a dramatic blind 5.5-story elevation drop down rolling hills.',
+        coords: [-121.758, 36.5843],
+        bearing: 210
+    },
+    {
+        id: 'stelvio',
+        name: 'Stelvio Pass (Passo dello Stelvio)',
+        country: 'Italy',
+        category: 'pass',
+        desc: 'Dramatic Alpine pass with 48 numbered hairpins climbing to 2,757m altitude.',
+        coords: [10.4533, 46.5286],
+        bearing: 110
+    },
+    {
+        id: 'transfagarasan',
+        name: 'Transfăgărășan Mountain Highway',
+        country: 'Romania',
+        category: 'pass',
+        desc: 'Crowned Top Gear best road in the world: endless Carpathian mountain hairpins and glacial drops.',
+        coords: [24.6167, 45.5992],
+        bearing: 180
+    },
+    {
+        id: 'tailofthedragon',
+        name: 'Tail of the Dragon (318 Mountain Curves)',
+        country: 'Tennessee, USA',
+        category: 'pass',
+        desc: '318 intense mountain switchbacks packed into 11 miles of deep Great Smoky forest.',
+        coords: [-83.9208, 35.5186],
+        bearing: 140
+    },
+    {
+        id: 'sanfrancisco',
+        name: 'San Francisco Lombard Street Hairpins',
+        country: 'San Francisco, USA',
+        category: 'pass',
+        desc: 'The world crookedest street: eight tight switchbacks descending a 27% steep grade.',
+        coords: [-122.4187, 37.8021],
+        bearing: 270
+    },
+    {
         id: 'mulholland',
-        name: 'Mulholland Drive',
+        name: 'Mulholland Drive Canyon Ridge',
         country: 'Los Angeles, USA',
-        desc: 'Legendary scenic ridge highway overlooking the dazzling lights of Hollywood.',
+        category: 'pass',
+        desc: 'Legendary canyon ridgeline highway overlooking the dazzling lights of Hollywood.',
         coords: [-118.4485, 34.1278],
         bearing: 90
     },
     {
         id: 'paris',
-        name: 'Arc de Triomphe',
+        name: 'Arc de Triomphe & Champs-Élysées',
         country: 'Paris, France',
-        desc: 'The ultimate giant 12-lane chaotic roundabout leading directly down the Champs-Élysées.',
+        category: 'city',
+        desc: 'The ultimate 12-avenue chaotic roundabout circle leading down the Champs-Élysées.',
         coords: [2.295, 48.8738],
         bearing: 135
     },
     {
+        id: 'london',
+        name: 'Westminster & Big Ben Thames Route',
+        country: 'London, UK',
+        category: 'city',
+        desc: 'Historic Thames riverfront boulevard passing the Houses of Parliament and Big Ben.',
+        coords: [-0.1246, 51.5007],
+        bearing: 180
+    },
+    {
+        id: 'dubai',
+        name: 'Dubai Sheikh Zayed 14-Lane Skyline',
+        country: 'Dubai, UAE',
+        category: 'city',
+        desc: 'Futuristic 14-lane high-speed expressway flanked by world-record super-skyscrapers.',
+        coords: [55.2708, 25.2048],
+        bearing: 45
+    },
+    {
+        id: 'miami',
+        name: 'Miami Ocean Drive & South Beach',
+        country: 'Florida, USA',
+        category: 'city',
+        desc: 'Iconic Art Deco beachfront boulevard, neon hotels, and Atlantic coastal cruising.',
+        coords: [-80.13, 25.7825],
+        bearing: 180
+    },
+    {
+        id: 'berlin',
+        name: 'Berlin Autobahn & Tiergarten',
+        country: 'Germany',
+        category: 'city',
+        desc: 'Historic boulevards past the Brandenburg Gate and unrestricted high-speed speedways.',
+        coords: [13.3777, 52.5163],
+        bearing: 90
+    },
+    {
         id: 'belgrade',
-        name: 'Belgrade Waterfront',
+        name: 'Belgrade Waterfront (GEO Ride HQ)',
         country: 'Serbia',
-        desc: 'Home base: Modern riverside boulevards and wide urban curves along the Sava.',
+        category: 'city',
+        desc: 'Home base: Modern riverside boulevards and wide sweeping urban curves along the Sava.',
         coords: [20.449425, 44.809684],
         bearing: 107
     }
@@ -87,6 +186,7 @@ export function teleportToCoordinates(lng, lat, locationName = 'Custom Location'
     if (settingsPanel) settingsPanel.classList.remove('active');
     const spotsModal = document.getElementById('spots-modal-backdrop');
     if (spotsModal) spotsModal.classList.remove('active');
+    syncMapInteractions(activeMap);
 
     setTimeout(() => {
         state.lng = lng;
@@ -167,11 +267,13 @@ function syncMapInteractions(map) {
     const settingsPanel = document.getElementById('settings-panel');
     const proModal = document.getElementById('pro-modal-backdrop');
     const spotsModal = document.getElementById('spots-modal-backdrop');
+    const changelogModal = document.getElementById('changelog-modal-backdrop');
     const isSettingsOpen = settingsPanel?.classList.contains('active');
     const isProModalOpen = proModal?.classList.contains('active');
     const isSpotsOpen = spotsModal?.classList.contains('active');
+    const isChangelogOpen = changelogModal?.classList.contains('active');
 
-    if (isSettingsOpen || isProModalOpen || isSpotsOpen) {
+    if (isSettingsOpen || isProModalOpen || isSpotsOpen || isChangelogOpen) {
         map.dragPan?.disable();
         map.scrollZoom?.disable();
         map.doubleClickZoom?.disable();
@@ -186,20 +288,43 @@ function syncMapInteractions(map) {
     }
 }
 
+function initHiddenUiEdgeTrigger() {
+    const edgeTrigger = document.getElementById('hidden-ui-edge-trigger');
+    const settingsWrapper = document.querySelector('.settings-wrapper');
+    if (edgeTrigger && settingsWrapper) {
+        let edgeTimeout = null;
+        const revealSettings = () => {
+            clearTimeout(edgeTimeout);
+            settingsWrapper.classList?.add('edge-revealed');
+        };
+        const hideSettings = () => {
+            edgeTimeout = setTimeout(() => {
+                settingsWrapper.classList?.remove('edge-revealed');
+            }, 500);
+        };
+        edgeTrigger.addEventListener?.('mouseenter', revealSettings);
+        edgeTrigger.addEventListener?.('mouseleave', hideSettings);
+        settingsWrapper.addEventListener?.('mouseenter', revealSettings);
+        settingsWrapper.addEventListener?.('mouseleave', hideSettings);
+    }
+}
+
 export function initUI(map) {
     activeMap = map;
     isManualPresetMenuOpen = state.lightPreset !== 'realtime';
+    applyHudVisibility();
+    if (map) applyMapLabels(map);
+    applyGraphicsQuality(map);
+    initHiddenUiEdgeTrigger();
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('settings-panel');
-    const mpBtn = document.getElementById('mp-btn');
-    const mpDropdown = document.getElementById('mp-dropdown');
     const searchBox = document.querySelector('.search-box');
     const searchInput = document.getElementById('location-search');
     const searchBtn = document.getElementById('search-btn');
 
     // Prevent map interactions while panels/modals are open, BUT let inputs work normally
-    const mapPanels = [settingsPanel, mpDropdown, document.querySelector('.pro-modal')];
+    const mapPanels = [settingsPanel, document.querySelector('.pro-modal')];
     mapPanels.forEach((panel) => {
         if (!panel) return;
         [
@@ -219,15 +344,22 @@ export function initUI(map) {
         });
     });
 
-    settingsBtn.onclick = (e) => {
-        if (settingsPanel && settingsPanel.contains(e.target)) return;
+    const setSettingsOpen = (open) => {
+        if (!settingsPanel) return;
+        state.isSettingsOpen = !!open;
+        if (open) {
+            state.velocity = 0;
+            state.keys = {};
+        }
+        settingsPanel.classList.toggle('active', open);
+        syncMapInteractions(map);
+    };
 
+    settingsBtn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (mpDropdown) mpDropdown.classList.remove('active');
         if (searchBox) searchBox.classList.remove('expanded');
-        settingsPanel.classList.toggle('active');
-        syncMapInteractions(map);
+        setSettingsOpen(!settingsPanel.classList.contains('active'));
         if (haptics) haptics.tap();
         try {
             if (typeof initMultiplayer === 'function') initMultiplayer();
@@ -242,8 +374,7 @@ export function initUI(map) {
         const closeSettings = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            settingsPanel.classList.remove('active');
-            syncMapInteractions(map);
+            setSettingsOpen(false);
             if (haptics) haptics.tap();
         };
 
@@ -251,28 +382,93 @@ export function initUI(map) {
         settingsCloseBtn.addEventListener('touchstart', closeSettings, { passive: false });
     }
 
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth > 1024) {
-            if (
-                settingsPanel?.classList.contains('active') &&
-                !settingsPanel.contains(e.target) &&
-                e.target !== settingsBtn &&
-                !settingsBtn.contains(e.target)
-            ) {
-                settingsPanel.classList.remove('active');
-                syncMapInteractions(map);
+    if (settingsPanel) {
+        // Backdrop click and Escape (keydown never reaches window from inside the panel)
+        settingsPanel.addEventListener('click', (e) => {
+            if (e.target === settingsPanel) setSettingsOpen(false);
+        });
+        settingsPanel.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                setSettingsOpen(false);
+                settingsBtn.focus?.();
             }
-        }
+        });
 
-        if (
-            mpDropdown?.classList.contains('active') &&
-            !mpDropdown.contains(e.target) &&
-            e.target !== mpBtn &&
-            !mpBtn.contains(e.target)
-        ) {
-            mpDropdown.classList.remove('active');
-        }
+        // Tabs
+        const hasQuery = typeof settingsPanel.querySelectorAll === 'function';
+        const tabButtons = hasQuery ? Array.from(settingsPanel.querySelectorAll('[data-sx-tab]')) : [];
+        const tabPanes = hasQuery ? Array.from(settingsPanel.querySelectorAll('[data-sx-pane]')) : [];
+        const activateTab = (name, focus = false) => {
+            tabButtons.forEach((b) => {
+                const on = b.dataset.sxTab === name;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-selected', on ? 'true' : 'false');
+                b.tabIndex = on ? 0 : -1;
+                if (on && focus) b.focus();
+            });
+            tabPanes.forEach((p) => {
+                const on = p.dataset.sxPane === name;
+                p.classList.toggle('active', on);
+                p.hidden = !on;
+            });
+            const body = settingsPanel.querySelector('.sx-body');
+            if (body) body.scrollTop = 0;
+        };
+        tabButtons.forEach((btn, idx) => {
+            btn.addEventListener('click', () => {
+                activateTab(btn.dataset.sxTab);
+                btn.scrollIntoView?.({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+                if (haptics) haptics.select();
+            });
+            btn.addEventListener('keydown', (e) => {
+                const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+                if (!(e.key in keys)) return;
+                e.preventDefault();
+                const next = tabButtons[(idx + keys[e.key] + tabButtons.length) % tabButtons.length];
+                activateTab(next.dataset.sxTab, true);
+            });
+        });
 
+        // Shortcuts to other tabs & modals inside Settings
+        document.getElementById('settings-pro-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setSettingsOpen(false);
+            openProModal();
+            if (haptics) haptics.tap();
+        });
+
+        document.getElementById('settings-spots-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activateTab('places');
+            if (haptics) haptics.tap();
+        });
+
+        const handleOpenChangelog = (e) => {
+            e.stopPropagation();
+            activateTab('changelog');
+            if (haptics) haptics.tap();
+        };
+        document.getElementById('settings-changelog-btn')?.addEventListener('click', handleOpenChangelog);
+        document.getElementById('settings-changelog-pill')?.addEventListener('click', handleOpenChangelog);
+
+        // Spot cards in Settings places tab (teleport & auto-close settings)
+        if (hasQuery) {
+            settingsPanel.querySelectorAll('.spot-card').forEach((card) => {
+                card.addEventListener('click', () => {
+                    const spotId = card.getAttribute('data-spot-id');
+                    const spot = FAMOUS_SPOTS.find((s) => s.id === spotId);
+                    if (spot) {
+                        setSettingsOpen(false);
+                        teleportToCoordinates(spot.coords[0], spot.coords[1], spot.name, spot.bearing);
+                        if (haptics) haptics.success();
+                    }
+                });
+            });
+        }
+    }
+
+    document.addEventListener('click', (e) => {
         if (searchBox?.classList.contains('expanded') && !searchBox.contains(e.target)) {
             searchBox.classList.remove('expanded');
         }
@@ -511,6 +707,168 @@ export function initUI(map) {
         });
     }
 
+    // Haptics vibration toggle
+    document.querySelectorAll('.haptics-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.hapticsEnabled = btn.dataset.haptics === 'on';
+            updateToggleStates();
+            saveState();
+            if (state.hapticsEnabled) haptics.success();
+        };
+    });
+
+    // Body roll suspension toggle
+    document.querySelectorAll('.bodyroll-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.bodyRollEnabled = btn.dataset.bodyroll === 'on';
+            updateToggleStates();
+            saveState();
+            haptics.select();
+        };
+    });
+
+    // Skidmarks toggle
+    document.querySelectorAll('.skidmarks-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.skidMarksEnabled = btn.dataset.skidmarks === 'on';
+            if (!state.skidMarksEnabled) state.skidMarks = [];
+            updateToggleStates();
+            saveState();
+            haptics.select();
+        };
+    });
+
+    // Drift steer assist toggle
+    document.querySelectorAll('.drift-assist-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.driftAssist = btn.dataset.assist;
+            updateToggleStates();
+            saveState();
+            haptics.select();
+        };
+    });
+
+    // Graphics quality toggle
+    document.querySelectorAll('.graphics-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.graphicsQuality = btn.dataset.quality;
+            applyGraphicsQuality(map);
+            updateToggleStates();
+            saveState();
+            haptics.select();
+            const labels = {
+                ultra: 'ULTRA (Native 2K/4K, High Detail)',
+                balanced: 'BALANCED (1080p Optimized)',
+                eco: 'ECO (Battery Saver, Fast Render)'
+            };
+            showToast('GRAPHICS QUALITY', labels[state.graphicsQuality] || state.graphicsQuality.toUpperCase());
+        };
+    });
+
+    // Map labels toggle
+    document.querySelectorAll('.labels-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.mapLabels = btn.dataset.labels === 'on';
+            applyMapLabels(map);
+            updateToggleStates();
+            saveState();
+            haptics.select();
+        };
+    });
+
+    // HUD mode toggle
+    document.querySelectorAll('.hud-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            state.hudVisibility = btn.dataset.hud;
+            applyHudVisibility();
+            updateToggleStates();
+            saveState();
+            haptics.select();
+        };
+    });
+
+    // Camera perspective toggle (Chase / Hood / Wide)
+    document.querySelectorAll('.camera-mode-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            const cam = btn.dataset.camera;
+            if (cam) {
+                state.cameraMode = cam;
+                import('./controls.js')
+                    .then(({ setCameraMode }) => {
+                        setCameraMode(cam);
+                    })
+                    .catch(() => {
+                        updateToggleStates();
+                    });
+                updateToggleStates();
+                saveState();
+                haptics.select();
+            }
+        };
+    });
+
+    // Direct radio station select buttons
+    document.querySelectorAll('.radio-station-btn').forEach((btn) => {
+        btn.onclick = () => {
+            setRadioStation(btn.dataset.station);
+            updateToggleStates();
+            haptics.select();
+        };
+    });
+
+    // Fast respawn at Belgrade home
+    const homeBtn = document.getElementById('settings-home-btn');
+    if (homeBtn) {
+        homeBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSettingsOpen(false);
+            teleportToCoordinates(INITIAL_CENTER[0], INITIAL_CENTER[1], 'Belgrade Waterfront', 107);
+            showToast('RESPAWN', 'Returned to Belgrade Waterfront spawn.');
+            haptics.success();
+        };
+    }
+
+    // Restore factory defaults
+    const resetPrefsBtn = document.getElementById('settings-reset-prefs-btn');
+    if (resetPrefsBtn) {
+        resetPrefsBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            resetUserPreferences(map);
+            haptics.success();
+        };
+    }
+
+    // Spots category filters
+    document.querySelectorAll('.spot-filter-chip').forEach((chip) => {
+        chip.onclick = () => {
+            filterSpots(chip.dataset.filter);
+            haptics.select();
+        };
+    });
+
+    // Multiplayer pilot callsign
+    const mpPlayerNameInput = document.getElementById('mp-player-name');
+    if (mpPlayerNameInput) {
+        mpPlayerNameInput.oninput = (e) => {
+            state.playerName = (e.target.value || '').trim().slice(0, 16);
+            saveState();
+        };
+    }
+
+    // Multiplayer quick join global lobby
+    const mpQuickJoinBtn = document.getElementById('mp-quick-join-btn');
+    if (mpQuickJoinBtn) {
+        mpQuickJoinBtn.onclick = (e) => {
+            e.stopPropagation();
+            const joinPeerInput = document.getElementById('join-peer-id');
+            if (joinPeerInput) joinPeerInput.value = '';
+            document.getElementById('join-mp-btn')?.click();
+            haptics.success();
+        };
+    }
+
     // In-memory location search cache to prevent redundant Mapbox Geocoding API calls
     const locationSearchCache = new Map();
 
@@ -548,7 +906,10 @@ export function initUI(map) {
                 setup3DVehicleLayer(map);
 
                 // Auto-close settings dashboard on mobile or desktop if open
-                if (settingsPanel) settingsPanel.classList.remove('active');
+                if (settingsPanel) {
+                    settingsPanel.classList.remove('active');
+                    syncMapInteractions(map);
+                }
 
                 // Give it a moment to animate the shrinking/ball expansion at the start
                 setTimeout(() => {
@@ -587,7 +948,6 @@ export function initUI(map) {
         e.stopPropagation();
         if (!searchBox.classList.contains('expanded')) {
             if (settingsPanel) settingsPanel.classList.remove('active');
-            if (mpDropdown) mpDropdown.classList.remove('active');
             searchBox.classList.add('expanded');
             setTimeout(() => searchInput.focus(), 50);
             state.isInputFocused = true;
@@ -646,7 +1006,7 @@ export function initUI(map) {
         }, 500);
     }
     // Add tracking to external links
-    document.querySelector('.coffee-btn')?.addEventListener('click', () => {
+    document.querySelector('.coffee-btn-link')?.addEventListener('click', () => {
         trackEvent('click_coffee_btn');
         haptics.tap();
     });
@@ -709,6 +1069,16 @@ export function initUI(map) {
         });
     }
 
+    const proBackBtn = document.getElementById('pro-back-to-settings-btn');
+    if (proBackBtn) {
+        proBackBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeProModal();
+            openSettings('about');
+            if (haptics) haptics.tap();
+        });
+    }
+
     document.getElementById('pro-modal-monthly-btn')?.addEventListener('click', () => {
         trackEvent('pro_checkout_click', { plan: 'monthly', price: 4.99 });
         if (haptics) haptics.success();
@@ -720,13 +1090,15 @@ export function initUI(map) {
     });
 
     // Famous Spots Modal Listeners
-    const spotsBtn = document.getElementById('spots-btn');
+    const spotsBtn = document.getElementById('settings-spots-btn');
     const spotsBackdrop = document.getElementById('spots-modal-backdrop');
     const spotsClose = document.getElementById('spots-modal-close');
+    const spotsBackBtn = document.getElementById('spots-back-to-settings-btn');
 
     if (spotsBtn && spotsBackdrop) {
         spotsBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            settingsPanel?.classList.remove('active');
             spotsBackdrop.classList.add('active');
             syncMapInteractions(map);
             if (haptics) haptics.tap();
@@ -737,6 +1109,15 @@ export function initUI(map) {
         spotsClose.addEventListener('click', () => {
             spotsBackdrop.classList.remove('active');
             syncMapInteractions(map);
+            if (haptics) haptics.tap();
+        });
+    }
+
+    if (spotsBackBtn && spotsBackdrop) {
+        spotsBackBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            spotsBackdrop.classList.remove('active');
+            openSettings('general');
             if (haptics) haptics.tap();
         });
     }
@@ -766,6 +1147,35 @@ export function initUI(map) {
         }
     }
 
+    // Changelog Modal Listeners
+    const changelogBackdrop = document.getElementById('changelog-modal-backdrop');
+    const changelogClose = document.getElementById('changelog-modal-close');
+    const changelogBackBtn = document.getElementById('changelog-back-to-settings-btn');
+
+    if (changelogClose && changelogBackdrop) {
+        changelogClose.addEventListener('click', () => {
+            closeChangelogModal();
+            if (haptics) haptics.tap();
+        });
+    }
+
+    if (changelogBackdrop) {
+        changelogBackdrop.addEventListener('click', (e) => {
+            if (e.target === changelogBackdrop) {
+                closeChangelogModal();
+            }
+        });
+    }
+
+    if (changelogBackBtn && changelogBackdrop) {
+        changelogBackBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeChangelogModal();
+            openSettings('more');
+            if (haptics) haptics.tap();
+        });
+    }
+
     // Camera Mode Toggle Button Listener
     const cameraToggleBtn = document.getElementById('camera-toggle-btn');
     if (cameraToggleBtn) {
@@ -781,14 +1191,14 @@ export function initUI(map) {
     if (radioPlayBtn) {
         radioPlayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            import('./audio.js').then(({ toggleRadio }) => toggleRadio());
+            toggleRadio();
             if (haptics) haptics.tap();
         });
     }
     if (radioNextBtn) {
         radioNextBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            import('./audio.js').then(({ nextRadioStation }) => nextRadioStation());
+            nextRadioStation();
             if (haptics) haptics.select();
         });
     }
@@ -810,6 +1220,9 @@ export function initUI(map) {
                     ? `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`
                     : `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
             }
+            document.querySelectorAll('.radio-station-btn').forEach((btn) => {
+                btn.classList.toggle('active', btn.dataset.station === radioState.station?.id);
+            });
         };
     }
 
@@ -894,13 +1307,72 @@ export function initUI(map) {
     initGameNotifications();
 }
 
+export function openSettings(tabName = null) {
+    if (typeof document === 'undefined') return;
+    const settingsPanel = document.getElementById('settings-panel');
+    if (!settingsPanel) return;
+    state.isSettingsOpen = true;
+    state.velocity = 0;
+    state.keys = {};
+    settingsPanel.classList.add('active');
+    const targetTab = tabName === 'more' ? 'about' : tabName;
+    if (targetTab && typeof settingsPanel.querySelectorAll === 'function') {
+        const tabBtn =
+            settingsPanel.querySelector(`[data-sx-tab="${targetTab}"]`) ||
+            settingsPanel.querySelector(`[data-sx-tab="${tabName}"]`);
+        if (tabBtn && typeof tabBtn.click === 'function') {
+            tabBtn.click();
+        }
+    }
+    syncMapInteractions(activeMap);
+}
+
+export function closeSettings() {
+    if (typeof document === 'undefined') return;
+    state.isSettingsOpen = false;
+    const settingsPanel = document.getElementById('settings-panel');
+    if (settingsPanel) {
+        settingsPanel.classList.remove('active');
+        syncMapInteractions(activeMap);
+    }
+}
+
+export function openChangelogModal() {
+    if (typeof document === 'undefined') return;
+    const backdrop = document.getElementById('changelog-modal-backdrop');
+    if (backdrop) {
+        backdrop.classList.add('active');
+        state.isInputFocused = true;
+        if (document.body && document.body.classList) {
+            document.body.classList.remove('hide-cursor');
+        }
+        syncMapInteractions(activeMap);
+    }
+}
+
+export function closeChangelogModal() {
+    if (typeof document === 'undefined') return;
+    const backdrop = document.getElementById('changelog-modal-backdrop');
+    if (backdrop) {
+        backdrop.classList.remove('active');
+        state.isInputFocused = false;
+        state.keys = {};
+        syncMapInteractions(activeMap);
+    }
+}
+
 export function closeAllPanels() {
+    state.isSettingsOpen = false;
     document.getElementById('settings-panel')?.classList.remove('active');
-    document.getElementById('mp-dropdown')?.classList.remove('active');
+    document.getElementById('spots-modal-backdrop')?.classList.remove('active');
+    closeChangelogModal();
     document.querySelector('.search-box')?.classList.remove('expanded');
     closeProModal();
     state.isInputFocused = false;
-    document.getElementById('location-search')?.blur();
+    const searchInput = document.getElementById('location-search');
+    if (searchInput && typeof searchInput.blur === 'function') {
+        searchInput.blur();
+    }
     syncMapInteractions(activeMap);
 }
 
@@ -1055,6 +1527,171 @@ export function updateToggleStates() {
         volumeLabelUI.textContent = Math.round(volumeSliderUI.value * 100) + '%';
         if (volumeSliderUI.value <= 0) volumeLabelUI.textContent = 'MUTED';
     }
+
+    document
+        .querySelectorAll('.haptics-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.haptics === (state.hapticsEnabled ? 'on' : 'off')));
+    document
+        .querySelectorAll('.skidmarks-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.skidmarks === (state.skidMarksEnabled ? 'on' : 'off')));
+    document
+        .querySelectorAll('.bodyroll-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.bodyroll === (state.bodyRollEnabled ? 'on' : 'off')));
+    document
+        .querySelectorAll('.drift-assist-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.assist === (state.driftAssist || 'assisted')));
+    document
+        .querySelectorAll('.tilt-sens-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.sens === (state.tiltSensitivity || 'normal')));
+    document
+        .querySelectorAll('.camera-fov-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.fov === (state.cameraFovMode || 'dynamic')));
+    document
+        .querySelectorAll('.autocenter-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.autocenter === (state.cameraAutoCenter ? 'on' : 'off')));
+    document
+        .querySelectorAll('.graphics-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.quality === (state.graphicsQuality || 'ultra')));
+    document
+        .querySelectorAll('.labels-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.labels === (state.mapLabels ? 'on' : 'off')));
+    document
+        .querySelectorAll('.hud-toggle button')
+        .forEach((b) => b.classList.toggle('active', b.dataset.hud === (state.hudVisibility || 'full')));
+
+    // Camera perspective toggle buttons and description
+    document
+        .querySelectorAll('.camera-mode-toggle button')
+        .forEach((b) => b.classList?.toggle('active', b.dataset?.camera === (state.cameraMode || 'chase')));
+    const camMode = state.cameraMode || 'chase';
+    const camLabel = document.getElementById('cam-mode-label');
+    if (camLabel) camLabel.textContent = camMode.toUpperCase();
+    const camDesc = document.getElementById('camera-mode-desc');
+    const camDescriptions = {
+        chase: 'Dynamic 3rd-person chase camera with drift compensation and speed tilt.',
+        hood: 'Immersive bumper/hood first-person perspective for extreme sense of speed.',
+        wide: 'High-angle cinematic overhead perspective with expanded peripheral vision.'
+    };
+    if (camDesc && camDescriptions[camMode]) {
+        camDesc.textContent = camDescriptions[camMode];
+    }
+
+    // Driver Telemetry Statistics
+    const statSpeed = document.getElementById('stat-top-speed');
+    const statDrift = document.getElementById('stat-drift-score');
+    const statDist = document.getElementById('stat-distance');
+    if (statSpeed) {
+        statSpeed.textContent = `${Math.round(state.topSpeedRecord || 0)} ${state.unit === 'mi' ? 'MPH' : 'KM/H'}`;
+    }
+    if (statDrift) {
+        statDrift.textContent = `${Math.round(state.driftScore || 0).toLocaleString()} PTS`;
+    }
+    if (statDist) {
+        statDist.textContent = `${(state.totalDistanceKm || 0).toFixed(1)} KM`;
+    }
+
+    const playerNameInput = document.getElementById('mp-player-name');
+    if (playerNameInput && document.activeElement !== playerNameInput) {
+        playerNameInput.value = state.playerName || 'Pilot';
+    }
+}
+
+export function applyMapLabels(map) {
+    if (!map || !map.getStyle) return;
+    try {
+        const style = map.getStyle();
+        if (!style || !style.layers) return;
+        const visibility = state.mapLabels !== false ? 'visible' : 'none';
+        style.layers.forEach((layer) => {
+            if (layer.type === 'symbol') {
+                try {
+                    map.setLayoutProperty(layer.id, 'visibility', visibility);
+                } catch {}
+            }
+        });
+    } catch {}
+}
+
+export function applyHudVisibility() {
+    if (typeof document === 'undefined') return;
+    const isHidden = state.hudVisibility === 'hidden';
+    document.body?.classList?.toggle('hidden-ui', isHidden);
+}
+
+export function applyGraphicsQuality(map = activeMap) {
+    if (typeof document === 'undefined') return;
+    const quality = state.graphicsQuality || 'ultra';
+
+    if (document.documentElement && document.documentElement.classList) {
+        document.documentElement.classList.remove('quality-ultra', 'quality-balanced', 'quality-eco');
+        document.documentElement.classList.add('quality-' + quality);
+    }
+
+    const threeLayer = getThreeLayer();
+    if (threeLayer && threeLayer.renderer && typeof threeLayer.renderer.setPixelRatio === 'function') {
+        const ratio =
+            quality === 'ultra'
+                ? Math.min(typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1, 2.0)
+                : quality === 'balanced'
+                  ? 1.0
+                  : 0.75;
+        threeLayer.renderer.setPixelRatio(ratio);
+        threeLayer.maxParticles = quality === 'ultra' ? 120 : quality === 'balanced' ? 60 : 15;
+    }
+
+    if (map && typeof map.getLayer === 'function' && typeof map.setPaintProperty === 'function') {
+        try {
+            if (map.getLayer('3d-buildings')) {
+                const opacity = quality === 'ultra' ? 0.95 : quality === 'balanced' ? 0.75 : 0.45;
+                map.setPaintProperty('3d-buildings', 'fill-extrusion-opacity', opacity);
+            }
+        } catch {}
+    }
+
+    if (map && typeof map.triggerRepaint === 'function') {
+        try {
+            map.triggerRepaint();
+        } catch {}
+    }
+}
+
+export function resetUserPreferences(map) {
+    state.masterVolume = 0.5;
+    state.unit = 'km';
+    state.collisionsEnabled = true;
+    state.is3D = true;
+    state.is3DBuildings = true;
+    state.hapticsEnabled = true;
+    state.skidMarksEnabled = true;
+    state.bodyRollEnabled = true;
+    state.driftAssist = 'assisted';
+    state.tiltSensitivity = 'normal';
+    state.cameraFovMode = 'dynamic';
+    state.cameraAutoCenter = true;
+    state.graphicsQuality = 'ultra';
+    state.mapLabels = true;
+    state.hudVisibility = 'full';
+    state.controlsMode = 'tilt';
+    state.activeVehicle = 'car';
+    state.godMode = false;
+    updateToggleStates();
+    applyHudVisibility();
+    applyGraphicsQuality(map);
+    if (map) applyMapLabels(map);
+    saveState();
+    showToast('PREFERENCES RESET', 'All options restored to factory defaults.');
+}
+
+export function filterSpots(category) {
+    if (typeof document === 'undefined') return;
+    document.querySelectorAll('.spot-filter-chip').forEach((chip) => {
+        chip.classList.toggle('active', chip.dataset.filter === category);
+    });
+    document.querySelectorAll('.spot-card').forEach((card) => {
+        const spotCat = card.dataset.spotCategory;
+        const visible = category === 'all' || spotCat === category;
+        card.style.display = visible ? 'flex' : 'none';
+    });
 }
 
 export function add3DBuildings(map) {

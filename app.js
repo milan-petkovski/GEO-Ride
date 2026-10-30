@@ -29,7 +29,7 @@ import {
 import { recordPurchase } from './js/supabase-georide.js';
 import { initControls, pollGamepad } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
-import { initMultiplayer, updateOtherPlayers } from './js/multiplayer.js';
+import { updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
 import { cleanMap, addSkidMarksLayer } from './js/utils.js';
 import { trackEvent, trackWebVitals } from './js/analytics.js';
@@ -236,6 +236,13 @@ function update(time) {
     const dtFinal = isNaN(rawDt) ? 1 : Math.min(Math.max(rawDt, 0.6), 1.4);
 
     if (state.loopStarted) {
+        // While settings panel is open, pause heavy 3D redraw and physics to ensure buttery smooth 60fps scrolling
+        if (state.isSettingsOpen) {
+            updateAudio(state);
+            requestAnimationFrame(update);
+            return;
+        }
+
         pollGamepad();
         updatePhysics(dtFinal, map);
         updateCamera(dtFinal, map);
@@ -294,35 +301,3 @@ initControls();
 
 // Disable Right-Click
 document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-document.getElementById('mp-btn').onclick = (e) => {
-    const mpDropdown = document.getElementById('mp-dropdown');
-    if (mpDropdown && mpDropdown.contains(e.target)) return;
-
-    e.stopPropagation();
-
-    // Enforce Exclusivity: Close other popups
-    const settingsPanel = document.getElementById('settings-panel');
-    if (settingsPanel && settingsPanel.classList.contains('active')) {
-        settingsPanel.classList.remove('active');
-        // Re-enable map interactions that were disabled by settings
-        if (window.map) {
-            window.map.dragPan?.enable();
-            window.map.scrollZoom?.enable();
-            window.map.doubleClickZoom?.enable();
-            window.map.touchZoomRotate?.enable();
-            window.map.keyboard?.enable();
-        }
-    }
-    const searchBox = document.querySelector('.search-box');
-    if (searchBox) searchBox.classList.remove('expanded');
-
-    if (!window.mpInitialized) {
-        initMultiplayer();
-        if (mpDropdown) mpDropdown.classList.add('active');
-        trackEvent('multiplayer_init');
-    } else {
-        const isActive = mpDropdown.classList.toggle('active');
-        trackEvent('multiplayer_toggle', { active: isActive });
-    }
-};

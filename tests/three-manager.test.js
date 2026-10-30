@@ -310,6 +310,13 @@ test('threeLayer onAdd, buildVehicle across all vehicle types, and render loop e
             }
         },
         AmbientLight: class {},
+        PointLight: class {
+            constructor() {
+                this.position = {
+                    set() {}
+                };
+            }
+        },
         DirectionalLight: class {
             constructor() {
                 this.position = {

@@ -20,6 +20,7 @@ export const haptics = {
      * Check if device supports haptic feedback
      */
     isSupported() {
+        if (state && state.hapticsEnabled === false) return false;
         const nav = this.getNav();
         return !!(nav && (nav.vibrate || nav.mozVibrate || nav.webkitVibrate || nav.msVibrate));
     },

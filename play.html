@@ -258,6 +258,8 @@
                 </button>
             </aside>
 
+            <div id="hidden-ui-edge-trigger" class="hidden-ui-edge-trigger" aria-hidden="true"></div>
+
             <header>
                 <div class="header-left">
                     <a href="/" class="logo" aria-label="GEO Ride - Back to Home" title="Back to Home"
@@ -283,28 +285,6 @@
                     </div>
 
                     <button
-                        id="spots-btn"
-                        class="spots-header-btn"
-                        title="Famous Driving Spots"
-                        aria-label="Famous Driving Spots"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="spots-icon"
-                        >
-                            <polygon
-                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-                            ></polygon>
-                        </svg>
-                        <span class="spots-btn-label">SPOTS</span>
-                    </button>
-
-                    <button
                         id="pro-open-btn"
                         class="pro-header-btn"
                         title="Unlock GEO Ride Pro"
@@ -327,67 +307,13 @@
                         </span>
                     </button>
 
-                    <div class="multiplayer-wrapper">
-                        <button id="mp-btn" class="mp-main-btn" title="Multiplayer">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                            <span class="beta-badge">BETA</span>
-                        </button>
-
-                        <div id="mp-dropdown" class="mp-dropdown">
-                            <div class="mp-dropdown-header">
-                                <span>MULTIPLAYER</span>
-                                <div id="mp-status-dot" class="status-dot"></div>
-                            </div>
-
-                            <div class="mp-section">
-                                <div class="id-row">
-                                    <div class="id-badge" id="my-peer-id" title="Your personal code">...</div>
-                                    <button id="copy-id-btn">COPY</button>
-                                </div>
-                            </div>
-
-                            <div class="mp-section">
-                                <div
-                                    id="mp-connection-status"
-                                    style="
-                                        font-size: 0.7rem;
-                                        color: #ff4b4b;
-                                        text-align: center;
-                                        margin-bottom: 10px;
-                                        font-weight: 800;
-                                        letter-spacing: 1px;
-                                    "
-                                >
-                                    NOT CONNECTED
-                                </div>
-                                <input type="text" id="join-peer-id" placeholder="ENTER PRIVATE CODE" />
-                                <button id="join-mp-btn" type="button" class="primary-btn">JOIN ROOM</button>
-                                <button id="disconnect-mp-btn" class="danger-btn" style="display: none">
-                                    DISCONNECT
-                                </button>
-                            </div>
-
-                            <div id="mp-players-list" class="mp-players-list" style="display: none"></div>
-                        </div>
-                    </div>
-
                     <a
                         href="https://paypal.me/milanwebportal"
                         target="_blank"
+                        rel="noopener"
                         class="coffee-btn"
                         title="Buy me a coffee"
+                        aria-label="Buy me a coffee"
                     >
                         <svg
                             viewBox="0 0 24 24"
@@ -425,365 +351,6 @@
                     </button>
 
                     <div class="settings-wrapper">
-                        <div id="settings-panel" class="settings-panel">
-                            <div class="settings-mobile-header">
-                                <span>SETTINGS</span>
-                                <button
-                                    id="settings-close-btn"
-                                    class="settings-close-btn"
-                                    title="Close Settings"
-                                    aria-label="Close Settings"
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2.5"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        style="width: 20px; height: 20px"
-                                    >
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Dedicated Mobile Search Section (Mobile Only) -->
-                            <div class="settings-section mobile-only-section" id="mobile-search-section">
-                                <label>SEARCH LOCATION</label>
-                                <div class="mobile-search-row">
-                                    <input
-                                        type="text"
-                                        id="mobile-location-search"
-                                        placeholder="Search city, address, country..."
-                                    />
-                                    <button id="mobile-search-btn" class="primary-btn" aria-label="Search location">
-                                        <svg
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            style="
-                                                width: 16px;
-                                                height: 16px;
-                                                margin: 0;
-                                                display: inline-block;
-                                                vertical-align: middle;
-                                            "
-                                        >
-                                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Multiplayer Section -->
-                            <div class="settings-section" id="mobile-mp-section">
-                                <label>MULTIPLAYER <span class="beta-pill">BETA</span></label>
-                                <div class="mp-section" style="margin-top: 6px">
-                                    <div class="id-row">
-                                        <div class="id-badge" id="mobile-my-peer-id" title="Your personal code">
-                                            ...
-                                        </div>
-                                        <button
-                                            id="mobile-copy-id-btn"
-                                            class="util-btn"
-                                            style="height: 32px; font-size: 11px; padding: 0 10px"
-                                        >
-                                            COPY
-                                        </button>
-                                    </div>
-                                </div>
-                                <div
-                                    class="mp-section"
-                                    style="margin-top: 6px; display: flex; flex-direction: column; gap: 8px"
-                                >
-                                    <div
-                                        id="mobile-mp-connection-status"
-                                        style="
-                                            font-size: 0.7rem;
-                                            color: #ff4b4b;
-                                            text-align: center;
-                                            font-weight: 800;
-                                            letter-spacing: 1px;
-                                        "
-                                    >
-                                        NOT CONNECTED
-                                    </div>
-                                    <input
-                                        type="text"
-                                        id="mobile-join-peer-id"
-                                        placeholder="ENTER PRIVATE CODE"
-                                        style="
-                                            background: rgba(255, 255, 255, 0.03);
-                                            border: 1px solid rgba(255, 255, 255, 0.1);
-                                            border-radius: 10px;
-                                            padding: 10px;
-                                            color: #fff;
-                                            text-align: center;
-                                            font-size: 12px;
-                                            outline: none;
-                                            width: 100%;
-                                            box-sizing: border-box;
-                                        "
-                                    />
-                                    <button
-                                        id="mobile-join-mp-btn"
-                                        type="button"
-                                        class="primary-btn"
-                                        style="width: 100%; padding: 10px; font-size: 12px"
-                                    >
-                                        JOIN ROOM
-                                    </button>
-                                    <button
-                                        id="mobile-disconnect-mp-btn"
-                                        class="danger-btn"
-                                        style="display: none; width: 100%; padding: 10px; font-size: 12px"
-                                    >
-                                        DISCONNECT
-                                    </button>
-                                </div>
-                                <div
-                                    id="mobile-mp-players-list"
-                                    class="mp-players-list"
-                                    style="display: none; margin-top: 6px"
-                                ></div>
-                            </div>
-
-                            <div class="settings-section">
-                                <label
-                                    for="master-volume"
-                                    style="display: flex; justify-content: space-between; align-items: center"
-                                >
-                                    <span>MASTER SOUND</span>
-                                    <span id="volume-label" style="font-size: 0.7rem; opacity: 0.7">50%</span>
-                                </label>
-                                <input
-                                    type="range"
-                                    id="master-volume"
-                                    min="0"
-                                    max="1"
-                                    step="0.05"
-                                    value="0.5"
-                                    style="width: 100%; cursor: pointer; accent-color: #00f2ff"
-                                />
-                            </div>
-
-                            <div class="settings-section">
-                                <label>VEHICLE</label>
-                                <div class="toggle-group vehicle-toggle">
-                                    <button class="active" data-vehicle="car">CAR</button>
-                                    <button data-vehicle="bus">BUS</button>
-                                    <button data-vehicle="truck">TRUCK</button>
-                                    <button
-                                        data-vehicle="god"
-                                        id="vehicle-god-btn"
-                                        style="
-                                            --glow: #c470f0;
-                                            color: #c470f0;
-                                            display: inline-flex;
-                                            align-items: center;
-                                            justify-content: center;
-                                            gap: 4px;
-                                        "
-                                    >
-                                        <span>GOD</span
-                                        ><span
-                                            class="pro-badge-pill"
-                                            style="
-                                                font-size: 0.58rem;
-                                                background: linear-gradient(135deg, #9b3fd4, #c470f0);
-                                                color: #fff;
-                                                padding: 2px 6px;
-                                                border-radius: 999px;
-                                                line-height: 1;
-                                                display: inline-flex;
-                                                align-items: center;
-                                                font-weight: 800;
-                                                letter-spacing: 0.5px;
-                                            "
-                                            >PRO</span
-                                        >
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="settings-section">
-                                <label>MAP STYLE</label>
-                                <div class="toggle-group style-toggle">
-                                    <button class="active" data-style="streets-v12">STREETS</button>
-                                    <button data-style="satellite-v9">SATELLITE</button>
-                                    <button data-style="satellite-streets-v12">HYBRID</button>
-                                    <button data-style="standard">WOW</button>
-                                </div>
-                            </div>
-                            <div class="settings-section" id="light-preset-section" style="display: none">
-                                <label>LIGHT PRESET</label>
-                                <div class="toggle-group light-toggle" id="light-main-group">
-                                    <button class="active" id="btn-realtime" data-preset="realtime">REAL TIME</button>
-                                    <button id="btn-manual-trigger">MANUAL</button>
-                                </div>
-                                <div
-                                    id="light-manual-group"
-                                    style="display: none; align-items: center; gap: 8px; width: 100%"
-                                >
-                                    <button
-                                        id="btn-light-back"
-                                        style="
-                                            flex-shrink: 0;
-                                            background: rgba(255, 255, 255, 0.05);
-                                            border: 1px solid rgba(255, 255, 255, 0.1);
-                                            border-radius: 6px;
-                                            color: #fff;
-                                            cursor: pointer;
-                                            padding: 6px 12px;
-                                            font-size: 11px;
-                                            font-weight: 600;
-                                            transition: all 0.2s ease;
-                                        "
-                                        onmouseover="
-                                            this.style.background = 'rgba(255,255,255,0.1)';
-                                            this.style.borderColor = 'rgba(255,255,255,0.2)';
-                                        "
-                                        onmouseout="
-                                            this.style.background = 'rgba(255,255,255,0.05)';
-                                            this.style.borderColor = 'rgba(255,255,255,0.1)';
-                                        "
-                                    >
-                                        ←
-                                    </button>
-                                    <div class="toggle-group light-toggle" style="flex: 1; margin: 0">
-                                        <button data-preset="day">DAY</button>
-                                        <button data-preset="dawn">DAWN</button>
-                                        <button data-preset="dusk">DUSK</button>
-                                        <button data-preset="night">NIGHT</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="settings-section">
-                                <label>UNITS</label>
-                                <div class="toggle-group unit-toggle">
-                                    <button class="active" data-unit="km">KM/H</button>
-                                    <button data-unit="mi">MPH</button>
-                                </div>
-                            </div>
-                            <div class="settings-section" id="collision-settings-section">
-                                <label>COLLISIONS</label>
-                                <div class="toggle-group collision-toggle">
-                                    <button class="active" data-collision="on">ON</button>
-                                    <button data-collision="off">OFF</button>
-                                </div>
-                            </div>
-                            <div class="settings-row">
-                                <div class="settings-section">
-                                    <label>3D VEHICLES</label>
-                                    <div class="toggle-group d3v-toggle">
-                                        <button class="active" data-d3v="on">ON</button>
-                                        <button data-d3v="off">OFF</button>
-                                    </div>
-                                </div>
-                                <div class="settings-section">
-                                    <label>3D BUILDINGS</label>
-                                    <div class="toggle-group d3b-toggle">
-                                        <button class="active" data-d3b="on">ON</button>
-                                        <button data-d3b="off">OFF</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="settings-section">
-                                <label style="color: #ff00e5; text-shadow: 0 0 10px #ff00e5">GOD MODE</label>
-                                <div class="toggle-group god-toggle">
-                                    <button class="active" data-god="off">OFF</button>
-                                    <button
-                                        data-god="on"
-                                        id="god-on-btn"
-                                        style="
-                                            --glow: #ff00e5;
-                                            display: inline-flex;
-                                            align-items: center;
-                                            justify-content: center;
-                                            gap: 4px;
-                                        "
-                                    >
-                                        <span>ON</span
-                                        ><span
-                                            class="pro-badge-pill"
-                                            style="
-                                                font-size: 0.58rem;
-                                                background: linear-gradient(135deg, #9b3fd4, #c470f0);
-                                                color: #fff;
-                                                padding: 2px 6px;
-                                                border-radius: 999px;
-                                                line-height: 1;
-                                                display: inline-flex;
-                                                align-items: center;
-                                                font-weight: 800;
-                                                letter-spacing: 0.5px;
-                                            "
-                                            >PRO</span
-                                        >
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="settings-section" id="mobile-controls-toggle-section">
-                                <label>MOBILE CONTROLS</label>
-                                <div class="toggle-group controls-toggle">
-                                    <button class="active" data-controls="tilt">TILT STEER</button>
-                                    <button data-controls="off">OFF</button>
-                                </div>
-                            </div>
-
-                            <!-- Dedicated Mobile Coffee Section (Mobile Only) -->
-                            <div
-                                class="settings-section mobile-only-section"
-                                id="mobile-coffee-section"
-                                style="
-                                    margin-top: 15px;
-                                    border-top: 1px solid rgba(255, 255, 255, 0.08);
-                                    padding-top: 15px;
-                                "
-                            >
-                                <a
-                                    href="https://paypal.me/milanwebportal"
-                                    target="_blank"
-                                    class="mobile-coffee-link"
-                                    style="
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        gap: 8px;
-                                        background: rgba(0, 242, 255, 0.1);
-                                        border: 1px solid rgba(0, 242, 255, 0.2);
-                                        border-radius: 12px;
-                                        padding: 12px;
-                                        color: #00f2ff;
-                                        text-decoration: none;
-                                        font-weight: 800;
-                                        font-size: 13px;
-                                        letter-spacing: 1px;
-                                    "
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        style="width: 18px; height: 18px; margin: 0"
-                                    >
-                                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                                        <line x1="6" y1="1" x2="6" y2="4"></line>
-                                        <line x1="10" y1="1" x2="10" y2="4"></line>
-                                        <line x1="14" y1="1" x2="14" y2="4"></line>
-                                    </svg>
-                                    <span>BUY ME A COFFEE</span>
-                                </a>
-                            </div>
-                        </div>
                         <button id="settings-btn" class="settings-main-btn" aria-label="Open settings">
                             <svg
                                 viewBox="0 0 24 24"
@@ -806,8 +373,9 @@
 
             <div class="bottom-ui">
                 <div class="copyright-notice">
-                    Copyright © 2026 <a href="https://milanwebportal.com" target="_blank">milanwebportal.com</a>. All
-                    rights reserved.
+                    Copyright &copy; 2026&nbsp;<a href="https://milanwebportal.com" target="_blank" rel="noopener"
+                        >milanwebportal.com</a
+                    >.&nbsp;All rights reserved.
                 </div>
                 <div class="speed-container">
                     <div id="speed">0</div>
@@ -836,64 +404,6 @@
                     <div class="control-item">
                         <kbd>SPACE</kbd>
                         <span>DRIFT</span>
-                    </div>
-                </div>
-
-                <div class="bottom-actions">
-                    <button
-                        id="camera-toggle-btn"
-                        class="cam-toggle-btn"
-                        title="Toggle Camera View (C)"
-                        aria-label="Toggle Camera View"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="cam-icon"
-                        >
-                            <path
-                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                            ></path>
-                            <circle cx="12" cy="13" r="4"></circle>
-                        </svg>
-                        <span id="cam-mode-label">CHASE</span>
-                    </button>
-
-                    <div id="radio-widget" class="radio-widget" title="Web Radio (M)">
-                        <button id="radio-play-btn" class="radio-btn" aria-label="Play / Pause Radio">
-                            <svg
-                                id="radio-play-icon"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                        </button>
-                        <div class="radio-text">
-                            <span class="radio-tag">RADIO</span>
-                            <span id="radio-station-title" class="radio-name">SYNTHWAVE FM</span>
-                        </div>
-                        <button id="radio-next-btn" class="radio-btn radio-next" aria-label="Next Station">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <polygon points="5 4 15 12 5 20 5 4"></polygon>
-                                <line x1="19" y1="5" x2="19" y2="19"></line>
-                            </svg>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -930,6 +440,1466 @@
                         <div class="pedal-label">GAS</div>
                         <div class="pedal-pedal"></div>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen Settings Center -->
+        <div id="settings-panel" class="sx-modal" role="dialog" aria-modal="true" aria-labelledby="sx-title">
+            <div class="sx-shell">
+                <div class="sx-head">
+                    <div class="sx-head-text">
+                        <h2 id="sx-title" class="sx-title">SETTINGS</h2>
+                        <div class="sx-subtitle-row">
+                            <span class="sx-subtitle">GEO RIDE</span>
+                            <button
+                                id="settings-changelog-pill"
+                                class="sx-version-pill"
+                                type="button"
+                                title="View Changelog"
+                            >
+                                v1.2.0 &bull; CHANGELOG
+                            </button>
+                        </div>
+                    </div>
+                    <button
+                        id="settings-close-btn"
+                        class="sx-close"
+                        type="button"
+                        title="Close Settings"
+                        aria-label="Close Settings"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="sx-tabs" role="tablist" aria-label="Settings sections">
+                    <div class="sx-tab-group">
+                        <span class="sx-tab-category">GAMEPLAY</span>
+                        <button
+                            class="sx-tab active"
+                            type="button"
+                            role="tab"
+                            aria-selected="true"
+                            data-sx-tab="general"
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <line x1="4" y1="21" x2="4" y2="14"></line>
+                                <line x1="4" y1="10" x2="4" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="3"></line>
+                                <line x1="20" y1="21" x2="20" y2="16"></line>
+                                <line x1="20" y1="12" x2="20" y2="3"></line>
+                                <line x1="1" y1="14" x2="7" y2="14"></line>
+                                <line x1="9" y1="8" x2="15" y2="8"></line>
+                                <line x1="17" y1="16" x2="23" y2="16"></line>
+                            </svg>
+                            <span>GENERAL</span>
+                        </button>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="driving">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <line x1="12" y1="2" x2="12" y2="9"></line>
+                                <line x1="4.2" y1="17" x2="9.9" y2="13.6"></line>
+                                <line x1="19.8" y1="17" x2="14.1" y2="13.6"></line>
+                            </svg>
+                            <span>DRIVING</span>
+                        </button>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="places">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                            </svg>
+                            <span>PLACES</span>
+                        </button>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="controls">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <rect x="2" y="6" width="20" height="12" rx="3"></rect>
+                                <line x1="6" y1="10" x2="6" y2="14"></line>
+                                <line x1="4" y1="12" x2="8" y2="12"></line>
+                                <circle cx="16" cy="11" r="1"></circle>
+                                <circle cx="18.5" cy="13" r="1"></circle>
+                            </svg>
+                            <span>CONTROLS</span>
+                        </button>
+                    </div>
+
+                    <div class="sx-tab-group">
+                        <span class="sx-tab-category">SIMULATION</span>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="map">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                                <line x1="8" y1="2" x2="8" y2="18"></line>
+                                <line x1="16" y1="6" x2="16" y2="22"></line>
+                            </svg>
+                            <span>MAP &amp; 3D</span>
+                        </button>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="multiplayer">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span>MULTIPLAYER</span>
+                        </button>
+                    </div>
+
+                    <div class="sx-tab-group">
+                        <span class="sx-tab-category">INFORMATION</span>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="about">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span>ABOUT</span>
+                        </button>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="changelog">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                            <span>CHANGELOG</span>
+                        </button>
+                    </div>
+                </nav>
+
+                <div class="sx-body">
+                    <!-- GENERAL -->
+                    <section class="sx-pane active" role="tabpanel" data-sx-pane="general">
+                        <div class="sx-card sx-span-2">
+                            <label class="sx-label" for="mobile-location-search">SEARCH LOCATION</label>
+                            <div class="sx-search-row">
+                                <input
+                                    type="text"
+                                    id="mobile-location-search"
+                                    class="sx-input"
+                                    placeholder="Search city, address, country..."
+                                    autocomplete="off"
+                                    autocapitalize="off"
+                                    spellcheck="false"
+                                    enterkeyhint="search"
+                                />
+                                <button
+                                    id="mobile-search-btn"
+                                    class="sx-btn sx-btn-primary sx-btn-icon"
+                                    type="button"
+                                    aria-label="Search location"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button id="settings-spots-btn" class="sx-btn sx-btn-ghost" type="button">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <polygon
+                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                                    ></polygon>
+                                </svg>
+                                <span>FAMOUS DRIVING SPOTS</span>
+                            </button>
+                        </div>
+
+                        <div class="sx-card">
+                            <label class="sx-label sx-label-split" for="master-volume">
+                                <span>MASTER SOUND</span>
+                                <span id="volume-label" class="sx-value">50%</span>
+                            </label>
+                            <input
+                                type="range"
+                                id="master-volume"
+                                class="sx-range"
+                                min="0"
+                                max="1"
+                                step="0.05"
+                                value="0.5"
+                            />
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">SPEED UNITS</span>
+                            <div class="toggle-group unit-toggle">
+                                <button class="active" data-unit="km" type="button">KM/H</button>
+                                <button data-unit="mi" type="button">MPH</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">WEB RADIO</span>
+                            <div id="radio-widget" class="sx-radio" title="Web Radio (M)">
+                                <button
+                                    id="radio-play-btn"
+                                    class="sx-radio-btn"
+                                    type="button"
+                                    aria-label="Play / Pause Radio"
+                                >
+                                    <svg
+                                        id="radio-play-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <div class="sx-radio-text">
+                                    <span class="sx-radio-tag">NOW TUNED</span>
+                                    <span id="radio-station-title" class="sx-radio-name">SYNTHWAVE FM</span>
+                                </div>
+                                <button
+                                    id="radio-next-btn"
+                                    class="sx-radio-btn"
+                                    type="button"
+                                    aria-label="Next Station"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                                        <line x1="19" y1="5" x2="19" y2="19"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="toggle-group radio-stations-group" style="margin-top: 10px">
+                                <button class="radio-station-btn active" data-station="synthwave" type="button">
+                                    SYNTHWAVE
+                                </button>
+                                <button class="radio-station-btn" data-station="chillsynth" type="button">
+                                    CHILL LO-FI
+                                </button>
+                                <button class="radio-station-btn" data-station="phonk" type="button">
+                                    TOKYO PHONK
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">HAPTIC VIBRATION</span>
+                            <div class="toggle-group haptics-toggle">
+                                <button class="active" data-haptics="on" type="button">ON</button>
+                                <button data-haptics="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">FAST RESPAWN</span>
+                            <button id="settings-home-btn" class="sx-btn sx-btn-ghost" type="button">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                <span>RESPAWN AT BELGRADE</span>
+                            </button>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">FACTORY RESET</span>
+                            <button id="settings-reset-prefs-btn" class="sx-btn sx-btn-danger" type="button">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <polyline points="1 4 1 10 7 10"></polyline>
+                                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                </svg>
+                                <span>RESTORE FACTORY DEFAULTS</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- DRIVING -->
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="driving" hidden>
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">VEHICLE CLASS</span>
+                            <div class="toggle-group vehicle-toggle">
+                                <button class="active" data-vehicle="car" type="button">CAR</button>
+                                <button data-vehicle="bus" type="button">BUS</button>
+                                <button data-vehicle="truck" type="button">TRUCK</button>
+                                <button data-vehicle="god" id="vehicle-god-btn" type="button" class="sx-god-btn">
+                                    <span>GOD</span><span class="pro-badge-pill">PRO</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card" id="collision-settings-section">
+                            <span class="sx-label">BUILDING COLLISIONS</span>
+                            <div class="toggle-group collision-toggle">
+                                <button class="active" data-collision="on" type="button">ON</button>
+                                <button data-collision="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label sx-label-god">GOD FLIGHT MODE</span>
+                            <div class="toggle-group god-toggle">
+                                <button class="active" data-god="off" type="button">OFF</button>
+                                <button data-god="on" id="god-on-btn" type="button" class="sx-god-btn">
+                                    <span>ON</span><span class="pro-badge-pill">PRO</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">SUSPENSION BODY ROLL</span>
+                            <div class="toggle-group bodyroll-toggle">
+                                <button class="active" data-bodyroll="on" type="button">SMOOTH</button>
+                                <button data-bodyroll="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">TIRE SMOKE &amp; SKIDMARKS</span>
+                            <div class="toggle-group skidmarks-toggle">
+                                <button class="active" data-skidmarks="on" type="button">ON</button>
+                                <button data-skidmarks="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">DRIFT STEER ASSIST</span>
+                            <div class="toggle-group drift-assist-toggle">
+                                <button class="active" data-assist="assisted" type="button">ASSISTED</button>
+                                <button data-assist="pro" type="button">PRO DRIFT</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- FAMOUS PLACES -->
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="places" hidden>
+                        <div class="sx-card sx-span-2 sx-places-pinned-head">
+                            <div class="sx-places-head">
+                                <div>
+                                    <span class="sx-label">GLOBAL DESTINATIONS</span>
+                                    <p class="sx-desc">
+                                        1-Click Teleport to the most legendary roads, passes, and circuits on Earth
+                                    </p>
+                                </div>
+                                <div class="spots-filters">
+                                    <button type="button" class="spot-filter-chip active" data-filter="all">
+                                        ALL (17)
+                                    </button>
+                                    <button type="button" class="spot-filter-chip" data-filter="circuit">
+                                        CIRCUITS (5)
+                                    </button>
+                                    <button type="button" class="spot-filter-chip" data-filter="city">
+                                        CITIES (7)
+                                    </button>
+                                    <button type="button" class="spot-filter-chip" data-filter="pass">
+                                        PASSES (5)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spots-list sx-span-2">
+                            <!-- Tokyo -->
+                            <div class="spot-card spot-list-card" data-spot-id="tokyo" data-spot-category="city">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">JAPAN &bull; STREET DRIFT &bull; CITY</div>
+                                    <div class="spot-card-title">Tokyo Shuto Expressway (Tokyo Drift)</div>
+                                    <p class="spot-card-desc">
+                                        World capital of midnight street racing, Wangan battles, and iconic Tokyo Drift
+                                        culture. Multi-tier elevated highway system slicing through illuminated Shinjuku
+                                        skyscrapers above Tokyo Bay.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Tokyo Shuto Expressway">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Monaco -->
+                            <div class="spot-card spot-list-card" data-spot-id="monaco" data-spot-category="circuit">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">MONACO &bull; FORMULA 1 CIRCUIT</div>
+                                    <div class="spot-card-title">Monaco GP Marina Circuit</div>
+                                    <p class="spot-card-desc">
+                                        The crown jewel of Formula 1 racing since 1929. World-famous for surgical
+                                        precision past superyachts, the legendary Casino Square hairpin, and the echoing
+                                        coastal tunnel roar.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Monaco GP Circuit">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Nürburgring -->
+                            <div
+                                class="spot-card spot-list-card"
+                                data-spot-id="nurburgring"
+                                data-spot-category="circuit"
+                            >
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">GERMANY &bull; MOTORSPORT CIRCUIT</div>
+                                    <div class="spot-card-title">Nürburgring Nordschleife (The Green Hell)</div>
+                                    <p class="spot-card-desc">
+                                        The Green Hell: the universal proving ground for automotive performance. 20.8 km
+                                        of unforgiving tarmac, severe elevation plunges, and over 150 corners carved
+                                        into the Eifel mountains.
+                                    </p>
+                                </div>
+                                <button
+                                    class="spot-drive-btn"
+                                    type="button"
+                                    aria-label="Drive Nürburgring Nordschleife"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Silverstone -->
+                            <div
+                                class="spot-card spot-list-card"
+                                data-spot-id="silverstone"
+                                data-spot-category="circuit"
+                            >
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">UK &bull; FORMULA 1 CIRCUIT</div>
+                                    <div class="spot-card-title">Silverstone Grand Prix Circuit</div>
+                                    <p class="spot-card-desc">
+                                        The historic home of British motorsport and high-speed aerodynamics. Full
+                                        throttle sweeps through Maggotts, Becketts, Chapel, and the celebrated Stowe
+                                        corner.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Silverstone GP Circuit">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Spa-Francorchamps -->
+                            <div class="spot-card spot-list-card" data-spot-id="spa" data-spot-category="circuit">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">BELGIUM &bull; FORMULA 1 CIRCUIT</div>
+                                    <div class="spot-card-title">Circuit de Spa-Francorchamps (Eau Rouge)</div>
+                                    <p class="spot-card-desc">
+                                        Rollercoaster motorsport Mecca hidden in the Ardennes forest. Legendary for the
+                                        heart-stopping compression of Eau Rouge, the climb of Raidillon, and ultra-fast
+                                        Kemmel Straight.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Spa-Francorchamps">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Laguna Seca -->
+                            <div
+                                class="spot-card spot-list-card"
+                                data-spot-id="lagunaseca"
+                                data-spot-category="circuit"
+                            >
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">USA &bull; MOTORSPORT CIRCUIT</div>
+                                    <div class="spot-card-title">Laguna Seca Raceway (The Corkscrew)</div>
+                                    <p class="spot-card-desc">
+                                        Monterey's world-famous road course crowned by Turn 8 and 8A: The Corkscrew, a
+                                        blinding 5.5-story drop where cars plummet down 59 vertical feet through
+                                        left-right camber sweeps.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Laguna Seca">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Stelvio Pass -->
+                            <div class="spot-card spot-list-card" data-spot-id="stelvio" data-spot-category="pass">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">ITALY &bull; ALPINE PASS</div>
+                                    <div class="spot-card-title">Stelvio Pass (Passo dello Stelvio)</div>
+                                    <p class="spot-card-desc">
+                                        Hailed as the greatest driving road on Earth. 48 numbered hairpin switchbacks
+                                        ascending to 2,757 meters altitude with dramatic Alpine mountain drop-offs.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Stelvio Pass">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Transfăgărășan -->
+                            <div
+                                class="spot-card spot-list-card"
+                                data-spot-id="transfagarasan"
+                                data-spot-category="pass"
+                            >
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">ROMANIA &bull; CARPATHIAN PASS</div>
+                                    <div class="spot-card-title">Transfăgărășan Mountain Highway</div>
+                                    <p class="spot-card-desc">
+                                        Carpathian mountain masterpiece built across Romania's highest peaks. Miles of
+                                        unbroken S-curves, viaduct bridges, and glacial valleys celebrated across global
+                                        car culture.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Transfăgărășan">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Tail of the Dragon -->
+                            <div
+                                class="spot-card spot-list-card"
+                                data-spot-id="tailofthedragon"
+                                data-spot-category="pass"
+                            >
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">USA &bull; SMOKY MOUNTAINS &bull; PASS</div>
+                                    <div class="spot-card-title">Tail of the Dragon (318 Mountain Curves)</div>
+                                    <p class="spot-card-desc">
+                                        America's top curve-carving road: 318 relentless curves packed into just 11
+                                        miles bordering the Great Smoky Mountains National Park with zero intersecting
+                                        driveways.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Tail of the Dragon">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- San Francisco Lombard -->
+                            <div class="spot-card spot-list-card" data-spot-id="sanfrancisco" data-spot-category="pass">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">USA &bull; STEEP SWITCHBACKS &bull; PASS</div>
+                                    <div class="spot-card-title">San Francisco Lombard Street Hairpins</div>
+                                    <p class="spot-card-desc">
+                                        The world's most crooked street. Eight sharp cobblestone switchbacks snaking
+                                        down a 27% downhill grade on Russian Hill, immortalized in countless cinematic
+                                        car chases.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Lombard Street">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Mulholland Drive -->
+                            <div class="spot-card spot-list-card" data-spot-id="mulholland" data-spot-category="pass">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">USA &bull; CANYON RIDGE &bull; PASS</div>
+                                    <div class="spot-card-title">Mulholland Drive Canyon Ridge</div>
+                                    <p class="spot-card-desc">
+                                        Legendary canyon ridgeline towering above the Hollywood Hills and Los Angeles
+                                        basin. The historic playground of nocturnal canyon carvers and sports car
+                                        culture.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Mulholland Drive">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Paris -->
+                            <div class="spot-card spot-list-card" data-spot-id="paris" data-spot-category="city">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">FRANCE &bull; HISTORIC ROUNDABOUT &bull; CITY</div>
+                                    <div class="spot-card-title">Arc de Triomphe &amp; Champs-Élysées</div>
+                                    <p class="spot-card-desc">
+                                        The most thrilling multi-lane roundabout on Earth. Twelve massive Parisian
+                                        avenues converge around Napoleon's monument with zero lane markings, demanding
+                                        total driver reflexes.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Arc de Triomphe">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- London -->
+                            <div class="spot-card spot-list-card" data-spot-id="london" data-spot-category="city">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">UK &bull; ROYAL EMBANKMENT &bull; CITY</div>
+                                    <div class="spot-card-title">Westminster &amp; Big Ben Thames Route</div>
+                                    <p class="spot-card-desc">
+                                        Classic British motoring along the River Thames embankment. Cross iconic
+                                        Westminster Bridge with Big Ben and Parliament looming overhead through tight
+                                        London corridors.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Westminster and Big Ben">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Dubai -->
+                            <div class="spot-card spot-list-card" data-spot-id="dubai" data-spot-category="city">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">UAE &bull; HYPERCAR HIGHWAY &bull; CITY</div>
+                                    <div class="spot-card-title">Dubai Sheikh Zayed 14-Lane Skyline</div>
+                                    <p class="spot-card-desc">
+                                        Futuristic 14-lane hypercar freeway cutting straight through the world's most
+                                        spectacular skyscraper corridor under dazzling desert skyline lighting.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Sheikh Zayed Road">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Miami -->
+                            <div class="spot-card spot-list-card" data-spot-id="miami" data-spot-category="city">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">USA &bull; OCEAN CRUISE &bull; CITY</div>
+                                    <div class="spot-card-title">Miami Ocean Drive &amp; South Beach</div>
+                                    <p class="spot-card-desc">
+                                        Iconic palm-lined coastal avenue facing South Beach. Past pastel Art Deco
+                                        hotels, neon facades, and cruising supercars under the vibrant Atlantic Florida
+                                        sun.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Miami Ocean Drive">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Berlin -->
+                            <div class="spot-card spot-list-card" data-spot-id="berlin" data-spot-category="city">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">GERMANY &bull; HISTORIC SPEEDWAY &bull; CITY</div>
+                                    <div class="spot-card-title">Berlin Autobahn &amp; Tiergarten</div>
+                                    <p class="spot-card-desc">
+                                        Grand German boulevard sweeps passing the Brandenburg Gate, victory column, and
+                                        leading directly to the legendary speed-unrestricted Autobahn network.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Berlin Tiergarten">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+
+                            <!-- Belgrade -->
+                            <div class="spot-card spot-list-card" data-spot-id="belgrade" data-spot-category="city">
+                                <div class="spot-card-info">
+                                    <div class="spot-card-badge">SERBIA &bull; BASE HQ &bull; CITY</div>
+                                    <div class="spot-card-title">Belgrade Waterfront (GEO Ride HQ)</div>
+                                    <p class="spot-card-desc">
+                                        The official spawn ground and birthplace of GEO Ride. Wide riverside boulevards,
+                                        glass tower architecture, and expansive asphalt sweeps directly along the Sava
+                                        river.
+                                    </p>
+                                </div>
+                                <button class="spot-drive-btn" type="button" aria-label="Drive Belgrade Waterfront">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>DRIVE SPOT</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- CONTROLS -->
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="controls" hidden>
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">KEYBOARD CONTROLS</span>
+                            <ul class="sx-keys">
+                                <li>
+                                    <span class="sx-keycaps"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span
+                                    ><span>Drive / Steer</span>
+                                </li>
+                                <li>
+                                    <span class="sx-keycaps"><kbd>SPACE</kbd></span
+                                    ><span>Handbrake Drift</span>
+                                </li>
+                                <li>
+                                    <span class="sx-keycaps"><kbd>R</kbd></span
+                                    ><span>Reset vehicle (+SHIFT global)</span>
+                                </li>
+                                <li>
+                                    <span class="sx-keycaps"><kbd>C</kbd></span
+                                    ><span>Camera view toggle</span>
+                                </li>
+                                <li>
+                                    <span class="sx-keycaps"><kbd>M</kbd></span
+                                    ><span>Radio on or off</span>
+                                </li>
+                                <li>
+                                    <span class="sx-keycaps"><kbd>H</kbd></span
+                                    ><span>Horn sound</span>
+                                </li>
+                                <li>
+                                    <span class="sx-keycaps"><kbd>F</kbd></span
+                                    ><span>Flash headlights</span>
+                                </li>
+                                <li>
+                                    <span class="sx-keycaps"><kbd>ESC</kbd></span
+                                    ><span>Close menus</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <div class="sx-label sx-label-split">
+                                <span>CAMERA PERSPECTIVE</span>
+                                <span class="sx-key-hint"
+                                    >HOTKEY: <kbd>C</kbd> &bull; <strong id="cam-mode-label">CHASE</strong></span
+                                >
+                            </div>
+                            <div class="toggle-group camera-mode-toggle" id="camera-mode-toggle">
+                                <button class="active" data-camera="chase" type="button">CHASE</button>
+                                <button data-camera="hood" type="button">HOOD</button>
+                                <button data-camera="wide" type="button">WIDE</button>
+                            </div>
+                            <div id="camera-mode-desc" class="camera-mode-desc-box">
+                                Dynamic 3rd-person chase camera with drift compensation and speed tilt.
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-touch-only">
+                            <span class="sx-label">MOBILE CONTROLS</span>
+                            <div class="toggle-group controls-toggle">
+                                <button class="active" data-controls="tilt" type="button">TILT STEER</button>
+                                <button data-controls="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">TILT SENSITIVITY</span>
+                            <div class="toggle-group tilt-sens-toggle">
+                                <button data-sens="low" type="button">LOW</button>
+                                <button class="active" data-sens="normal" type="button">NORMAL</button>
+                                <button data-sens="high" type="button">HIGH</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">AUTO-CENTER CAMERA</span>
+                            <div class="toggle-group autocenter-toggle">
+                                <button class="active" data-autocenter="on" type="button">ON</button>
+                                <button data-autocenter="off" type="button">OFF</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- MAP & 3D -->
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="map" hidden>
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">MAP STYLE</span>
+                            <div class="toggle-group style-toggle">
+                                <button class="active" data-style="streets-v12" type="button">STREETS</button>
+                                <button data-style="satellite-v9" type="button">SATELLITE</button>
+                                <button data-style="satellite-streets-v12" type="button">HYBRID</button>
+                                <button data-style="standard" type="button">WOW</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-span-2" id="light-preset-section" style="display: none">
+                            <span class="sx-label">LIGHT PRESET</span>
+                            <div class="toggle-group light-toggle" id="light-main-group">
+                                <button class="active" id="btn-realtime" data-preset="realtime" type="button">
+                                    REAL TIME
+                                </button>
+                                <button id="btn-manual-trigger" type="button">MANUAL</button>
+                            </div>
+                            <div id="light-manual-group" class="sx-light-manual" style="display: none">
+                                <button
+                                    id="btn-light-back"
+                                    class="sx-btn sx-btn-ghost sx-btn-icon"
+                                    type="button"
+                                    aria-label="Back to automatic lighting"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                                        <polyline points="12 19 5 12 12 5"></polyline>
+                                    </svg>
+                                </button>
+                                <div class="toggle-group light-toggle">
+                                    <button data-preset="day" type="button">DAY</button>
+                                    <button data-preset="dawn" type="button">DAWN</button>
+                                    <button data-preset="dusk" type="button">DUSK</button>
+                                    <button data-preset="night" type="button">NIGHT</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">3D VEHICLES</span>
+                            <div class="toggle-group d3v-toggle">
+                                <button class="active" data-d3v="on" type="button">ON</button>
+                                <button data-d3v="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">3D BUILDINGS</span>
+                            <div class="toggle-group d3b-toggle">
+                                <button class="active" data-d3b="on" type="button">ON</button>
+                                <button data-d3b="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">GRAPHICS QUALITY</span>
+                            <div class="toggle-group graphics-toggle">
+                                <button class="active" data-quality="ultra" type="button">ULTRA</button>
+                                <button data-quality="balanced" type="button">BALANCED</button>
+                                <button data-quality="eco" type="button">ECO</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">STREET LABELS</span>
+                            <div class="toggle-group labels-toggle">
+                                <button class="active" data-labels="on" type="button">SHOW</button>
+                                <button data-labels="off" type="button">HIDE</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">HUD DISPLAY MODE</span>
+                            <div class="toggle-group hud-toggle">
+                                <button class="active" data-hud="full" type="button">DEFAULT UI</button>
+                                <button data-hud="hidden" type="button">HIDDEN UI</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- MULTIPLAYER -->
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="multiplayer" hidden>
+                        <div class="sx-card sx-span-2">
+                            <div class="sx-label sx-label-split">
+                                <span>MULTIPLAYER <em class="sx-beta">FAST LIVE</em></span>
+                                <span id="mp-status-dot" class="status-dot" aria-hidden="true"></span>
+                            </div>
+                            <div id="mp-connection-status" class="sx-mp-status">NOT CONNECTED</div>
+                        </div>
+
+                        <div class="sx-card">
+                            <label class="sx-label" for="mp-player-name">PILOT CALLSIGN</label>
+                            <input
+                                type="text"
+                                id="mp-player-name"
+                                class="sx-input"
+                                maxlength="16"
+                                placeholder="Enter pilot callsign..."
+                                value="Pilot"
+                                autocomplete="off"
+                            />
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">YOUR PLAYER CODE</span>
+                            <div class="sx-id-row">
+                                <div class="sx-id-badge" id="my-peer-id" title="Your personal code">...</div>
+                                <button id="copy-id-btn" class="sx-btn sx-btn-ghost" type="button">COPY</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <label class="sx-label" for="join-peer-id">JOIN A ROOM</label>
+                            <div class="sx-search-row">
+                                <input
+                                    type="text"
+                                    id="join-peer-id"
+                                    class="sx-input sx-input-center"
+                                    placeholder="ROOM CODE (OR LEAVE BLANK)"
+                                    autocomplete="off"
+                                    autocapitalize="off"
+                                    spellcheck="false"
+                                />
+                                <button id="join-mp-btn" type="button" class="sx-btn sx-btn-primary sx-btn-compact">
+                                    JOIN
+                                </button>
+                                <button
+                                    id="disconnect-mp-btn"
+                                    type="button"
+                                    class="sx-btn sx-btn-danger sx-btn-compact"
+                                    style="display: none"
+                                >
+                                    LEAVE
+                                </button>
+                            </div>
+                            <button
+                                id="mp-quick-join-btn"
+                                type="button"
+                                class="sx-btn sx-btn-ghost"
+                                style="margin-top: 8px"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                                <span>QUICK JOIN GLOBAL LOBBY</span>
+                            </button>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">PLAYERS IN ROOM</span>
+                            <div id="mp-players-list" class="mp-players-list sx-players" style="display: none"></div>
+                            <p class="sx-hint">
+                                Leave the code empty to join the public room. Free rooms hold up to 10 players.
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- ABOUT -->
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="about" hidden>
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">CREATOR &amp; LEAD DEVELOPER</span>
+                            <div class="sx-about-content">
+                                <h3 class="sx-about-title">MILAN <span>WEB PORTAL</span></h3>
+                                <p class="sx-about-lead">
+                                    Founder of Milan Web Portal and 2nd-year Software Engineering student at
+                                    Metropolitan University in Belgrade, Serbia. Specializing in high-performance WebGL
+                                    3D graphics, interactive digital systems, and cutting-edge web applications.
+                                </p>
+                                <div class="sx-about-meta">
+                                    <div class="sx-meta-item">
+                                        <span class="sx-meta-k">AGENCY / STUDIO</span>
+                                        <a
+                                            href="https://milanwebportal.com"
+                                            target="_blank"
+                                            rel="noopener"
+                                            class="sx-meta-v"
+                                            >milanwebportal.com</a
+                                        >
+                                    </div>
+                                    <div class="sx-meta-item">
+                                        <span class="sx-meta-k">LOCATION &amp; ACADEMICS</span>
+                                        <span class="sx-meta-v">Belgrade &bull; Metropolitan Uni</span>
+                                    </div>
+                                    <div class="sx-meta-item">
+                                        <span class="sx-meta-k">KEY PROJECTS</span>
+                                        <span class="sx-meta-v">GEO Ride &bull; GymGO &bull; All In One</span>
+                                    </div>
+                                    <div class="sx-meta-item">
+                                        <span class="sx-meta-k">CONTACT &amp; BUSINESS</span>
+                                        <a href="mailto:contact@milanwebportal.com" class="sx-meta-v sx-meta-email"
+                                            >contact@milanwebportal.com</a
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">ENGINE &amp; ARCHITECTURE</span>
+                            <div class="sx-tech-grid">
+                                <div class="sx-tech-card">
+                                    <div class="sx-tech-title">THREE.JS WEBGL LAYER</div>
+                                    <p class="sx-tech-desc">
+                                        Custom procedural vehicle rendering, 4-wheel independent suspension roll,
+                                        realistic headlight cone illumination, and dynamic tire smoke particle
+                                        generation.
+                                    </p>
+                                </div>
+                                <div class="sx-tech-card">
+                                    <div class="sx-tech-title">MAPBOX GL VECTOR PIPELINE</div>
+                                    <p class="sx-tech-desc">
+                                        Global streaming vector road networks, high-resolution satellite imagery, 3D
+                                        building extrusions with realistic heights, and dynamic sun lighting
+                                        calculations.
+                                    </p>
+                                </div>
+                                <div class="sx-tech-card">
+                                    <div class="sx-tech-title">NEWTONIAN PHYSICS ENGINE</div>
+                                    <p class="sx-tech-desc">
+                                        Client-side physics with Ackermann steering, slip friction curves, handbrake
+                                        drift momentum conservation, centrifugal force reaction, and aerodynamics.
+                                    </p>
+                                </div>
+                                <div class="sx-tech-card">
+                                    <div class="sx-tech-title">WEBSOCKET MULTIPLAYER &amp; AUDIO</div>
+                                    <p class="sx-tech-desc">
+                                        Low-latency binary synchronization with dead-reckoning interpolation, room
+                                        routing, procedural Web Audio oscillator synthesis, and streaming web radio.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">DRIVER TELEMETRY &amp; RECORDS</span>
+                            <div class="sx-stats-grid">
+                                <div class="sx-stat-box">
+                                    <span class="sx-stat-label">TOP SPEED RECORD</span>
+                                    <span id="stat-top-speed" class="sx-stat-num">0 KM/H</span>
+                                </div>
+                                <div class="sx-stat-box">
+                                    <span class="sx-stat-label">DRIFT SCORE</span>
+                                    <span id="stat-drift-score" class="sx-stat-num">0 PTS</span>
+                                </div>
+                                <div class="sx-stat-box">
+                                    <span class="sx-stat-label">DISTANCE TRAVELED</span>
+                                    <span id="stat-distance" class="sx-stat-num">0.0 KM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">GEO RIDE PRO</span>
+                            <button id="settings-pro-btn" class="sx-btn sx-btn-pro" type="button">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                                </svg>
+                                <span>UNLOCK PRO</span>
+                            </button>
+                        </div>
+
+                        <div class="sx-card">
+                            <span class="sx-label">SUPPORT CREATOR</span>
+                            <a
+                                href="https://paypal.me/milanwebportal"
+                                target="_blank"
+                                rel="noopener"
+                                class="sx-btn sx-btn-ghost coffee-btn-link"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                                </svg>
+                                <span>BUY ME A COFFEE</span>
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- CHANGELOG -->
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="changelog" hidden>
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">SYSTEM UPDATES</span>
+                            <p class="sx-desc">Continuous improvements, physics upgrades, and simulator features</p>
+                            <div class="changelog-list">
+                                <article class="changelog-entry">
+                                    <div class="changelog-entry-head">
+                                        <div class="changelog-tags">
+                                            <span class="changelog-version">v1.3.0</span>
+                                            <span class="changelog-tag-latest">LATEST</span>
+                                        </div>
+                                        <time class="changelog-date">Current Release</time>
+                                    </div>
+                                    <h3 class="changelog-heading">
+                                        Deep Settings Center, 17 Global Places, Graphics Tuning &amp; Hidden UI
+                                    </h3>
+                                    <ul class="changelog-items">
+                                        <li>
+                                            <strong>Smooth Performance Optimization:</strong> Complete scroll latency
+                                            elimination with hardware compositing isolation and background physics sleep
+                                            while browsing settings.
+                                        </li>
+                                        <li>
+                                            <strong>Native Graphics Scaling &amp; Quality Modes:</strong> 3-tier
+                                            graphics profiling (Ultra 2K/4K native, Balanced 1080p, Eco battery saver)
+                                            dynamically scaling WebGL pixel ratio, tire smoke particles, and Mapbox 3D
+                                            building density.
+                                        </li>
+                                        <li>
+                                            <strong>Expanded 17 Global Destinations:</strong> Pinned header with instant
+                                            category filters for legendary circuits (Monaco, Nürburgring, Silverstone,
+                                            Spa, Laguna Seca), iconic passes (Stelvio, Transfăgărășan, Tail of the
+                                            Dragon), and metropolis routes.
+                                        </li>
+                                        <li>
+                                            <strong>Segmented Camera Perspectives:</strong> Instant switching between
+                                            Chase, Hood, and Wide cameras with dynamic perspective guidance.
+                                        </li>
+                                        <li>
+                                            <strong>Hidden UI Display Mode:</strong> Minimalist full-screen immersion
+                                            that reveals the settings controls only when hovering near the screen edge.
+                                        </li>
+                                        <li>
+                                            <strong>Compact Multiplayer Controls:</strong> Streamlined room join
+                                            interface preventing text clipping across all display resolutions.
+                                        </li>
+                                    </ul>
+                                </article>
+
+                                <article class="changelog-entry">
+                                    <div class="changelog-entry-head">
+                                        <div class="changelog-tags">
+                                            <span class="changelog-version">v1.2.0</span>
+                                        </div>
+                                        <time class="changelog-date">June 2026</time>
+                                    </div>
+                                    <h3 class="changelog-heading">
+                                        Global Multiplayer Rooms, Sound Synthesis &amp; Telemetry
+                                    </h3>
+                                    <ul class="changelog-items">
+                                        <li>
+                                            <strong>Free Multiplayer Lobbies:</strong> Instant peer-to-peer room
+                                            connections, custom pilot callsigns, and quick matching.
+                                        </li>
+                                        <li>
+                                            <strong>Audio Synthesis &amp; Web Radio:</strong> Multi-frequency synthetic
+                                            engine audio profiling and integrated live streaming radio stations.
+                                        </li>
+                                        <li>
+                                            <strong>Driver Telemetry:</strong> Automatic tracking of top speed records,
+                                            drift scores, and accumulated distance.
+                                        </li>
+                                    </ul>
+                                </article>
+
+                                <article class="changelog-entry">
+                                    <div class="changelog-entry-head">
+                                        <div class="changelog-tags">
+                                            <span class="changelog-version">v1.0.0</span>
+                                        </div>
+                                        <time class="changelog-date">May 8, 2026</time>
+                                    </div>
+                                    <h3 class="changelog-heading">Official Game Launch</h3>
+                                    <ul class="changelog-items">
+                                        <li>
+                                            <strong>Worldwide Release:</strong> Global 3D driving simulator operating
+                                            directly in modern web browsers powered by Mapbox GL vector mapping.
+                                        </li>
+                                        <li>
+                                            <strong>Newtonian 3D Physics:</strong> Realistic traction, drifting, vehicle
+                                            mass specifications, and building collision detection.
+                                        </li>
+                                        <li>
+                                            <strong>Cross-Platform Support:</strong> Fully responsive controls for
+                                            desktop keyboards and mobile touchscreens with virtual pedals and tilt
+                                            steering.
+                                        </li>
+                                    </ul>
+                                </article>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="sx-foot">
+                    Copyright &copy; 2026&nbsp;<a href="https://milanwebportal.com" target="_blank" rel="noopener"
+                        >milanwebportal.com</a
+                    >.&nbsp;All rights reserved.
                 </div>
             </div>
         </div>
@@ -1006,20 +1976,42 @@
             aria-labelledby="pro-modal-title"
         >
             <div class="pro-modal">
-                <button id="pro-modal-close" class="pro-modal-close" aria-label="Close Pro modal">
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        style="width: 18px; height: 18px"
+                <div class="pro-modal-top-bar">
+                    <button
+                        id="pro-back-to-settings-btn"
+                        class="modal-back-btn"
+                        type="button"
+                        aria-label="Back to Settings"
+                        title="Back to Settings"
                     >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        <span>SETTINGS</span>
+                    </button>
+                    <button id="pro-modal-close" class="pro-modal-close" aria-label="Close Pro modal">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="width: 18px; height: 18px"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
                 <div class="pro-modal-badge">
                     <svg
                         viewBox="0 0 24 24"
@@ -1201,123 +2193,6 @@
                         gap: 6px;
                     "
                 ></div>
-            </div>
-        </div>
-
-        <!-- Famous Driving Spots Modal -->
-        <div
-            id="spots-modal-backdrop"
-            class="spots-modal-backdrop"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="spots-modal-title"
-        >
-            <div class="spots-modal">
-                <div class="spots-modal-header">
-                    <div class="spots-header-titles">
-                        <div class="spots-badge">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                style="
-                                    width: 13px;
-                                    height: 13px;
-                                    display: inline-block;
-                                    vertical-align: middle;
-                                    margin-right: 4px;
-                                "
-                            >
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="2" y1="12" x2="22" y2="12"></line>
-                                <path
-                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                                ></path>
-                            </svg>
-                            GLOBAL DESTINATIONS
-                        </div>
-                        <h2 id="spots-modal-title" class="spots-modal-title">Famous <span>Driving Spots</span></h2>
-                        <p class="spots-modal-subtitle">
-                            1-Click Teleport to the most legendary roads and circuits on Earth
-                        </p>
-                    </div>
-                    <button id="spots-modal-close" class="spots-modal-close" aria-label="Close modal">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            style="width: 18px; height: 18px"
-                        >
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="spots-grid">
-                    <div class="spot-card" data-spot-id="tokyo">
-                        <div class="spot-card-badge">JAPAN</div>
-                        <div class="spot-card-title">Tokyo Shuto Expressway</div>
-                        <p class="spot-card-desc">
-                            Futuristic multi-layer skyway above Tokyo Bay with illuminated skyscrapers and high-speed
-                            bends.
-                        </p>
-                        <button class="spot-drive-btn">DRIVE SPOT</button>
-                    </div>
-                    <div class="spot-card" data-spot-id="nurburgring">
-                        <div class="spot-card-badge">GERMANY</div>
-                        <div class="spot-card-title">Nürburgring Nordschleife</div>
-                        <p class="spot-card-desc">
-                            The Green Hell: world-famous 20.8 km legendary circuit carved into the Eifel mountains.
-                        </p>
-                        <button class="spot-drive-btn">DRIVE SPOT</button>
-                    </div>
-                    <div class="spot-card" data-spot-id="stelvio">
-                        <div class="spot-card-badge">ITALY</div>
-                        <div class="spot-card-title">Stelvio Pass</div>
-                        <p class="spot-card-desc">
-                            Dramatic Alpine pass with 48 numbered hairpins reaching an altitude of 2,757 meters.
-                        </p>
-                        <button class="spot-drive-btn">DRIVE SPOT</button>
-                    </div>
-                    <div class="spot-card" data-spot-id="monaco">
-                        <div class="spot-card-badge">MONACO</div>
-                        <div class="spot-card-title">Monaco GP Circuit</div>
-                        <p class="spot-card-desc">
-                            Drive the ultra-tight marina chicane, Casino Square, and the echoing coastal tunnel.
-                        </p>
-                        <button class="spot-drive-btn">DRIVE SPOT</button>
-                    </div>
-                    <div class="spot-card" data-spot-id="mulholland">
-                        <div class="spot-card-badge">USA</div>
-                        <div class="spot-card-title">Mulholland Drive</div>
-                        <p class="spot-card-desc">
-                            Iconic ridgeline winding road high above Los Angeles and the San Fernando Valley.
-                        </p>
-                        <button class="spot-drive-btn">DRIVE SPOT</button>
-                    </div>
-                    <div class="spot-card" data-spot-id="paris">
-                        <div class="spot-card-badge">FRANCE</div>
-                        <div class="spot-card-title">Arc de Triomphe</div>
-                        <p class="spot-card-desc">
-                            The ultimate 12-avenue roundabout circle leading into the Champs-Élysées.
-                        </p>
-                        <button class="spot-drive-btn">DRIVE SPOT</button>
-                    </div>
-                    <div class="spot-card" data-spot-id="belgrade">
-                        <div class="spot-card-badge">SERBIA</div>
-                        <div class="spot-card-title">Belgrade Waterfront</div>
-                        <p class="spot-card-desc">
-                            Wide riverside esplanades and modern architecture right beside the Sava river.
-                        </p>
-                        <button class="spot-drive-btn">DRIVE SPOT</button>
-                    </div>
-                </div>
             </div>
         </div>
 

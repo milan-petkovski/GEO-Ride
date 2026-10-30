@@ -300,6 +300,24 @@ export function nextRadioStation() {
     }
 }
 
+export function setRadioStation(indexOrId) {
+    let targetIndex = 0;
+    if (typeof indexOrId === 'number') {
+        targetIndex = (indexOrId + RADIO_STATIONS.length) % RADIO_STATIONS.length;
+    } else if (typeof indexOrId === 'string') {
+        const found = RADIO_STATIONS.findIndex((s) => s.id === indexOrId);
+        if (found !== -1) targetIndex = found;
+    }
+    currentStationIndex = targetIndex;
+    if (isRadioActive) {
+        toggleRadio(true);
+    } else {
+        if (typeof window !== 'undefined' && window.onRadioStateUpdate) {
+            window.onRadioStateUpdate(getRadioState());
+        }
+    }
+}
+
 export function setRadioVolume(vol) {
     if (radioAudio) {
         radioAudio.volume = Math.max(0, Math.min(1, vol));

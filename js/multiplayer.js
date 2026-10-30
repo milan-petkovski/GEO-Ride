@@ -5,15 +5,29 @@
 
 import { state } from './state.js';
 import { VEHICLE_CONFIG } from './config.js';
-import { updateToggleStates, openProModal, showToast } from './ui.js';
+import { updateToggleStates, showToast } from './ui.js';
 import { setup3DVehicleLayer, setupVehicleMarker } from './three-manager.js';
 import { trackEvent } from './analytics.js';
+import { MpClient } from './mp-client.js';
+import { createBuffer, pushSample, sampleBuffer, INTERP_DELAY_MS } from './mp-interp.js';
+import { FLAG_DRIFT, FLAG_BRAKE, FLAG_FLASH, FLAG_TELEPORT } from './mp-protocol.js';
 
 let client;
 let currentTopic = 'georide/global/pro';
 let myId = 'p_' + Math.random().toString(36).substr(2, 4);
 let lastSent = { lng: 0, lat: 0, bearing: 0, velocity: 0, vehicle: '' };
 let isManualDisconnect = false;
+
+/** Game server WebSocket URL. When empty (or unreachable) the legacy MQTT transport is used. */
+const MP_URL =
+    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_MP_URL) ||
+    (typeof process !== 'undefined' && process.env && process.env.VITE_MP_URL) ||
+    '';
+
+/** @type {MpClient|null} */
+let mpClient = null;
+let serverSyncTimer = null;
+let lastUpload = { lng: 0, lat: 0, bearing: 0, speed: 0, steer: 0, flags: 0, vehicle: '', at: 0 };
 
 const Paho = typeof window !== 'undefined' ? window.Paho : null;
 
@@ -32,6 +46,7 @@ let cleanupTimer = null;
  */
 export function stopMultiplayerTimers() {
     isManualDisconnect = true;
+    stopServerClient();
     if (typeof window !== 'undefined') {
         window.mpInitialized = false;
         if (window.reconnectTimeout) {
@@ -135,6 +150,168 @@ export function getRoomTopic(roomCode) {
         .toLowerCase()
         .replace(/[^a-z0-9_-]/g, '');
     return sanitized ? 'georide/room/' + sanitized : 'georide/global/pro';
+}
+
+/**
+ * Returns the active game server client, if the WebSocket transport is in use.
+ * @returns {MpClient|null}
+ */
+export function getMpClient() {
+    return mpClient;
+}
+
+/**
+ * Captures the local vehicle state in wire format, including drift, brake and light flags.
+ * @param {Object} [st=state] - Game state object.
+ * @returns {{lng:number,lat:number,bearing:number,speed:number,steer:number,flags:number,vehicle:string}}
+ */
+export function collectLocalState(st = state) {
+    let flags = 0;
+    if (st.isDrifting) flags |= FLAG_DRIFT;
+    if (st.keys && (st.keys.s || st.keys[' ']) && st.velocity > 0.02) flags |= FLAG_BRAKE;
+    if (st.headlightFlashActive) flags |= FLAG_FLASH;
+    return {
+        lng: st.lng,
+        lat: st.lat,
+        bearing: st.bearing,
+        speed: st.velocity || 0,
+        steer: st.steeringAngle || 0,
+        flags,
+        vehicle: st.activeVehicle
+    };
+}
+
+/**
+ * Decides whether a new state packet is worth sending (movement, orientation, flags) or a heartbeat is due.
+ * @param {Object} cur - Current local state.
+ * @param {Object} last - Previously uploaded state with an `at` timestamp.
+ * @param {number} now - Current time in milliseconds.
+ * @returns {boolean}
+ */
+export function shouldUpload(cur, last, now) {
+    if (!last.at) return true;
+    if (now - last.at >= 500) return true;
+    return (
+        Math.abs(cur.lng - last.lng) > 1e-7 ||
+        Math.abs(cur.lat - last.lat) > 1e-7 ||
+        Math.abs(cur.bearing - last.bearing) > 0.1 ||
+        Math.abs(cur.speed - last.speed) > 0.0005 ||
+        cur.flags !== last.flags ||
+        cur.vehicle !== last.vehicle
+    );
+}
+
+function startServerSync() {
+    stopServerSync();
+    lastUpload = { lng: 0, lat: 0, bearing: 0, speed: 0, steer: 0, flags: 0, vehicle: '', at: 0 };
+    serverSyncTimer = setInterval(() => {
+        if (!mpClient || !mpClient.isOpen) return;
+        const now = Date.now();
+        const cur = collectLocalState();
+        if (!shouldUpload(cur, lastUpload, now)) return;
+
+        // A jump of more than about 50 m between packets is a teleport or reset: tell peers to snap, not slide.
+        const jump =
+            !lastUpload.at ||
+            Math.hypot(cur.lat - lastUpload.lat, (cur.lng - lastUpload.lng) * Math.cos((cur.lat * Math.PI) / 180)) >
+                0.0005;
+        const flags = cur.flags | (jump || state.isTeleporting ? FLAG_TELEPORT : 0);
+        if (mpClient.sendState({ ...cur, flags })) lastUpload = { ...cur, at: now };
+    }, 50);
+}
+
+function stopServerSync() {
+    if (serverSyncTimer) clearInterval(serverSyncTimer);
+    serverSyncTimer = null;
+}
+
+/**
+ * Closes the game server connection and stops state uploads.
+ * @returns {void}
+ */
+export function stopServerClient() {
+    stopServerSync();
+    if (mpClient) {
+        const c = mpClient;
+        mpClient = null;
+        c.close();
+    }
+}
+
+/**
+ * Creates or updates a remote player record backed by a snapshot buffer.
+ * @param {number} slot - Server assigned player slot.
+ * @param {{name?:string,vehicle?:string}} [info]
+ * @returns {Object} Remote player record.
+ */
+export function ensureRemote(slot, info = {}) {
+    const id = 's' + slot;
+    let p = state.otherPlayers[id];
+    if (!p) {
+        p = {
+            id,
+            slot,
+            name: info.name || 'P' + slot,
+            vehicle: info.vehicle || 'car',
+            lng: 0,
+            lat: 0,
+            bearing: 0,
+            velocity: 0,
+            flags: 0,
+            positioned: false,
+            buf: createBuffer(),
+            lastSeen: Date.now()
+        };
+        state.otherPlayers[id] = p;
+    } else {
+        if (info.name) p.name = info.name;
+        if (info.vehicle) p.vehicle = info.vehicle;
+    }
+    return p;
+}
+
+/**
+ * Removes a remote player and its map marker.
+ * @param {number} slot
+ * @returns {void}
+ */
+export function removeRemote(slot) {
+    const id = 's' + slot;
+    const p = state.otherPlayers[id];
+    if (p && p.marker2d && typeof p.marker2d.remove === 'function') p.marker2d.remove();
+    delete state.otherPlayers[id];
+}
+
+/**
+ * Feeds a decoded server snapshot into the per player interpolation buffers.
+ * @param {{time:number, players:Array<Object>}} snap
+ * @returns {void}
+ */
+export function applySnapshot(snap) {
+    const received = Date.now();
+    for (const rec of snap.players) {
+        const p = ensureRemote(rec.slot);
+        pushSample(p.buf, {
+            time: snap.time,
+            lng: rec.lng,
+            lat: rec.lat,
+            bearing: rec.bearing,
+            speed: rec.speed,
+            steer: rec.steer,
+            flags: rec.flags,
+            teleport: (rec.flags & FLAG_TELEPORT) !== 0
+        });
+        p.vehicle = rec.vehicle;
+        p.velocity = rec.speed;
+        p.flags = rec.flags;
+        p.lastSeen = received;
+        if (!p.positioned) {
+            p.lng = rec.lng;
+            p.lat = rec.lat;
+            p.bearing = rec.bearing;
+            p.positioned = true;
+        }
+    }
 }
 
 /**
@@ -284,25 +461,119 @@ export function initMultiplayer() {
         }
     }
 
+    const applyMpSettings = () => {
+        state.is3D = false;
+        state.is3DBuildings = false;
+        state.collisionsEnabled = false;
+        updateToggleStates();
+        setup3DVehicleLayer(window.map);
+        setupVehicleMarker(window.map);
+    };
+
+    const setJoinButtonsText = (text, background = '') => {
+        [joinBtn, mobileJoinBtn].forEach((btn) => {
+            if (!btn) return;
+            btn.textContent = text;
+            btn.style.background = background;
+        });
+    };
+
+    const setStatusText = (text, color) => {
+        [statusLabel, mobileStatusLabel].forEach((el) => {
+            if (!el) return;
+            el.textContent = text;
+            el.style.color = color;
+        });
+    };
+
+    const showConnectedUI = (label) => {
+        [joinBtn, joinInput, mobileJoinBtn, mobileJoinInput].forEach((el) => {
+            if (el) el.style.display = 'none';
+        });
+        [disconnectBtn, mobileDisconnectBtn, mpPlayersList, mobileMpPlayersList].forEach((el) => {
+            if (el) el.style.display = 'block';
+        });
+        setStatusText(label, '#00ff88');
+    };
+
+    /**
+     * Joins a room on the GEO Ride game server. Falls back to the legacy MQTT transport when the server
+     * cannot be reached before the first welcome message.
+     */
+    const joinViaServer = (targetCode, fallback) => {
+        stopServerClient();
+        setJoinButtonsText('CONNECTING...');
+        let welcomed = false;
+        let roomLabel = targetCode.toUpperCase();
+
+        const client = new MpClient(MP_URL, {
+            onStatus: (status) => {
+                if (mpClient !== client) return;
+                if (status === 'online') mpStatusDot?.classList.add('online');
+                else mpStatusDot?.classList.remove('online');
+
+                if (status === 'reconnecting') setStatusText('RECONNECTING...', '#ffb800');
+                if (status === 'failed') {
+                    stopServerClient();
+                    if (!welcomed) {
+                        fallback();
+                    } else {
+                        handleDisconnect();
+                        if (typeof showToast === 'function') {
+                            showToast('CONNECTION LOST', 'The multiplayer server is not reachable. Please rejoin.');
+                        }
+                    }
+                }
+            },
+            onWelcome: (msg) => {
+                welcomed = true;
+                Object.keys(state.otherPlayers).forEach((id) => {
+                    if (state.otherPlayers[id].slot) removeRemote(state.otherPlayers[id].slot);
+                });
+                msg.players.forEach((pl) => ensureRemote(pl.slot, pl));
+                roomLabel = String(msg.room || targetCode).toUpperCase();
+                showConnectedUI('CONNECTED TO: ' + roomLabel);
+                applyMpSettings();
+                startServerSync();
+                renderActivePlayers();
+                trackEvent('multiplayer_room_connect', { room: msg.room, transport: 'ws' });
+            },
+            onJoined: (msg) => {
+                ensureRemote(msg.slot, msg);
+                renderActivePlayers();
+            },
+            onLeft: (msg) => {
+                removeRemote(msg.slot);
+                renderActivePlayers();
+            },
+            onSnapshot: applySnapshot,
+            onLatency: (rtt) => {
+                if (welcomed) setStatusText(`CONNECTED TO: ${roomLabel} (${Math.round(rtt)} ms)`, '#00ff88');
+            },
+            onFull: (cap) => {
+                setJoinButtonsText('JOIN ROOM');
+                stopServerClient();
+                if (typeof showToast === 'function') {
+                    showToast('ROOM FULL', `This room has reached its limit of ${cap} players.`);
+                }
+            },
+            onError: (code) => {
+                if (code === 'server_busy' && typeof showToast === 'function') {
+                    showToast('SERVER BUSY', 'Multiplayer is very busy right now. Please try again shortly.');
+                }
+            }
+        });
+
+        mpClient = client;
+        const email = typeof localStorage !== 'undefined' ? localStorage.getItem('geo_ride_pro_email') : null;
+        client.connect({ room: targetCode, name: myId.toUpperCase(), vehicle: state.activeVehicle, email });
+    };
+
     const handleJoin = (targetCode, _activeBtn) => {
         isManualDisconnect = false;
-        if (targetCode && targetCode.trim() !== '') {
-            if (!state.isPro) {
-                if (typeof openProModal === 'function') openProModal();
-                if (typeof showToast === 'function') {
-                    showToast(
-                        'PRO FEATURE',
-                        'Private multiplayer rooms require GEO Ride Pro. Upgrade now to invite friends and host private rooms!',
-                        {
-                            isPro: true,
-                            actionText: 'Upgrade',
-                            onAction: openProModal
-                        }
-                    );
-                }
-                return;
-            }
+        const cleanCode = targetCode && targetCode.trim() !== '' ? targetCode.trim().toLowerCase() : 'public';
 
+        const startMqtt = () => {
             if (joinBtn) joinBtn.textContent = 'CONNECTING...';
             if (mobileJoinBtn) mobileJoinBtn.textContent = 'CONNECTING...';
 
@@ -333,7 +604,11 @@ export function initMultiplayer() {
                     if (window.reconnectTimeout) clearTimeout(window.reconnectTimeout);
                     window.reconnectTimeout = setTimeout(() => {
                         if (!isManualDisconnect && client)
-                            client.connect({ onSuccess: onConnectSuccess, onFailure: onConnectFailure, useSSL: true });
+                            client.connect({
+                                onSuccess: onConnectSuccess,
+                                onFailure: onConnectFailure,
+                                useSSL: true
+                            });
                     }, 3000);
                 }
             };
@@ -374,7 +649,7 @@ export function initMultiplayer() {
             };
 
             const onConnectSuccess = () => {
-                console.log('MQTT Connected to:', targetCode);
+                console.log('MQTT Connected to:', cleanCode);
                 mpStatusDot?.classList.add('online');
 
                 if (joinBtn) joinBtn.style.display = 'none';
@@ -383,11 +658,11 @@ export function initMultiplayer() {
                 if (mobileJoinInput) mobileJoinInput.style.display = 'none';
 
                 if (statusLabel) {
-                    statusLabel.textContent = 'CONNECTED TO: ' + targetCode.toUpperCase();
+                    statusLabel.textContent = 'CONNECTED TO: ' + cleanCode.toUpperCase();
                     statusLabel.style.color = '#00ff88';
                 }
                 if (mobileStatusLabel) {
-                    mobileStatusLabel.textContent = 'CONNECTED TO: ' + targetCode.toUpperCase();
+                    mobileStatusLabel.textContent = 'CONNECTED TO: ' + cleanCode.toUpperCase();
                     mobileStatusLabel.style.color = '#00ff88';
                 }
 
@@ -397,12 +672,12 @@ export function initMultiplayer() {
                 if (mpPlayersList) mpPlayersList.style.display = 'block';
                 if (mobileMpPlayersList) mobileMpPlayersList.style.display = 'block';
 
-                currentTopic = getRoomTopic(targetCode);
+                currentTopic = getRoomTopic(cleanCode);
                 client.subscribe(currentTopic);
                 startSyncTimers();
                 renderActivePlayers();
 
-                trackEvent('multiplayer_room_connect', { room: targetCode });
+                trackEvent('multiplayer_room_connect', { room: cleanCode });
             };
 
             const onConnectFailure = (err) => {
@@ -435,13 +710,13 @@ export function initMultiplayer() {
                 keepAliveInterval: 30
             });
 
-            // MP Settings
-            state.is3D = false;
-            state.is3DBuildings = false;
-            state.collisionsEnabled = false;
-            updateToggleStates();
-            setup3DVehicleLayer(window.map);
-            setupVehicleMarker(window.map);
+            applyMpSettings();
+        };
+
+        if (MP_URL && typeof WebSocket !== 'undefined') {
+            joinViaServer(cleanCode, startMqtt);
+        } else {
+            startMqtt();
         }
     };
 
@@ -460,6 +735,7 @@ export function initMultiplayer() {
 
     const handleDisconnect = () => {
         isManualDisconnect = true;
+        stopServerClient();
         playerMessageTimes.clear();
         if (client && client.isConnected && client.isConnected()) client.disconnect();
 
@@ -573,6 +849,7 @@ export function renderActivePlayers() {
         { id: myId, vehicle: state.activeVehicle, isSelf: true },
         ...Object.keys(state.otherPlayers).map((id) => ({
             id,
+            name: state.otherPlayers[id].name,
             vehicle: state.otherPlayers[id].vehicle,
             isSelf: false
         }))
@@ -580,7 +857,7 @@ export function renderActivePlayers() {
 
     // Optimize: Only update DOM if the player count or IDs changed
     const currentIdList = activePlayers
-        .map((p) => p.id)
+        .map((p) => p.id + (p.name || ''))
         .sort()
         .join(',');
     if (typeof window !== 'undefined') {
@@ -597,7 +874,7 @@ export function renderActivePlayers() {
 
             const idSpan = document.createElement('span');
             idSpan.className = 'mp-player-id';
-            idSpan.textContent = p.id.toUpperCase();
+            idSpan.textContent = (p.name || p.id).toUpperCase();
 
             const vehicleSpan = document.createElement('span');
             vehicleSpan.className = 'mp-player-vehicle';
@@ -623,22 +900,34 @@ export function updateOtherPlayers(dtFinal, map) {
     Object.keys(state.otherPlayers).forEach((id) => {
         const p = state.otherPlayers[id];
 
-        if (p.velocity && Math.abs(p.velocity) > 0.0001) {
-            const rad = p.bearing * (Math.PI / 180);
-            const latRad = p.lat * (Math.PI / 180);
-            const projectionFactor = 1 / Math.cos(latRad);
-            p.lng += Math.sin(rad) * p.velocity * 0.0001 * projectionFactor * dtFinal;
-            p.lat += Math.cos(rad) * p.velocity * 0.0001 * dtFinal;
-        }
+        if (p.buf && mpClient) {
+            // Game server transport: render slightly in the past between real samples (no rubber banding).
+            if (!p.positioned) return;
+            const s = sampleBuffer(p.buf, mpClient.serverNow() - INTERP_DELAY_MS);
+            if (s) {
+                p.lng = s.lng;
+                p.lat = s.lat;
+                p.bearing = s.bearing;
+                p.flags = s.flags;
+            }
+        } else {
+            if (p.velocity && Math.abs(p.velocity) > 0.0001) {
+                const rad = p.bearing * (Math.PI / 180);
+                const latRad = p.lat * (Math.PI / 180);
+                const projectionFactor = 1 / Math.cos(latRad);
+                p.lng += Math.sin(rad) * p.velocity * 0.0001 * projectionFactor * dtFinal;
+                p.lat += Math.cos(rad) * p.velocity * 0.0001 * dtFinal;
+            }
 
-        const lerpFactor = 0.18 * dtFinal;
-        if (p.targetLng != null) {
-            p.lng += (p.targetLng - p.lng) * lerpFactor;
-            p.lat += (p.targetLat - p.lat) * lerpFactor;
-            let bDiff = p.targetBearing - p.bearing;
-            while (bDiff < -180) bDiff += 360;
-            while (bDiff > 180) bDiff -= 360;
-            p.bearing += bDiff * lerpFactor;
+            const lerpFactor = 0.18 * dtFinal;
+            if (p.targetLng != null) {
+                p.lng += (p.targetLng - p.lng) * lerpFactor;
+                p.lat += (p.targetLat - p.lat) * lerpFactor;
+                let bDiff = p.targetBearing - p.bearing;
+                while (bDiff < -180) bDiff += 360;
+                while (bDiff > 180) bDiff -= 360;
+                p.bearing += bDiff * lerpFactor;
+            }
         }
 
         if (!p.marker2d) {

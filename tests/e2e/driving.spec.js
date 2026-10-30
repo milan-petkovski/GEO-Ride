@@ -228,16 +228,17 @@ test.describe('GEO Ride Driving Simulator', () => {
         await expect(mapContainer).toBeVisible();
     });
 
-    test('opens multiplayer panel on button click', async ({ page }) => {
-        const mpBtn = page.locator('#mp-btn');
-        if (await mpBtn.isVisible()) {
-            await page.evaluate(() => {
-                const btn = document.getElementById('mp-btn');
-                if (btn) btn.click();
-            });
-            const mpDropdown = page.locator('#mp-dropdown');
-            await expect(mpDropdown).toHaveClass(/active/);
-        }
+    test('opens fullscreen settings and switches to the multiplayer tab', async ({ page }) => {
+        await page.evaluate(() => document.getElementById('settings-btn')?.click());
+        const settings = page.locator('#settings-panel');
+        await expect(settings).toHaveClass(/active/);
+
+        await page.evaluate(() => document.querySelector('[data-sx-tab="multiplayer"]')?.click());
+        await expect(page.locator('[data-sx-pane="multiplayer"]')).toBeVisible();
+        await expect(page.locator('#join-mp-btn')).toBeVisible();
+
+        await page.evaluate(() => document.getElementById('settings-close-btn')?.click());
+        await expect(settings).not.toHaveClass(/active/);
     });
 
     test('vehicle selector tab interactions', async ({ page }) => {

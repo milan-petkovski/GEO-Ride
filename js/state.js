@@ -114,7 +114,21 @@ export const state = {
     headlightFlashActive: false,
     radioPlaying: false,
     radioStationIndex: 0,
-    topSpeedRecord: 0
+    topSpeedRecord: 0,
+    hapticsEnabled: true,
+    skidMarksEnabled: true,
+    bodyRollEnabled: true,
+    driftAssist: 'assisted', // 'assisted' | 'pro'
+    underglowColor: 'cyan', // 'cyan' | 'pink' | 'lime' | 'amber' | 'off'
+    tiltSensitivity: 'normal', // 'low' | 'normal' | 'high'
+    cameraFovMode: 'dynamic', // 'dynamic' | 'close' | 'wide'
+    cameraAutoCenter: true,
+    graphicsQuality: 'ultra', // 'ultra' | 'balanced' | 'eco'
+    mapLabels: true,
+    hudVisibility: 'full', // 'full' | 'hidden'
+    isSettingsOpen: false,
+    playerName: 'Pilot',
+    totalDistanceKm: 0
 };
 
 /** @type {Map<string, Set<Function>>} */
@@ -180,7 +194,20 @@ export function saveState() {
             userPrefs: state.userPrefs,
             cameraMode: state.cameraMode,
             topSpeedRecord: state.topSpeedRecord,
-            driftScore: state.driftScore
+            driftScore: state.driftScore,
+            hapticsEnabled: state.hapticsEnabled,
+            skidMarksEnabled: state.skidMarksEnabled,
+            bodyRollEnabled: state.bodyRollEnabled,
+            driftAssist: state.driftAssist,
+            underglowColor: state.underglowColor,
+            tiltSensitivity: state.tiltSensitivity,
+            cameraFovMode: state.cameraFovMode,
+            cameraAutoCenter: state.cameraAutoCenter,
+            graphicsQuality: state.graphicsQuality,
+            mapLabels: state.mapLabels,
+            hudVisibility: state.hudVisibility,
+            playerName: state.playerName,
+            totalDistanceKm: state.totalDistanceKm
         };
         localStorage.setItem('geo_ride_state', JSON.stringify(dataToSave));
     } catch (e) {
@@ -241,6 +268,28 @@ export function loadState() {
         setStateKey('cameraMode', validateStr(parsed.cameraMode, ['chase', 'hood', 'wide'], 'chase'));
         setStateKey('topSpeedRecord', validateNum(parsed.topSpeedRecord, 0));
         setStateKey('driftScore', validateNum(parsed.driftScore, 0));
+        setStateKey('hapticsEnabled', validateBool(parsed.hapticsEnabled, true));
+        setStateKey('skidMarksEnabled', validateBool(parsed.skidMarksEnabled, true));
+        setStateKey('bodyRollEnabled', validateBool(parsed.bodyRollEnabled, true));
+        setStateKey('driftAssist', validateStr(parsed.driftAssist, ['assisted', 'pro'], 'assisted'));
+        setStateKey(
+            'underglowColor',
+            validateStr(parsed.underglowColor, ['cyan', 'pink', 'lime', 'amber', 'off'], 'cyan')
+        );
+        setStateKey('tiltSensitivity', validateStr(parsed.tiltSensitivity, ['low', 'normal', 'high'], 'normal'));
+        setStateKey('cameraFovMode', validateStr(parsed.cameraFovMode, ['dynamic', 'close', 'wide'], 'dynamic'));
+        setStateKey('cameraAutoCenter', validateBool(parsed.cameraAutoCenter, true));
+        setStateKey('graphicsQuality', validateStr(parsed.graphicsQuality, ['ultra', 'balanced', 'eco'], 'ultra'));
+        setStateKey('mapLabels', validateBool(parsed.mapLabels, true));
+        const rawHud = parsed.hudVisibility === 'minimal' ? 'hidden' : parsed.hudVisibility;
+        setStateKey('hudVisibility', validateStr(rawHud, ['full', 'hidden'], 'full'));
+        setStateKey(
+            'playerName',
+            typeof parsed.playerName === 'string' && parsed.playerName.trim()
+                ? parsed.playerName.trim().slice(0, 16)
+                : 'Pilot'
+        );
+        setStateKey('totalDistanceKm', validateNum(parsed.totalDistanceKm, 0));
 
         state.currentHome = [state.lng, state.lat];
         state.isPro =

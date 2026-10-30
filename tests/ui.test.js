@@ -449,3 +449,186 @@ test('triggerDonationPopup opens and closes donation overlay correctly', () => {
 
     globalThis.document = origDoc;
 });
+
+test('openSettings, closeSettings, openChangelogModal, closeChangelogModal, and cross-modal navigation', async () => {
+    const { openSettings, closeSettings, openChangelogModal, closeChangelogModal, closeAllPanels } =
+        await import('../js/ui.js');
+
+    const classes = new Map();
+    const getClassList = (name) => {
+        if (!classes.has(name)) {
+            const set = new Set();
+            classes.set(name, {
+                add: (c) => set.add(c),
+                remove: (c) => set.delete(c),
+                contains: (c) => set.has(c),
+                toggle: (c, force) => {
+                    if (force === undefined) {
+                        set.has(c) ? set.delete(c) : set.add(c);
+                    } else if (force) {
+                        set.add(c);
+                    } else {
+                        set.delete(c);
+                    }
+                }
+            });
+        }
+        return classes.get(name);
+    };
+
+    let clickedTab = null;
+    const mockElements = {
+        'settings-panel': {
+            classList: getClassList('settings-panel'),
+            querySelectorAll: () => [
+                {
+                    dataset: { sxTab: 'general' },
+                    click: () => {
+                        clickedTab = 'general';
+                    }
+                },
+                {
+                    dataset: { sxTab: 'about' },
+                    click: () => {
+                        clickedTab = 'about';
+                    }
+                },
+                {
+                    dataset: { sxTab: 'places' },
+                    click: () => {
+                        clickedTab = 'places';
+                    }
+                },
+                {
+                    dataset: { sxTab: 'changelog' },
+                    click: () => {
+                        clickedTab = 'changelog';
+                    }
+                }
+            ],
+            querySelector: (sel) => {
+                const match = ['general', 'about', 'places', 'changelog'].find((tab) => sel.includes(tab));
+                if (match) {
+                    return {
+                        click: () => {
+                            clickedTab = match;
+                        }
+                    };
+                }
+                return null;
+            }
+        },
+        'spots-modal-backdrop': { classList: getClassList('spots-modal-backdrop') },
+        'pro-modal-backdrop': { classList: getClassList('pro-modal-backdrop') },
+        'changelog-modal-backdrop': { classList: getClassList('changelog-modal-backdrop') },
+        'location-search': { classList: getClassList('location-search'), blur() {} }
+    };
+
+    const origDoc = globalThis.document;
+    try {
+        globalThis.document = {
+            ...origDoc,
+            getElementById: (id) => mockElements[id] || { classList: getClassList(id), blur() {} },
+            querySelector: (sel) => (origDoc?.querySelector ? origDoc.querySelector(sel) : null),
+            querySelectorAll: (sel) => (origDoc?.querySelectorAll ? origDoc.querySelectorAll(sel) : []),
+            body: origDoc?.body || { classList: getClassList('body') }
+        };
+
+        // Test openSettings with specific tab (supports 'more' fallback to 'about', 'places', 'changelog')
+        openSettings('more');
+        assert.strictEqual(mockElements['settings-panel'].classList.contains('active'), true);
+        assert.strictEqual(clickedTab, 'about');
+
+        openSettings('places');
+        assert.strictEqual(clickedTab, 'places');
+
+        openSettings('changelog');
+        assert.strictEqual(clickedTab, 'changelog');
+
+        // Test closeSettings
+        closeSettings();
+        assert.strictEqual(mockElements['settings-panel'].classList.contains('active'), false);
+
+        // Test openChangelogModal & closeChangelogModal
+        openChangelogModal();
+        assert.strictEqual(mockElements['changelog-modal-backdrop'].classList.contains('active'), true);
+        closeChangelogModal();
+        assert.strictEqual(mockElements['changelog-modal-backdrop'].classList.contains('active'), false);
+
+        // Test closeAllPanels
+        openSettings();
+        openChangelogModal();
+        mockElements['spots-modal-backdrop'].classList.add('active');
+        mockElements['pro-modal-backdrop'].classList.add('active');
+        closeAllPanels();
+
+        assert.strictEqual(mockElements['settings-panel'].classList.contains('active'), false);
+        assert.strictEqual(mockElements['spots-modal-backdrop'].classList.contains('active'), false);
+        assert.strictEqual(mockElements['changelog-modal-backdrop'].classList.contains('active'), false);
+        assert.strictEqual(mockElements['pro-modal-backdrop'].classList.contains('active'), false);
+    } finally {
+        globalThis.document = origDoc;
+    }
+});
+
+test('FAMOUS_SPOTS contains 17 spots including circuits, cities, and passes with helper functions', async () => {
+    const {
+        FAMOUS_SPOTS,
+        filterSpots,
+        applyMapLabels,
+        applyHudVisibility,
+        applyGraphicsQuality,
+        resetUserPreferences
+    } = await import('../js/ui.js');
+
+    assert.strictEqual(FAMOUS_SPOTS.length, 17);
+    const dubai = FAMOUS_SPOTS.find((s) => s.id === 'dubai');
+    const sf = FAMOUS_SPOTS.find((s) => s.id === 'sanfrancisco');
+    const london = FAMOUS_SPOTS.find((s) => s.id === 'london');
+    const silverstone = FAMOUS_SPOTS.find((s) => s.id === 'silverstone');
+    const spa = FAMOUS_SPOTS.find((s) => s.id === 'spa');
+
+    assert.ok(dubai && dubai.category === 'city');
+    assert.ok(sf && sf.category === 'pass');
+    assert.ok(london && london.category === 'city');
+    assert.ok(silverstone && silverstone.category === 'circuit');
+    assert.ok(spa && spa.category === 'circuit');
+
+    // Test filterSpots with DOM mocks
+    const chips = [{ dataset: { filter: 'all' }, classList: { toggle() {} } }];
+    const cards = [{ dataset: { spotCategory: 'city' }, style: {} }];
+    const origDoc = globalThis.document;
+    globalThis.document = {
+        querySelectorAll: (sel) => {
+            if (sel.includes('spot-filter-chip')) return chips;
+            if (sel.includes('spot-card')) return cards;
+            return [];
+        },
+        getElementById: () => null,
+        body: { classList: { toggle() {} } }
+    };
+
+    filterSpots('city');
+    assert.strictEqual(cards[0].style.display, 'flex');
+    filterSpots('circuit');
+    assert.strictEqual(cards[0].style.display, 'none');
+
+    // Test applyHudVisibility
+    applyHudVisibility();
+
+    // Test applyMapLabels with map mock
+    let setVisibilityVal = null;
+    const mockMap = {
+        getStyle: () => ({ layers: [{ id: 'road-label', type: 'symbol' }] }),
+        setLayoutProperty: (id, prop, val) => {
+            setVisibilityVal = val;
+        }
+    };
+    applyMapLabels(mockMap);
+    assert.strictEqual(setVisibilityVal, 'visible');
+
+    // Test resetUserPreferences
+    resetUserPreferences(mockMap);
+
+    globalThis.document = origDoc;
+});

@@ -178,7 +178,6 @@ export function setup3DVehicleLayer(map) {
             this.wheels = [];
             if (type === 'god') return;
 
-            const accentColor = 0x00f2ff;
             const loader = new THREE.TextureLoader();
             const logoTex = loader.load('favicon.png');
             const wheelSegments = state.performance.eliteEnd ? 24 : state.performance.lowEnd ? 8 : 12;
@@ -198,8 +197,8 @@ export function setup3DVehicleLayer(map) {
             if (type === 'car' || type === 'god') {
                 const mainMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.8 });
                 const accentMat = new THREE.MeshStandardMaterial({
-                    color: accentColor,
-                    emissive: accentColor,
+                    color: 0x00f2ff,
+                    emissive: 0x00f2ff,
                     emissiveIntensity: 2
                 });
                 const glassMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.5 });
@@ -265,7 +264,7 @@ export function setup3DVehicleLayer(map) {
 
                 const wheelGeom = new THREE.CylinderGeometry(0.45, 0.45, 0.35, wheelSegments);
                 const wheelMat = new THREE.MeshStandardMaterial({ color: 0x050505 });
-                const rimMat = new THREE.MeshStandardMaterial({ color: accentColor, metalness: 1, roughness: 0.2 });
+                const rimMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, metalness: 1, roughness: 0.2 });
                 [
                     [-0.9, 0.45, 1.4],
                     [0.9, 0.45, 1.4],
@@ -598,8 +597,13 @@ export function setup3DVehicleLayer(map) {
                 altitude = Math.sin(progress * Math.PI) * 20;
             }
 
-            // Smoke particle system during drift & burnout
-            if (this.particleGroup && (state.isDrifting || state.isCharging) && Math.abs(state.velocity) > 0.02) {
+            // Smoke particle system during drift & burnout (only when skidMarksEnabled is true)
+            if (
+                state.skidMarksEnabled !== false &&
+                this.particleGroup &&
+                (state.isDrifting || state.isCharging) &&
+                Math.abs(state.velocity) > 0.02
+            ) {
                 if (Math.random() < 0.6) {
                     const THREE = getThree();
                     if (THREE) {
@@ -614,7 +618,13 @@ export function setup3DVehicleLayer(map) {
                     }
                 }
             }
-            if (this.smokeParticles && this.smokeParticles.length > 0) {
+            if (state.skidMarksEnabled === false && this.smokeParticles && this.smokeParticles.length > 0) {
+                this.smokeParticles.forEach((p) => {
+                    this.particleGroup.remove(p);
+                    disposeMesh(p);
+                });
+                this.smokeParticles = [];
+            } else if (this.smokeParticles && this.smokeParticles.length > 0) {
                 for (let i = this.smokeParticles.length - 1; i >= 0; i--) {
                     const p = this.smokeParticles[i];
                     p.userData.life -= 0.035;
@@ -689,7 +699,7 @@ export function updateSkidMarks(map) {
 
         const currentTires = { right: getTirePos(1), left: getTirePos(-1) };
 
-        if (state.lastSkidPos && state.lastSkidPos.right) {
+        if (state.skidMarksEnabled !== false && state.lastSkidPos && state.lastSkidPos.right) {
             const createTrack = (side) => {
                 const tire = side === 1 ? currentTires.right : currentTires.left;
                 const lastTire = side === 1 ? state.lastSkidPos.right : state.lastSkidPos.left;

@@ -8,8 +8,15 @@ import {
     updateOtherPlayers,
     initMultiplayer,
     stopMultiplayerTimers,
-    getMqttClient
+    getMqttClient,
+    collectLocalState,
+    shouldUpload,
+    ensureRemote,
+    removeRemote,
+    applySnapshot,
+    getMpClient
 } from '../js/multiplayer.js';
+import { FLAG_DRIFT, FLAG_BRAKE, FLAG_FLASH, FLAG_TELEPORT } from '../js/mp-protocol.js';
 
 import { state } from '../js/state.js';
 
@@ -262,7 +269,7 @@ test('initMultiplayer initializes MQTT client, handlers, room join and disconnec
     };
 
     try {
-        state.isPro = true;
+        state.isPro = false; // Free players can freely join multiplayer rooms (up to 10 players)
         state.otherPlayers = {};
         initMultiplayer();
 
@@ -365,7 +372,7 @@ test('initMultiplayer handles connection failure callback gracefully', () => {
     };
 
     try {
-        state.isPro = true;
+        state.isPro = false; // Free players can freely join multiplayer rooms (up to 10 players)
         initMultiplayer();
         if (mockButtons['join-mp-btn'] && mockButtons['join-mp-btn'].onclick) {
             mockButtons['join-mp-btn'].onclick();
@@ -431,7 +438,7 @@ test('initMultiplayer message arrival, leave events and disconnectMultiplayer cl
     };
 
     try {
-        state.isPro = true;
+        state.isPro = false; // Free players can freely join multiplayer rooms (up to 10 players)
         initMultiplayer();
         const client = getMqttClient();
         if (mockButtons['join-mp-btn'] && mockButtons['join-mp-btn'].onclick) {
@@ -477,4 +484,79 @@ test('initMultiplayer message arrival, leave events and disconnectMultiplayer cl
         globalThis.window = origWindow;
         globalThis.document = origDoc;
     }
+});
+
+test('collectLocalState packs drift, brake and flash flags from game state', () => {
+    const st = {
+        lng: 20.4,
+        lat: 44.8,
+        bearing: 123,
+        velocity: 0.3,
+        steeringAngle: 0.5,
+        activeVehicle: 'car',
+        isDrifting: true,
+        keys: { s: true },
+        headlightFlashActive: true
+    };
+    const out = collectLocalState(st);
+    assert.strictEqual(out.flags, FLAG_DRIFT | FLAG_BRAKE | FLAG_FLASH);
+    assert.strictEqual(out.speed, 0.3);
+    assert.strictEqual(out.vehicle, 'car');
+
+    const idle = collectLocalState({ ...st, isDrifting: false, keys: {}, headlightFlashActive: false });
+    assert.strictEqual(idle.flags, 0);
+});
+
+test('shouldUpload sends first packet, real changes and 500 ms heartbeats but skips idle duplicates', () => {
+    const cur = { lng: 20, lat: 44, bearing: 10, speed: 0.1, flags: 0, vehicle: 'car' };
+    assert.strictEqual(shouldUpload(cur, { at: 0 }, 1000), true);
+
+    const last = { ...cur, at: 1000 };
+    assert.strictEqual(shouldUpload(cur, last, 1100), false);
+    assert.strictEqual(shouldUpload(cur, last, 1600), true);
+    assert.strictEqual(shouldUpload({ ...cur, lng: 20.00001 }, last, 1100), true);
+    assert.strictEqual(shouldUpload({ ...cur, bearing: 12 }, last, 1100), true);
+    assert.strictEqual(shouldUpload({ ...cur, flags: FLAG_DRIFT }, last, 1100), true);
+    assert.strictEqual(shouldUpload({ ...cur, vehicle: 'bus' }, last, 1100), true);
+});
+
+test('ensureRemote, applySnapshot and removeRemote manage buffered remote players', () => {
+    state.otherPlayers = {};
+    const p = ensureRemote(7, { name: 'Zed', vehicle: 'truck' });
+    assert.strictEqual(p.id, 's7');
+    assert.strictEqual(p.name, 'Zed');
+    assert.strictEqual(p.positioned, false);
+
+    applySnapshot({
+        time: 1000,
+        players: [
+            { slot: 7, lng: 20.5, lat: 44.9, bearing: 45, speed: 0.2, steer: 0, flags: FLAG_DRIFT, vehicle: 'bus' }
+        ]
+    });
+    assert.strictEqual(state.otherPlayers.s7.positioned, true);
+    assert.strictEqual(state.otherPlayers.s7.lng, 20.5);
+    assert.strictEqual(state.otherPlayers.s7.vehicle, 'bus');
+    assert.strictEqual(state.otherPlayers.s7.buf.samples.length, 1);
+
+    // Unknown slots are created on demand.
+    applySnapshot({
+        time: 1050,
+        players: [{ slot: 9, lng: 1, lat: 2, bearing: 0, speed: 0, steer: 0, flags: FLAG_TELEPORT, vehicle: 'car' }]
+    });
+    assert.ok(state.otherPlayers.s9);
+
+    let removed = false;
+    state.otherPlayers.s7.marker2d = {
+        remove() {
+            removed = true;
+        }
+    };
+    removeRemote(7);
+    assert.strictEqual(removed, true);
+    assert.strictEqual(state.otherPlayers.s7, undefined);
+    state.otherPlayers = {};
+});
+
+test('getMpClient is null until a game server connection is started', () => {
+    assert.strictEqual(getMpClient(), null);
 });
