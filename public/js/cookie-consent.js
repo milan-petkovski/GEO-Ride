@@ -60,6 +60,8 @@
                 transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
                 opacity: 0;
                 pointer-events: none;
+                will-change: transform, opacity;
+                contain: layout;
             }
             body:has(.ui-container) #cookie-consent-banner {
                 bottom: 94px;
@@ -131,12 +133,14 @@
             #cookie-consent-banner .cookie-actions {
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 10px;
                 flex-shrink: 0;
             }
             #cookie-consent-banner .cookie-btn {
-                padding: 0 16px;
-                height: 38px;
+                padding: 0 18px;
+                min-height: 48px;
+                min-width: 48px;
+                height: 48px;
                 font-family: inherit;
                 font-size: 0.72rem;
                 font-weight: 800;
@@ -149,6 +153,10 @@
                 align-items: center;
                 justify-content: center;
                 white-space: nowrap;
+            }
+            #cookie-consent-banner .cookie-btn:focus-visible {
+                outline: 2px solid #00f2ff;
+                outline-offset: 2px;
             }
             #cookie-consent-banner .cookie-btn-decline {
                 background: rgba(255, 255, 255, 0.06);
@@ -168,20 +176,22 @@
             }
             #cookie-consent-banner .cookie-btn-accept:hover {
                 filter: brightness(1.08);
-                transform: translateY(-1px);
-                box-shadow: 0 4px 22px rgba(0, 242, 255, 0.55);
+                border-color: #ffffff;
+                box-shadow: 0 0 24px rgba(0, 242, 255, 0.58);
             }
             @media (max-width: 767px) {
-                #cookie-consent-banner,
-                body:has(.ui-container) #cookie-consent-banner {
-                    bottom: 86px;
-                    width: calc(100vw - 28px);
+                #cookie-consent-banner {
+                    bottom: 12px;
+                    width: calc(100vw - 24px);
                     max-width: 400px;
-                    padding: 14px 16px;
-                    border-radius: 18px;
+                    padding: 12px 14px;
+                    border-radius: 16px;
                     flex-direction: column;
                     align-items: stretch;
-                    gap: 12px;
+                    gap: 10px;
+                }
+                body:has(.ui-container) #cookie-consent-banner {
+                    bottom: 86px;
                 }
                 #cookie-consent-banner .cookie-icon {
                     width: 36px;
@@ -196,8 +206,9 @@
                 }
                 #cookie-consent-banner .cookie-btn {
                     flex: 1;
-                    height: 36px;
-                    font-size: 0.68rem;
+                    min-height: 44px;
+                    height: 44px;
+                    font-size: 0.7rem;
                     padding: 0 12px;
                 }
             }
@@ -238,9 +249,19 @@
         document.getElementById('cookie-decline-btn')?.addEventListener('click', () => closeBanner(false));
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', renderBanner);
+    function scheduleBanner() {
+        setTimeout(() => {
+            if (typeof requestIdleCallback === 'function') {
+                requestIdleCallback(renderBanner, { timeout: 1000 });
+            } else {
+                renderBanner();
+            }
+        }, 450);
+    }
+
+    if (document.readyState === 'complete') {
+        scheduleBanner();
     } else {
-        renderBanner();
+        window.addEventListener('load', scheduleBanner, { once: true });
     }
 })();

@@ -491,4 +491,16 @@ test('drift mechanics - points accumulation, combo duration, multiplier progress
     assert.strictEqual(state.isDrifting, false);
     assert.strictEqual(state.currentDriftPoints, 0);
     assert.strictEqual(state.driftScore, 1200); // 120 * x10
+
+    // Test that drift under 1000 points fails and does NOT bank
+    state.isDrifting = true;
+    state.currentDriftPoints = 400;
+    state.driftComboDuration = 0;
+    state.driftMultiplier = 1; // 400 * 1 = 400 < 1000
+    state.lastDriftTime = Date.now() - 3000;
+    updatePhysics(1.0, mockMap);
+
+    assert.strictEqual(state.isDrifting, false);
+    assert.strictEqual(state.currentDriftPoints, 0);
+    assert.strictEqual(state.driftScore, 1200); // Unchanged!
 });

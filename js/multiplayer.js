@@ -813,6 +813,7 @@ export function initMultiplayer() {
 
     const handleCopy = (btn) => {
         navigator.clipboard.writeText(myId.toUpperCase());
+        trackEvent('multiplayer_copy_peer_id');
         btn.textContent = 'OK';
         setTimeout(() => {
             btn.textContent = 'COPY';

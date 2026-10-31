@@ -3,6 +3,8 @@
  * @description Location discovery engine performing throttled, cached reverse-geocoding requests to Mapbox Places API and triggering cinematic HUD location banners when entering new cities.
  */
 
+import { trackEvent } from './analytics.js';
+
 let lastDiscoveredCity = null;
 let lastCheckTime = 0;
 let lastCheckedLng = null;
@@ -159,6 +161,7 @@ export function showDiscoveryCinematic(city, country, subtitle = 'ARRIVED AT') {
 
     overlay.classList.remove('hidden');
     overlay.classList.add('show');
+    trackEvent('location_discovered', { city, country: country || '' });
 
     // Auto-hide the cinematic after 3.5 seconds
     if (overlay._hideTimeout) clearTimeout(overlay._hideTimeout);

@@ -763,6 +763,8 @@ header {
     display: flex;
     flex-direction: column;
     gap: 3px;
+    text-decoration: none;
+    color: inherit;
 }
 
 .logo {
@@ -3228,12 +3230,16 @@ body.hidden-ui .donation-popup {
     justify-content: center;
     padding: 20px;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    transition:
+        opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pro-modal-backdrop.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
 }
 
@@ -3533,7 +3539,7 @@ body.hidden-ui .donation-popup {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     max-width: 440px;
     margin: 0 auto;
     width: 100%;
@@ -3542,7 +3548,8 @@ body.hidden-ui .donation-popup {
 .pro-activation-input {
     flex: 1;
     min-width: 0;
-    height: 40px;
+    height: 44px;
+    min-height: 44px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 10px;
@@ -3569,7 +3576,9 @@ body.hidden-ui .donation-popup {
 }
 
 .pro-activation-btn {
-    height: 40px;
+    height: 44px;
+    min-height: 44px;
+    min-width: 44px;
     padding: 0 18px;
     border-radius: 10px;
     border: 1px solid rgba(196, 112, 240, 0.5);
@@ -3640,23 +3649,24 @@ body.hidden-ui .donation-popup {
     box-sizing: border-box;
     pointer-events: auto;
     opacity: 0;
-    transform: translateY(-8px) scale(0.96);
-    animation: toastSlideInCenter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(-14px) scale(0.95);
+    animation: toastSlideInCenter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transition:
-        opacity 0.24s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity 0.2s cubic-bezier(0.4, 0, 1, 1),
+        transform 0.2s cubic-bezier(0.4, 0, 1, 1),
+        filter 0.2s cubic-bezier(0.4, 0, 1, 1);
     white-space: nowrap;
     user-select: none;
+    will-change: transform, opacity, filter;
 }
 
 .toast-msg.toast-pulse {
-    animation: toastPulse 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: toastPulse 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .toast-msg.hide {
-    opacity: 0 !important;
-    transform: translateY(-10px) scale(0.95) !important;
     pointer-events: none !important;
+    animation: toastSlideOutCenter 0.25s cubic-bezier(0.32, 0, 0.67, 0) forwards !important;
 }
 
 .toast-msg.toast-pro {
@@ -3898,13 +3908,28 @@ body.hidden-ui .donation-popup {
 }
 
 @keyframes toastSlideInCenter {
-    from {
+    0% {
         opacity: 0;
-        transform: translateY(-8px) scale(0.96);
+        transform: translateY(-16px) scale(0.95);
+        filter: blur(4px);
     }
-    to {
+    100% {
         opacity: 1;
         transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes toastSlideOutCenter {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-16px) scale(0.95);
+        filter: blur(4px);
     }
 }
 
@@ -3984,18 +4009,21 @@ body.hidden-ui .donation-popup {
     }
     .pro-activation-box {
         flex-direction: row !important;
-        gap: 6px !important;
+        gap: 10px !important;
         width: 100% !important;
     }
     .pro-activation-input {
-        font-size: 0.75rem !important;
-        padding: 0 10px !important;
-        height: 38px !important;
+        font-size: 0.78rem !important;
+        padding: 0 12px !important;
+        height: 48px !important;
+        min-height: 48px !important;
     }
     .pro-activation-btn {
-        padding: 0 12px !important;
-        font-size: 0.72rem !important;
-        height: 38px !important;
+        padding: 0 14px !important;
+        font-size: 0.76rem !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        min-width: 48px !important;
     }
     .toast-container {
         right: auto;
@@ -6575,6 +6603,7 @@ header {
     box-sizing: border-box !important;
     position: relative !important;
     z-index: 20 !important;
+    height: var(--hud-btn-size) !important;
 }
 
 .header-left {
@@ -6582,20 +6611,41 @@ header {
     flex-direction: column !important;
     justify-content: center !important;
     align-items: stretch !important;
-    width: fit-content !important;
+    width: max-content !important;
+    height: var(--hud-btn-size) !important;
     min-height: var(--hud-btn-size) !important;
-    height: auto !important;
-    gap: 8px !important;
+    max-height: var(--hud-btn-size) !important;
+    gap: 2px !important;
     min-width: 0 !important;
     flex-shrink: 0 !important;
     pointer-events: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+    color: inherit !important;
+    cursor: pointer !important;
+}
+
+.header-left:hover .logo {
+    transform: scale(1.02) !important;
+    opacity: 0.95 !important;
+}
+
+.header-left:hover .author-link {
+    color: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(0, 242, 255, 0.45) !important;
+    background: rgba(4, 6, 14, 0.92) !important;
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.45),
+        0 0 10px rgba(0, 242, 255, 0.25) !important;
 }
 
 .logo {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 2.15rem !important;
+    font-size: 2rem !important;
     font-weight: 800 !important;
-    line-height: 1 !important;
+    line-height: 0.9 !important;
     letter-spacing: 0.5px !important;
     color: #ffffff !important;
     text-decoration: none !important;
@@ -6604,11 +6654,12 @@ header {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    min-height: 38px !important;
+    min-height: auto !important;
+    height: auto !important;
     gap: 6px !important;
     width: max-content !important;
     margin: 0 !important;
-    padding: 2px 4px !important;
+    padding: 0 !important;
     transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
@@ -6623,23 +6674,23 @@ header {
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
-    width: 100% !important;
-    min-height: 26px !important;
+    width: 0 !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
     box-sizing: border-box !important;
-    padding: 4px 10px !important;
-    margin-top: 2px !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-bottom: 0 !important;
+    padding: 2.5px 3px !important;
+    margin: 0 !important;
     border-radius: 999px !important;
     background: rgba(10, 13, 24, 0.68) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(0, 242, 255, 0.22) !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
-    font-size: 0.55rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    font-size: 0.5rem !important;
     font-weight: 700 !important;
-    letter-spacing: 1.6px !important;
+    letter-spacing: 0.8px !important;
     line-height: 1 !important;
     color: rgba(255, 255, 255, 0.72) !important;
     text-decoration: none !important;
@@ -6649,9 +6700,11 @@ header {
 
 .author-link:hover {
     color: rgba(255, 255, 255, 0.95) !important;
-    border-color: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(0, 242, 255, 0.45) !important;
     background: rgba(4, 6, 14, 0.92) !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.45),
+        0 0 10px rgba(0, 242, 255, 0.25) !important;
 }
 
 /* --- HEADER RIGHT ACTION BAR --- */
@@ -7237,6 +7290,111 @@ kbd.pressed {
     justify-content: center !important;
 }
 
+/* Drift Shatter & Fail Effect (for drifts < 1000 pts or collisions) */
+.drift-hud.failed-shatter,
+.drift-hud.shatter {
+    opacity: 1 !important;
+    pointer-events: none !important;
+    transition: none !important;
+}
+
+.drift-hud.failed-shatter .drift-hud-content,
+.drift-hud.shatter .drift-hud-content {
+    background: rgba(36, 6, 16, 0.94) !important;
+    border-color: #ff3366 !important;
+    box-shadow:
+        0 10px 30px rgba(255, 51, 102, 0.5),
+        inset 0 0 16px rgba(255, 51, 102, 0.35) !important;
+    position: relative !important;
+    overflow: visible !important;
+    transition: none !important;
+    animation: driftFailVibrate 1.05s cubic-bezier(0.2, 0.9, 0.3, 1) forwards !important;
+}
+
+.drift-hud.failed-shatter .drift-hud-content::after,
+.drift-hud.shatter .drift-hud-content::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -2px !important;
+    bottom: -2px !important;
+    left: 48% !important;
+    width: 2px !important;
+    background: linear-gradient(180deg, #ff3366 0%, #ffffff 50%, #ff3366 100%) !important;
+    box-shadow: 0 0 8px #ff3366 !important;
+    transform: rotate(22deg) !important;
+    pointer-events: none !important;
+    opacity: 0.9 !important;
+}
+
+.drift-hud.failed-shatter .drift-badge,
+.drift-hud.shatter .drift-badge {
+    color: #ff3366 !important;
+    letter-spacing: 2px !important;
+    transition: none !important;
+}
+
+.drift-hud.failed-shatter .drift-score-ticker,
+.drift-hud.shatter .drift-score-ticker {
+    color: #ff3366 !important;
+    text-shadow: 0 0 14px rgba(255, 51, 102, 0.7) !important;
+    transition: none !important;
+}
+
+.drift-hud.failed-shatter .drift-multiplier-pill,
+.drift-hud.shatter .drift-multiplier-pill {
+    background: #ff3366 !important;
+    box-shadow: 0 0 12px rgba(255, 51, 102, 0.6) !important;
+    transition: none !important;
+}
+
+/* When the shatter finishes, it stays completely gone without any chance of reappearing */
+.drift-hud.shatter-done {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: none !important;
+}
+
+.drift-shard {
+    display: none !important;
+}
+
+@keyframes driftFailVibrate {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    6% {
+        transform: translateX(-6px) scale(1.02);
+        opacity: 1;
+    }
+    13% {
+        transform: translateX(6px) scale(1.01);
+        opacity: 1;
+    }
+    20% {
+        transform: translateX(-4px);
+        opacity: 1;
+    }
+    27% {
+        transform: translateX(3px);
+        opacity: 1;
+    }
+    34% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+    84% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.92) translateY(-6px);
+        opacity: 0;
+    }
+}
+
 /* --- TOAST NOTIFICATIONS & PORTRAIT HINT (DESKTOP: GORE U TOP KAO PRE) --- */
 .toast-container {
     position: fixed !important;
@@ -7269,33 +7427,178 @@ kbd.pressed {
     color: #f8fafc !important;
 }
 
-/* --- MAPBOX CONTROLS ACCESSIBILITY & TARGET SIZE --- */
+/* --- MAPBOX CONTROLS ACCESSIBILITY, COMPACT ATTRIBUTION & CORNER PLACEMENT --- */
+.mapboxgl-ctrl-bottom-left {
+    bottom: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 15 !important;
+    pointer-events: none !important;
+}
+
+.mapboxgl-ctrl-bottom-left .mapboxgl-ctrl {
+    margin: 0 0 0 8px !important;
+    float: left !important;
+    pointer-events: auto !important;
+}
+
 .mapboxgl-ctrl-logo {
-    min-height: 32px !important;
+    width: 88px !important;
+    height: 23px !important;
     min-width: 88px !important;
-    display: inline-block !important;
-    padding: 4px 6px !important;
-    box-sizing: content-box !important;
+    min-height: 23px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-size: 88px 23px !important;
+    background-position: left bottom !important;
+    background-repeat: no-repeat !important;
+    display: block !important;
+    border-radius: 0 !important;
+    opacity: 0.8 !important;
+    transition: opacity 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.mapboxgl-ctrl-logo:hover {
+    opacity: 1 !important;
+}
+
+.mapboxgl-ctrl-bottom-right {
+    bottom: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 15 !important;
+    pointer-events: none !important;
+}
+
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl {
+    margin: 0 4px 0 0 !important;
+    float: right !important;
+    pointer-events: auto !important;
+}
+
+.mapboxgl-ctrl-attrib,
+.mapboxgl-ctrl-attrib.mapboxgl-compact {
+    margin: 0 4px 0 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    background-color: transparent !important;
+    bottom: 0 !important;
+}
+
+.mapboxgl-ctrl-attrib:not(.mapboxgl-compact-show) {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 4px 0 0 !important;
+    margin-bottom: 0 !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    border-radius: 50% !important;
+}
+
+.mapboxgl-ctrl-attrib:not(.mapboxgl-compact-show) .mapboxgl-ctrl-attrib-inner {
+    display: none !important;
 }
 
 .mapboxgl-ctrl-attrib-button {
-    min-width: 36px !important;
-    min-height: 36px !important;
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        background-color 0.2s ease !important;
 }
 
-.mapboxgl-ctrl-attrib {
-    margin: 0 8px 8px 0 !important;
+.mapboxgl-ctrl-attrib:not(.mapboxgl-compact-show) .mapboxgl-ctrl-attrib-button {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill-rule='evenodd' fill='%23ffffff'%3E%3Cpath d='M4 10a6 6 0 1 0 12 0 6 6 0 1 0-12 0m5-3a1 1 0 1 0 2 0 1 1 0 1 0-2 0m0 3a1 1 0 1 1 2 0v3a1 1 0 1 1-2 0'/%3E%3C/svg%3E") !important;
+    background-size: 16px 16px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-color: rgba(10, 13, 24, 0.75) !important;
+    border: 1px solid rgba(0, 242, 255, 0.35) !important;
+    border-radius: 50% !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    opacity: 0.85 !important;
 }
 
-.mapboxgl-ctrl-attrib a {
+.mapboxgl-ctrl-attrib:not(.mapboxgl-compact-show) .mapboxgl-ctrl-attrib-button:hover {
+    opacity: 1 !important;
+    border-color: rgba(0, 242, 255, 0.8) !important;
+    transform: scale(1.08) !important;
+}
+
+.mapboxgl-ctrl-attrib.mapboxgl-compact-show {
+    margin: 0 4px 0 0 !important;
+    margin-bottom: 0 !important;
+    background: rgba(10, 13, 24, 0.92) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(0, 242, 255, 0.25) !important;
+    border-bottom: none !important;
+    border-radius: 6px 6px 0 0 !important;
+    padding: 2px 26px 0px 8px !important;
+    padding-bottom: 0 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+    color: #e2e8f0 !important;
+    font-size: 0.65rem !important;
+    line-height: 1.3 !important;
+    visibility: visible !important;
     display: inline-block !important;
-    min-height: 24px !important;
-    line-height: 24px !important;
-    padding: 0 4px !important;
+    position: relative !important;
+}
+
+.mapboxgl-ctrl-attrib.mapboxgl-compact-show .mapboxgl-ctrl-attrib-button {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 5L15 15M15 5L5 15' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-size: 11px 11px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    position: absolute !important;
+    top: 50% !important;
+    right: 5px !important;
+    transform: translateY(-50%) !important;
+    opacity: 0.9 !important;
+}
+
+.mapboxgl-ctrl-attrib.mapboxgl-compact-show .mapboxgl-ctrl-attrib-button:hover {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    transform: translateY(-50%) !important;
+}
+
+.mapboxgl-ctrl-attrib.mapboxgl-compact-show a {
+    color: #00f2ff !important;
+    text-decoration: none !important;
+}
+
+.mapboxgl-ctrl-attrib.mapboxgl-compact-show a:hover {
+    text-decoration: underline !important;
 }
 
 /* --- TOUCH CONTROLS (TABLET & MOBILE) --- */
@@ -7464,7 +7767,7 @@ kbd.pressed {
     }
 
     .logo {
-        font-size: 2.15rem !important;
+        font-size: 1.85rem !important;
     }
 
     .settings-main-btn {
@@ -7537,19 +7840,6 @@ kbd.pressed {
 @media (max-width: 1024px), (max-width: 1200px) and (pointer: coarse) {
     :root {
         --hud-btn-size: 44px;
-    }
-
-    /* Mapbox logo & attribution safe clearance from pedals on mobile/tablets */
-    .mapboxgl-ctrl-bottom-left {
-        bottom: 136px !important;
-        left: 14px !important;
-        margin: 0 !important;
-    }
-
-    .mapboxgl-ctrl-bottom-right {
-        bottom: 156px !important;
-        right: 14px !important;
-        margin: 0 !important;
     }
 
     .center-controls {
@@ -7772,23 +8062,37 @@ kbd.pressed {
         padding: 12px 18px !important;
     }
 
+    .header-left {
+        height: var(--hud-btn-size) !important;
+        min-height: var(--hud-btn-size) !important;
+        max-height: var(--hud-btn-size) !important;
+        gap: 1px !important;
+    }
+
     .logo {
-        font-size: 1.85rem !important;
+        font-size: 1.45rem !important;
+        line-height: 0.9 !important;
         letter-spacing: 0.5px !important;
-        gap: 5px !important;
+        gap: 4px !important;
         width: max-content !important;
-        min-height: 38px !important;
+        min-height: auto !important;
+        height: auto !important;
         display: inline-flex !important;
         align-items: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .author-link {
-        font-size: 0.5rem !important;
-        letter-spacing: 1.2px !important;
-        min-height: 26px !important;
-        padding: 4px 8px !important;
+        font-size: 0.42rem !important;
+        letter-spacing: 0.4px !important;
+        min-height: auto !important;
+        height: auto !important;
+        padding: 1.5px 2px !important;
         margin: 0 !important;
-        width: 100% !important;
+        width: 0 !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
         display: inline-flex !important;
         align-items: center !important;
@@ -7870,11 +8174,11 @@ kbd.pressed {
         padding: 1.5px 5px !important;
     }
 
-    /* In landscape, toasts appear cleanly below drift HUD */
+    /* In landscape, toasts appear cleanly at the top */
     .toast-container {
-        top: 98px !important;
+        top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
         width: calc(100vw - 36px) !important;
-        max-width: 460px !important;
+        max-width: 440px !important;
     }
 
     .speed-container {
@@ -7978,31 +8282,39 @@ kbd.pressed {
     }
 
     .header-left {
-        gap: 8px !important;
-        height: auto !important;
+        gap: 1.5px !important;
+        height: var(--hud-btn-size) !important;
+        min-height: var(--hud-btn-size) !important;
+        max-height: var(--hud-btn-size) !important;
         align-items: stretch !important;
         width: fit-content !important;
         justify-content: center !important;
     }
 
     .logo {
-        font-size: 1.85rem !important;
+        font-size: 1.55rem !important;
+        line-height: 0.9 !important;
         letter-spacing: 0.5px !important;
-        gap: 5px !important;
+        gap: 4px !important;
         width: max-content !important;
-        min-height: 38px !important;
+        min-height: auto !important;
+        height: auto !important;
         display: inline-flex !important;
         align-items: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .author-link {
-        font-size: 0.5rem !important;
-        letter-spacing: 1.2px !important;
-        min-height: 26px !important;
-        padding: 4px 8px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        width: 100% !important;
+        font-size: 0.42rem !important;
+        letter-spacing: 0.4px !important;
+        min-height: auto !important;
+        height: auto !important;
+        padding: 1.5px 2px !important;
+        margin: 0 !important;
+        width: 0 !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
         display: inline-flex !important;
         align-items: center !important;
@@ -8151,11 +8463,19 @@ kbd.pressed {
         padding: 2px 6px !important;
     }
 
-    /* Toasts flow cleanly below drift HUD on mobile phones */
+    /* Toasts flow cleanly below drift HUD on mobile phones (portrait by default, landscape overridden) */
     .toast-container {
         top: 114px !important;
         width: calc(100vw - 28px) !important;
         max-width: 362px !important;
+    }
+
+    @media (orientation: landscape) {
+        .toast-container {
+            top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+            width: calc(100vw - 36px) !important;
+            max-width: 440px !important;
+        }
     }
 
     @media (orientation: portrait) {
@@ -8257,6 +8577,24 @@ kbd.pressed {
         font-size: 0.75rem !important;
         letter-spacing: 3.8px !important;
         margin-top: 4px !important;
+    }
+
+    /* On mobile portrait, Mapbox logo is compact icon only (24px) to prevent overlapping copyright notice */
+    @media (orientation: portrait) {
+        .mapboxgl-ctrl-logo {
+            width: 24px !important;
+            height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+            max-width: 24px !important;
+            max-height: 24px !important;
+            border-radius: 50% !important;
+            background-size: auto 24px !important;
+            background-position: left center !important;
+            background-repeat: no-repeat !important;
+            overflow: hidden !important;
+            margin: 0 0 2px 6px !important;
+        }
     }
 }
 
@@ -8446,5 +8784,14 @@ kbd.pressed {
     [data-sx-pane='about'] .sx-spots-summary-grid,
     [data-sx-pane='about'] .sx-spots-ul-2col {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Global Mobile / Tablet Landscape override: always keep toasts at top of screen */
+@media (orientation: landscape) and (max-height: 560px), (orientation: landscape) and (max-width: 1024px) {
+    .toast-container {
+        top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+        width: calc(100vw - 36px) !important;
+        max-width: 440px !important;
     }
 }

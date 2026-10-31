@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+        <script src="/js/gtag-init.js" defer></script>
+
+        <title>404: GPS Signal Lost | GEO Ride 3D Driving Simulator</title>
+        <meta name="title" content="404: GPS Signal Lost | GEO Ride 3D Driving Simulator" />
+        <meta
+            name="description"
+            content="Error 404: Coordinates not found on planet Earth. Return to base or launch the 3D real-world driving simulator."
+        />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href="https://playgeoride.com/404" />
+
+        <meta name="theme-color" content="#020205" />
+        <meta name="color-scheme" content="dark" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="GEO Ride" />
+        <meta property="og:url" content="https://playgeoride.com/404" />
+        <meta property="og:title" content="404: GPS Signal Lost | GEO Ride 3D Driving Simulator" />
+        <meta
+            property="og:description"
+            content="Error 404: Off-grid coordinates. Return to base or launch the free 3D browser driving simulator."
+        />
+        <meta property="og:image" content="https://playgeoride.com/images/og.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="404: GPS Signal Lost | GEO Ride 3D Driving Simulator" />
+        <meta
+            name="twitter:description"
+            content="Error 404: Coordinates not found. Return to base or launch the free 3D browser driving simulator."
+        />
+        <meta name="twitter:image" content="https://playgeoride.com/images/og.jpg" />
+
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="preload" href="/fonts/rajdhani-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/outfit-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+        <script src="/js/cookie-consent.js" defer></script>
+
+        <style>
+            @font-face {
+                font-family: 'Outfit Fallback';
+                src: local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), local('Arial');
+                size-adjust: 100.6%;
+                ascent-override: 98%;
+                descent-override: 22%;
+                line-gap-override: 0%;
+            }
+            @font-face {
+                font-family: 'Rajdhani Fallback';
+                src: local('Segoe UI Semibold'), local('Roboto Condensed'), local('Arial');
+                size-adjust: 91.5%;
+                ascent-override: 102%;
+                descent-override: 24%;
+                line-gap-override: 0%;
+            }
+            @font-face {
+                font-family: 'Outfit';
+                font-style: normal;
+                font-weight: 400 700;
+                font-display: optional;
+                src: url('/fonts/outfit-400-latin.woff2') format('woff2');
+                unicode-range:
+                    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122,
+                    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+            }
+            @font-face {
+                font-family: 'Rajdhani';
+                font-style: normal;
+                font-weight: 600;
+                font-display: optional;
+                src: url('/fonts/rajdhani-600-latin.woff2') format('woff2');
+                unicode-range:
+                    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122,
+                    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+            }
+            @font-face {
+                font-family: 'Rajdhani';
+                font-style: normal;
+                font-weight: 700;
+                font-display: optional;
+                src: url('/fonts/rajdhani-700-latin.woff2') format('woff2');
+                unicode-range:
+                    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122,
+                    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+            }
+
+            :root {
+                --font-hud: 'Rajdhani', 'Rajdhani Fallback', sans-serif;
+                --font-main: 'Outfit', 'Outfit Fallback', sans-serif;
+                --bg: #020205;
+                --text: #f0f4fc;
+                --text-dim: #94a3b8;
+                --text-muted: #64748b;
+                --primary: #00f2ff;
+                --primary-glow: rgba(0, 242, 255, 0.28);
+                --primary-border: rgba(0, 242, 255, 0.32);
+                --pro-magenta: #ff00e5;
+                --pro-border: rgba(255, 0, 229, 0.35);
+                --border: rgba(255, 255, 255, 0.08);
+                --border-subtle: rgba(255, 255, 255, 0.06);
+                --r-pill: 9999px;
+                --r-md: 14px;
+                --r-lg: 22px;
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            html,
+            body {
+                width: 100%;
+                height: 100vh;
+                height: 100dvh;
+                overflow: hidden;
+                background-color: var(--bg);
+                color: var(--text);
+                font-family: var(--font-main);
+            }
+
+            body {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                position: relative;
+                background:
+                    radial-gradient(circle at 50% 36%, rgba(0, 242, 255, 0.06) 0%, rgba(2, 2, 5, 0.98) 68%),
+                    linear-gradient(180deg, #020205 0%, #03050c 100%);
+            }
+
+            /* --------------------------------------------------------------------------
+               HEADER - IDENTICAL COPY FROM LANDING PAGE (index.html)
+               -------------------------------------------------------------------------- */
+            #nav-header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 72px;
+                padding: 0 clamp(16px, 4vw, 56px);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                z-index: 1000;
+                background: rgba(2, 3, 9, 0.82);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-bottom: 1px solid var(--border);
+            }
+            .header-left-wrap {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+            .header-left {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+            .logo {
+                font-family: var(--font-hud);
+                font-size: 2.05rem;
+                font-weight: 700;
+                color: var(--text);
+                text-transform: uppercase;
+                line-height: 0.85;
+                letter-spacing: 1px;
+                text-decoration: none;
+                cursor: pointer;
+                display: inline-block;
+                margin-left: -1px;
+                transition: opacity 0.22s ease;
+                text-shadow:
+                    0 4px 20px rgba(0, 0, 0, 1),
+                    0 0 26px var(--primary-glow);
+            }
+            .logo:hover {
+                opacity: 0.9;
+            }
+            .logo span {
+                color: var(--primary);
+            }
+            .author-link {
+                font-family: var(--font-main);
+                font-size: 0.48rem;
+                color: var(--primary);
+                text-decoration: none;
+                letter-spacing: 1.35px;
+                font-weight: 600;
+                opacity: 0.78;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                transition:
+                    opacity 0.22s ease,
+                    color 0.22s ease;
+                margin-left: 0;
+                display: inline-flex;
+                align-items: center;
+                line-height: 1;
+                min-height: 44px;
+                min-width: 44px;
+                padding: 16px 0;
+                margin-top: -16px;
+                margin-bottom: -16px;
+            }
+            .author-link:hover {
+                opacity: 1;
+                color: #ffffff;
+            }
+            .nav-live-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                padding: 5px 11px;
+                border-radius: var(--r-pill);
+                background: rgba(16, 185, 129, 0.14);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                font-family: var(--font-hud);
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 1.2px;
+                line-height: 1;
+                color: #34d399;
+                flex-shrink: 0;
+            }
+            .live-indicator-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #10b981;
+                box-shadow: 0 0 8px #10b981;
+                flex-shrink: 0;
+            }
+            .version-text-aligned {
+                display: inline-block;
+                line-height: 1;
+                transform: translateY(-0.5px);
+            }
+            .nav-actions {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            /* Buttons matching Landing & Play pages */
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                min-height: 44px;
+                min-width: 44px;
+                padding: 10px 22px;
+                border-radius: var(--r-pill);
+                font-family: var(--font-hud);
+                font-size: 0.88rem;
+                font-weight: 800;
+                letter-spacing: 1.6px;
+                text-transform: uppercase;
+                text-decoration: none;
+                cursor: pointer;
+                border: 1px solid transparent;
+                white-space: nowrap;
+                transition:
+                    background-color 0.2s ease,
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease,
+                    color 0.2s ease;
+            }
+            .btn-sm {
+                min-height: 40px;
+                padding: 9px 18px;
+                font-size: 0.82rem;
+            }
+            .btn-md {
+                min-height: 46px;
+                padding: 12px 26px;
+                font-size: 0.92rem;
+            }
+            .btn-primary {
+                background: linear-gradient(135deg, #00f2ff 0%, #00b7ff 100%);
+                color: #02040a;
+                border-color: #67f7ff;
+                box-shadow: 0 0 24px rgba(0, 242, 255, 0.45);
+            }
+            .btn-primary:hover {
+                background: #33f5ff;
+                border-color: #33f5ff;
+                box-shadow: 0 0 32px rgba(0, 242, 255, 0.65);
+            }
+            .btn-secondary {
+                background: rgba(10, 16, 32, 0.85);
+                color: var(--text);
+                border: 1px solid var(--border);
+            }
+            .btn-secondary:hover {
+                border-color: var(--primary-border);
+                background: rgba(16, 26, 48, 0.95);
+                box-shadow: 0 0 16px rgba(0, 242, 255, 0.16);
+            }
+            .btn-pro-outline {
+                background: rgba(196, 112, 240, 0.12);
+                color: #f3d4ff;
+                border: 1px solid rgba(255, 0, 229, 0.4);
+            }
+            .btn-pro-outline:hover {
+                background: rgba(255, 0, 229, 0.2);
+                color: #ffffff;
+                box-shadow: 0 0 24px rgba(255, 0, 229, 0.35);
+            }
+
+            /* Central Stage (Zero Scroll) */
+            .stage-main {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 86px 20px 16px;
+                position: relative;
+                z-index: 10;
+            }
+
+            .cockpit-panel {
+                width: 100%;
+                max-width: 660px;
+                background: rgba(6, 10, 22, 0.84);
+                border: 1px solid var(--primary-border);
+                border-radius: var(--r-lg);
+                padding: 34px 34px 28px;
+                text-align: center;
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                box-shadow:
+                    0 0 60px rgba(0, 242, 255, 0.08),
+                    0 24px 48px rgba(0, 0, 0, 0.8);
+                position: relative;
+            }
+            .cockpit-panel::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 18%;
+                right: 18%;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, var(--primary), transparent);
+                box-shadow: 0 0 10px var(--primary);
+            }
+
+            .cockpit-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 14px;
+                border-radius: var(--r-pill);
+                background: rgba(255, 42, 75, 0.12);
+                border: 1px solid rgba(255, 42, 75, 0.45);
+                font-family: var(--font-hud);
+                font-size: 0.72rem;
+                font-weight: 700;
+                letter-spacing: 1.6px;
+                color: #ff3b5c;
+                margin-bottom: 12px;
+            }
+            .cockpit-badge-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #ff3b5c;
+                box-shadow: 0 0 8px #ff3b5c;
+                animation: pulseAlert 1.6s infinite;
+            }
+            @keyframes pulseAlert {
+                0%,
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                50% {
+                    opacity: 0.35;
+                    transform: scale(0.85);
+                }
+            }
+
+            .glitch-code {
+                font-family: var(--font-hud);
+                font-size: clamp(3.8rem, 10vw, 5.8rem);
+                font-weight: 900;
+                letter-spacing: 4px;
+                color: #ffffff;
+                line-height: 0.92;
+                margin-bottom: 8px;
+                text-shadow: 0 0 24px rgba(0, 242, 255, 0.5);
+            }
+            .glitch-code span {
+                color: var(--primary);
+            }
+
+            .cockpit-title {
+                font-family: var(--font-hud);
+                font-size: clamp(1.2rem, 3.2vw, 1.6rem);
+                font-weight: 800;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: #ffffff;
+                margin-bottom: 10px;
+            }
+
+            .cockpit-desc {
+                font-size: 0.92rem;
+                line-height: 1.55;
+                color: var(--text-dim);
+                max-width: 500px;
+                margin: 0 auto 22px;
+            }
+
+            .cockpit-cta-row {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+
+            .teleport-hud {
+                background: rgba(3, 6, 14, 0.75);
+                border: 1px solid var(--border-subtle);
+                border-radius: var(--r-md);
+                padding: 12px 14px;
+            }
+            .teleport-header {
+                font-family: var(--font-hud);
+                font-size: 0.72rem;
+                font-weight: 700;
+                letter-spacing: 1.6px;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .teleport-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            .teleport-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                padding: 7px 10px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid var(--border-subtle);
+                color: var(--text-dim);
+                text-decoration: none;
+                font-family: var(--font-hud);
+                font-size: 0.76rem;
+                font-weight: 700;
+                letter-spacing: 0.8px;
+                text-transform: uppercase;
+                transition:
+                    color 0.2s ease,
+                    border-color 0.2s ease,
+                    background 0.2s ease;
+            }
+            .teleport-pill:hover {
+                color: var(--primary);
+                border-color: var(--primary-border);
+                background: rgba(0, 242, 255, 0.08);
+            }
+            .teleport-dot {
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: var(--primary);
+                box-shadow: 0 0 6px var(--primary);
+                flex-shrink: 0;
+            }
+
+            /* --------------------------------------------------------------------------
+               FOOTER - POLISHED, MODERN & BALANCED (ZERO SCROLL)
+               -------------------------------------------------------------------------- */
+            .hud-footer {
+                position: relative;
+                z-index: 10;
+                background: rgba(2, 3, 9, 0.88);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-top: 1px solid var(--border);
+                padding: 14px clamp(16px, 4vw, 56px);
+                flex-shrink: 0;
+            }
+            .hud-footer::before {
+                content: '';
+                position: absolute;
+                top: -1px;
+                left: 20%;
+                right: 20%;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.35), transparent);
+            }
+            .hud-footer-content {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .footer-copy {
+                font-size: 0.82rem;
+                color: var(--text-muted);
+                white-space: nowrap;
+            }
+            .footer-inline-link {
+                color: #cbd5e1;
+                text-decoration: underline;
+                text-underline-offset: 3px;
+                font-weight: 500;
+                transition: color 0.2s ease;
+            }
+            .footer-inline-link:hover {
+                color: var(--primary);
+            }
+            .hud-footer-nav {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+            .hud-nav-link {
+                color: var(--text-dim);
+                text-decoration: none;
+                font-size: 0.82rem;
+                font-weight: 600;
+                transition: color 0.2s ease;
+            }
+            .hud-nav-link:hover {
+                color: var(--primary);
+            }
+            .hud-footer-tech {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .hud-tech-pill {
+                padding: 4px 10px;
+                border-radius: var(--r-pill);
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid var(--border);
+                font-family: var(--font-hud);
+                font-size: 0.68rem;
+                font-weight: 700;
+                letter-spacing: 0.8px;
+                color: var(--text-muted);
+                white-space: nowrap;
+            }
+
+            @media (max-width: 1024px) {
+                .nav-menu {
+                    display: none;
+                }
+                .hud-footer-tech {
+                    display: none;
+                }
+            }
+
+            @media (max-width: 640px) {
+                #nav-header {
+                    height: 64px;
+                    padding: 0 16px;
+                }
+                .logo {
+                    font-size: 1.6rem;
+                }
+                .author-link {
+                    font-size: 0.4rem;
+                }
+                .stage-main {
+                    padding: 72px 14px 12px;
+                }
+                .cockpit-panel {
+                    padding: 22px 16px 18px;
+                }
+                .cockpit-desc {
+                    font-size: 0.84rem;
+                    margin-bottom: 16px;
+                }
+                .cockpit-cta-row .btn {
+                    width: 100%;
+                }
+                .teleport-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .hud-footer {
+                    padding: 10px 16px;
+                }
+                .hud-footer-content {
+                    flex-direction: column;
+                    gap: 6px;
+                    text-align: center;
+                }
+                .footer-copy {
+                    font-size: 0.75rem;
+                }
+                .hud-footer-nav {
+                    gap: 12px;
+                    font-size: 0.75rem;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <header id="nav-header">
+            <div class="header-left-wrap">
+                <div class="header-left">
+                    <a href="/" class="logo" id="header-logo-top">GEO <span>RIDE</span></a>
+                    <a href="https://milanwebportal.com" target="_blank" rel="noopener" class="author-link"
+                        >BY MILANWEBPORTAL.COM</a
+                    >
+                </div>
+                <span id="nav-live-pill" class="nav-live-pill" title="Current Release Version v1.2.1">
+                    <span class="live-indicator-dot" aria-hidden="true"></span>
+                    <span id="nav-live-text" class="version-text-aligned">v1.2.1</span>
+                </span>
+            </div>
+
+            <div class="nav-actions">
+                <a
+                    href="/play"
+                    id="nav-play-btn"
+                    class="btn btn-primary btn-sm"
+                    data-track="play_click"
+                    data-track-location="nav_primary"
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        width="14"
+                        height="14"
+                        aria-hidden="true"
+                    >
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Play Free
+                </a>
+                <a
+                    href="/#pricing"
+                    class="btn btn-pro-outline btn-sm"
+                    data-track="pro_click"
+                    data-track-location="nav_secondary"
+                >
+                    Go Pro
+                </a>
+            </div>
+        </header>
+
+        <main class="stage-main">
+            <div class="cockpit-panel">
+                <div class="cockpit-badge">
+                    <span class="cockpit-badge-dot" aria-hidden="true"></span>
+                    <span>GPS SIGNAL LOST &bull; OFF-GRID COORDINATES</span>
+                </div>
+
+                <div class="glitch-code">4<span>0</span>4</div>
+
+                <h1 class="cockpit-title">Sector Not Found</h1>
+                <p class="cockpit-desc">
+                    The requested route or telemetry coordinates do not exist on the current Earth cartography grid.
+                    Recalibrate your compass or jump directly into the 3D driving simulator.
+                </p>
+
+                <div class="cockpit-cta-row">
+                    <a href="/play" class="btn btn-primary btn-md">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            width="16"
+                            height="16"
+                            aria-hidden="true"
+                        >
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Launch 3D Simulator
+                    </a>
+                    <a href="/" class="btn btn-secondary btn-md">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            width="16"
+                            height="16"
+                            aria-hidden="true"
+                        >
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        Return to Garage
+                    </a>
+                </div>
+
+                <div class="teleport-hud">
+                    <div class="teleport-header">
+                        <span>Emergency Coordinates Teleport</span>
+                        <span>Telemetry: Online</span>
+                    </div>
+                    <div class="teleport-grid">
+                        <a href="/play?lat=43.7384&amp;lng=7.4246&amp;zoom=16.8&amp;place=Monaco" class="teleport-pill">
+                            <span class="teleport-dot"></span>Monaco GP
+                        </a>
+                        <a
+                            href="/play?lat=50.3356&amp;lng=6.9475&amp;zoom=16&amp;place=Nurburgring"
+                            class="teleport-pill"
+                        >
+                            <span class="teleport-dot"></span>Nurburgring
+                        </a>
+                        <a href="/play?lat=35.6595&amp;lng=139.7004&amp;zoom=17&amp;place=Tokyo" class="teleport-pill">
+                            <span class="teleport-dot"></span>Tokyo
+                        </a>
+                        <a
+                            href="/play?lat=44.8125&amp;lng=20.4489&amp;zoom=16.5&amp;place=Belgrade"
+                            class="teleport-pill"
+                        >
+                            <span class="teleport-dot"></span>Belgrade
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="hud-footer">
+            <div class="hud-footer-content">
+                <div class="hud-footer-left">
+                    <p class="footer-copy">
+                        &copy; 2026 GEO Ride. Engineered by
+                        <a href="https://milanwebportal.com" target="_blank" rel="noopener" class="footer-inline-link"
+                            >Milan Web Portal</a
+                        >. All rights reserved.
+                    </p>
+                </div>
+                <nav class="hud-footer-nav" aria-label="Quick links">
+                    <a href="/" class="hud-nav-link">Home</a>
+                    <a href="/play" class="hud-nav-link">Simulator</a>
+                    <a href="/privacy" class="hud-nav-link">Privacy</a>
+                    <a href="/terms" class="hud-nav-link">Terms</a>
+                    <a href="/refund" class="hud-nav-link">Refund</a>
+                </nav>
+                <div class="hud-footer-tech">
+                    <span class="hud-tech-pill">Mapbox GL v3.3</span>
+                    <span class="hud-tech-pill">Three.js r147</span>
+                    <span class="hud-tech-pill">WebGL 2.0</span>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>

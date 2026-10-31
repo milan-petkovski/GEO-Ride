@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en" style="background-color: #020205; color: #ffffff">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <script src="/js/gtag-init.js" defer></script>
+
+        <title>Privacy Policy | GEO Ride 3D Driving Simulator</title>
+        <meta
+            name="description"
+            content="Official GDPR, CCPA, and ZZPL-compliant Privacy Policy for GEO Ride 3D driving simulator at playgeoride.com. Learn about our privacy-by-default architecture, client storage, and data protection rights."
+        />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://playgeoride.com/privacy" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="GEO Ride" />
+        <meta property="og:url" content="https://playgeoride.com/privacy" />
+        <meta property="og:title" content="Privacy Policy | GEO Ride 3D Driving Simulator" />
+        <meta
+            property="og:description"
+            content="Official GDPR-compliant Privacy Policy for GEO Ride 3D Real-World Browser Driving Simulator."
+        />
+        <meta property="og:image" content="https://playgeoride.com/images/og.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="GEO Ride 3D Real-World Driving Simulator Privacy Policy" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Privacy Policy | GEO Ride 3D Driving Simulator" />
+        <meta
+            name="twitter:description"
+            content="Official GDPR-compliant Privacy Policy for GEO Ride 3D Real-World Browser Driving Simulator."
+        />
+        <meta name="twitter:image" content="https://playgeoride.com/images/og.jpg" />
+
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="preload" href="/fonts/rajdhani-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/outfit-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+        <script src="/js/cookie-consent.js" defer></script>
+
+        <style>
+            @font-face {
+                font-family: 'Outfit Fallback';
+                src: local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), local('Arial');
+                size-adjust: 100.6%;
+                ascent-override: 98%;
+                descent-override: 22%;
+                line-gap-override: 0%;
+            }
+            @font-face {
+                font-family: 'Rajdhani Fallback';
+                src: local('Segoe UI Semibold'), local('Roboto Condensed'), local('Arial');
+                size-adjust: 91.5%;
+                ascent-override: 102%;
+                descent-override: 24%;
+                line-gap-override: 0%;
+            }
+            @font-face {
+                font-family: 'Outfit';
+                font-style: normal;
+                font-weight: 400 700;
+                font-display: optional;
+                src: url('/fonts/outfit-400-latin.woff2') format('woff2');
+            }
+            @font-face {
+                font-family: 'Rajdhani';
+                font-style: normal;
+                font-weight: 600;
+                font-display: optional;
+                src: url('/fonts/rajdhani-600-latin.woff2') format('woff2');
+            }
+            @font-face {
+                font-family: 'Rajdhani';
+                font-style: normal;
+                font-weight: 700;
+                font-display: optional;
+                src: url('/fonts/rajdhani-700-latin.woff2') format('woff2');
+            }
+            :root {
+                --primary: #00f2ff;
+                --primary-hover: #38f8ff;
+                --primary-glow: rgba(0, 242, 255, 0.52);
+                --primary-dim: rgba(0, 242, 255, 0.1);
+                --primary-border: rgba(0, 242, 255, 0.34);
+                --neon-blue: #0077ff;
+                --pro: #c470f0;
+                --pro-bright: #e599ff;
+                --pro-glow: rgba(196, 112, 240, 0.5);
+                --pro-dim: rgba(196, 112, 240, 0.14);
+                --pro-border: rgba(196, 112, 240, 0.42);
+                --bg: #020205;
+                --bg-surface: #050711;
+                --bg-card: rgba(8, 12, 26, 0.84);
+                --border: rgba(255, 255, 255, 0.1);
+                --border-bright: rgba(255, 255, 255, 0.2);
+                --text: #ffffff;
+                --text-dim: #b4c6dc;
+                --text-muted: #94a8c4;
+                --success: #10b981;
+                --r-card: 20px;
+                --r-pill: 9999px;
+                --font-main: 'Outfit', 'Outfit Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                --font-body: 'Outfit', 'Outfit Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                --font-hud: 'Rajdhani', 'Rajdhani Fallback', 'Outfit', sans-serif;
+            }
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body {
+                background-color: var(--bg);
+                color: var(--text);
+                font-family: var(--font-main);
+                line-height: 1.7;
+                min-height: 100vh;
+                overflow-x: hidden;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(0, 242, 255, 0.45) #02030a;
+            }
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #02030a;
+                border-left: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            ::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, rgba(0, 242, 255, 0.5) 0%, rgba(0, 119, 255, 0.6) 100%);
+                border-radius: 999px;
+                border: 2px solid #02030a;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(180deg, #00f2ff 0%, #0088ff 100%);
+                box-shadow: 0 0 10px rgba(0, 242, 255, 0.6);
+            }
+            ::-webkit-scrollbar-thumb:active {
+                background: #38f8ff;
+            }
+            ::-webkit-scrollbar-corner {
+                background: #02030a;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+            .skip-link {
+                position: fixed;
+                top: -120px;
+                left: 16px;
+                z-index: 10000;
+                background: var(--primary);
+                color: #020205;
+                font-family: var(--font-hud);
+                font-weight: 800;
+                font-size: 0.95rem;
+                padding: 12px 20px;
+                min-height: 44px;
+                min-width: 44px;
+                border-radius: 10px;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                transition: top 0.2s ease;
+            }
+            .skip-link:focus-visible {
+                top: 14px;
+                outline: 3px solid #ffffff;
+                outline-offset: 2px;
+            }
+            a:focus-visible,
+            button:focus-visible {
+                outline: 2px solid var(--primary);
+                outline-offset: 2px;
+            }
+            #nav-header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 72px;
+                padding: 0 clamp(16px, 4vw, 56px);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                z-index: 1000;
+                background: rgba(2, 3, 9, 0.82);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-bottom: 1px solid var(--border);
+            }
+            .header-left-wrap {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+            .header-left {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+            .logo {
+                font-family: var(--font-hud);
+                font-size: 2.05rem;
+                font-weight: 700;
+                color: var(--text);
+                text-transform: uppercase;
+                line-height: 0.85;
+                letter-spacing: 1px;
+                text-decoration: none;
+                cursor: pointer;
+                display: inline-block;
+                margin-left: -1px;
+                transition: opacity 0.22s ease;
+                text-shadow:
+                    0 4px 20px rgba(0, 0, 0, 1),
+                    0 0 26px var(--primary-glow);
+            }
+            .logo:hover {
+                opacity: 0.9;
+            }
+            .logo span {
+                color: var(--primary);
+            }
+            .author-link {
+                font-family: var(--font-main);
+                font-size: 0.48rem;
+                color: var(--primary);
+                text-decoration: none;
+                letter-spacing: 1.35px;
+                font-weight: 600;
+                opacity: 0.78;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                transition:
+                    opacity 0.22s ease,
+                    color 0.22s ease;
+                margin-left: 0;
+                display: inline-flex;
+                align-items: center;
+                line-height: 1;
+                min-height: 44px;
+                min-width: 44px;
+                padding: 16px 0;
+                margin-top: -16px;
+                margin-bottom: -16px;
+            }
+            .author-link:hover {
+                opacity: 1;
+                color: #ffffff;
+            }
+            .nav-live-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                padding: 5px 11px;
+                border-radius: var(--r-pill);
+                background: rgba(16, 185, 129, 0.14);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                font-family: var(--font-hud);
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 1.2px;
+                line-height: 1;
+                color: #34d399;
+                flex-shrink: 0;
+            }
+            .live-indicator-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #10b981;
+                box-shadow: 0 0 8px #10b981;
+                flex-shrink: 0;
+            }
+            .version-text-aligned {
+                display: inline-block;
+                line-height: 1;
+                transform: translateY(-0.5px);
+            }
+            .nav-actions {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                min-height: 48px;
+                min-width: 44px;
+                padding: 12px 26px;
+                border-radius: var(--r-pill);
+                font-family: var(--font-hud);
+                font-size: 0.96rem;
+                font-weight: 800;
+                letter-spacing: 1.6px;
+                text-transform: uppercase;
+                text-decoration: none;
+                cursor: pointer;
+                border: 1px solid transparent;
+                white-space: nowrap;
+            }
+            .btn-sm {
+                min-height: 44px;
+                padding: 10px 20px;
+                font-size: 0.86rem;
+            }
+            .btn-primary {
+                background: linear-gradient(135deg, #00f2ff 0%, #00b7ff 100%);
+                color: #02040a;
+                border-color: #67f7ff;
+                box-shadow: 0 0 26px rgba(0, 242, 255, 0.38);
+            }
+            .btn-pro-outline {
+                background: rgba(196, 112, 240, 0.12);
+                color: #f3d4ff;
+                border-color: var(--pro-border);
+            }
+            @media (max-width: 640px) {
+                .nav-actions .btn-pro-outline {
+                    display: none;
+                }
+            }
+            @media (max-width: 480px) {
+                .header-left-wrap {
+                    gap: 8px;
+                }
+                .logo {
+                    font-size: 1.55rem;
+                }
+                .author-link {
+                    font-size: 0.4rem;
+                    letter-spacing: 1px;
+                }
+                .nav-live-pill {
+                    padding: 4px 7px;
+                    font-size: 0.65rem;
+                }
+                .nav-actions .btn-sm {
+                    padding: 8px 12px;
+                    font-size: 0.76rem;
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="/landing.css" />
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@graph": [
+                    {
+                        "@type": "WebPage",
+                        "@id": "https://playgeoride.com/privacy#webpage",
+                        "url": "https://playgeoride.com/privacy",
+                        "name": "Privacy Policy | GEO Ride 3D Driving Simulator",
+                        "description": "Official GDPR, CCPA, and ZZPL-compliant Privacy Policy for GEO Ride 3D Real-World Browser Driving Simulator.",
+                        "inLanguage": "en",
+                        "isPartOf": {
+                            "@type": "WebSite",
+                            "@id": "https://playgeoride.com/#website",
+                            "name": "GEO Ride",
+                            "url": "https://playgeoride.com/"
+                        },
+                        "publisher": {
+                            "@type": "Organization",
+                            "name": "Milan Web Portal",
+                            "url": "https://milanwebportal.com/"
+                        },
+                        "breadcrumb": {
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [
+                                {
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "name": "Home",
+                                    "item": "https://playgeoride.com/"
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 2,
+                                    "name": "Privacy Policy",
+                                    "item": "https://playgeoride.com/privacy"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        </script>
+    </head>
+    <body>
+        <a href="#main-content" class="skip-link">Skip to main content</a>
+
+        <header id="nav-header">
+            <div class="header-left-wrap">
+                <div class="header-left">
+                    <a href="/" class="logo" aria-label="GEO Ride Home">GEO <span>RIDE</span></a>
+                    <a href="https://milanwebportal.com" target="_blank" rel="noopener" class="author-link"
+                        >BY MILANWEBPORTAL.COM</a
+                    >
+                </div>
+                <span id="nav-live-pill" class="nav-live-pill" title="Current Release Version v1.2.1">
+                    <span class="live-indicator-dot" aria-hidden="true"></span>
+                    <span id="nav-live-text" class="version-text-aligned">v1.2.1</span>
+                </span>
+            </div>
+
+            <div class="nav-actions">
+                <a href="/play" id="nav-play-btn" class="btn btn-primary btn-sm">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        width="14"
+                        height="14"
+                        aria-hidden="true"
+                    >
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Play Free
+                </a>
+                <a href="/#pricing" class="btn btn-pro-outline btn-sm">Go Pro</a>
+            </div>
+        </header>
+
+        <main id="main-content" class="legal-main">
+            <article class="legal-card">
+                <div class="legal-meta-row">
+                    <span class="legal-badge legal-badge-cyan">GDPR, CCPA &amp; ZZPL Compliant</span>
+                    <span class="legal-badge legal-badge-pro">Privacy By Design</span>
+                    <span class="legal-meta-date">Last Updated: October 31, 2026 • Version 1.2.1</span>
+                </div>
+
+                <h1 class="legal-title">Privacy Policy</h1>
+                <p class="legal-lead">
+                    This Privacy Policy explains how GEO Ride ("we", "our", or "us"), operated by Milan Petkovski (Milan
+                    Web Portal) at <a href="https://playgeoride.com">playgeoride.com</a>, handles data, respects
+                    statutory privacy frameworks, and safeguards user rights across our 3D real-world driving simulator.
+                </p>
+
+                <div class="legal-alert-box alert-info">
+                    <div class="legal-alert-title">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            width="20"
+                            height="20"
+                            aria-hidden="true"
+                        >
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        Privacy-By-Default: Zero Personal Data Required For Free Gameplay
+                    </div>
+                    <p class="legal-alert-desc">
+                        You can immediately launch and drive in GEO Ride on any real-world map without creating an
+                        account, without submitting your name or email, and without third-party advertising trackers.
+                        Core game settings are stored exclusively on your own device.
+                    </p>
+                </div>
+
+                <h2 class="legal-section-h2">1. Statutory Scope &amp; Legal Framework</h2>
+                <p>This policy adheres to the strictest international data protection laws, including:</p>
+                <ul>
+                    <li>
+                        <strong
+                            >European Union General Data Protection Regulation (GDPR - Regulation (EU) 2016/679)</strong
+                        >;
+                    </li>
+                    <li><strong>United Kingdom Data Protection Act 2018 (UK GDPR)</strong>;</li>
+                    <li>
+                        <strong
+                            >California Consumer Privacy Act of 2018 as amended by the CPRA (Cal. Civ. Code § 1798.100
+                            et seq.)</strong
+                        >;
+                    </li>
+                    <li>
+                        <strong
+                            >Republic of Serbia Law on Personal Data Protection (Zakon o zaštiti podataka o ličnosti -
+                            ZZPL, Sl. glasnik RS br. 87/2018)</strong
+                        >.
+                    </li>
+                </ul>
+
+                <h2 class="legal-section-h2">2. Categories of Data Processed &amp; Lawful Bases</h2>
+                <p>
+                    We apply strict data minimization principles under Article 5(1)(c) of the GDPR. We process only the
+                    bare minimum data strictly required to deliver simulation features:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Client-Side Local Storage (Zero Transmission):</strong> Vehicle physics preferences,
+                        custom keybindings, camera perspectives, audio volume levels, high-contrast HUD modes, and
+                        diagnostic telemetry counters are stored locally on your device via browser
+                        <code>localStorage</code>. This data never leaves your device and can be erased at any time
+                        through your browser settings.
+                    </li>
+                    <li>
+                        <strong>Paid Pro Subscriptions:</strong> If you purchase GEO Ride Pro ($4.99/month or
+                        $2.99/month billed annually), your email address is transmitted to our encrypted Supabase
+                        database strictly to verify Pro entitlements (God Mode, 10-player private rooms, Pro badge) upon
+                        subsequent visits.
+                        <em>Lawful basis: Article 6(1)(b) GDPR (Performance of Contract).</em>
+                    </li>
+                    <li>
+                        <strong>Payment Data (Merchant of Record):</strong> All financial transactions, credit card
+                        processing, and invoicing are handled exclusively by our authorized Merchant of Record,
+                        <strong>Fungies.io</strong>. We never process, see, or store your credit card numbers, CVVs, or
+                        bank account credentials on our servers.
+                    </li>
+                    <li>
+                        <strong>Ephemeral Real-Time Multiplayer Telemetry:</strong> Public and private multiplayer rooms
+                        transmit temporary vehicle coordinates (latitude, longitude, heading, speed, steering angle) and
+                        your chosen room nickname over encrypted WebSockets (<code>wss://</code>). Movement packets are
+                        routed purely in server RAM to synchronize 3D vehicle models across active players in that room
+                        and are never permanently recorded or stored on disk.
+                    </li>
+                    <li>
+                        <strong>Performance Analytics (Google Consent Mode v2):</strong> Anonymized Core Web Vitals and
+                        frame-time metrics (Google Analytics 4 / <code>gtag.js</code>) operate in a default state of
+                        <strong>denied</strong>. Analytics scripts are strictly blocked from loading or running until
+                        you explicitly click <strong>Accept</strong> on our GDPR consent banner.
+                        <em>Lawful basis: Article 6(1)(a) GDPR (Affirmative Consent).</em>
+                    </li>
+                </ul>
+
+                <h2 class="legal-section-h2">3. Third-Party Service Providers &amp; Sub-Processors</h2>
+                <p>
+                    We partner solely with reputable, security-audited infrastructure providers to operate the
+                    simulator:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Mapbox, Inc.:</strong> Supplies 3D satellite tiles, elevation terrain heightmaps, and
+                        vector street geometry via Mapbox GL JS v3.3. When map tiles are requested, your browser
+                        transmits standard IP headers directly to Mapbox global edge servers in accordance with Mapbox's
+                        privacy policy.
+                    </li>
+                    <li>
+                        <strong>Fungies.io:</strong> Serves as our Merchant of Record, providing PCI-DSS Level 1
+                        compliant payment processing, fraud prevention, global sales tax and VAT collection, and
+                        subscription management.
+                    </li>
+                    <li>
+                        <strong>Supabase (PostgreSQL Cloud):</strong> Encrypted database infrastructure hosted in
+                        secure, SOC-2 compliant data centers, storing user Pro entitlement email records with AES-256
+                        encryption at rest.
+                    </li>
+                    <li>
+                        <strong>Cloudflare / Netlify:</strong> Edge CDN hosting, TLS 1.3 certificate termination, and
+                        DDoS mitigation to ensure uninterrupted simulator availability.
+                    </li>
+                </ul>
+
+                <h2 class="legal-section-h2">4. Data Retention &amp; Security Architecture</h2>
+                <p>
+                    All transmissions across GEO Ride utilize strict Transport Layer Security (TLS 1.3 / HTTPS).
+                    Ephemeral multiplayer coordinates exist only for fractions of a second in server memory during live
+                    sessions and are completely discarded when players disconnect. Pro email records are retained only
+                    for the duration of your active subscription and deleted upon account termination requests.
+                </p>
+
+                <h2 class="legal-section-h2">5. Your Statutory Privacy Rights</h2>
+                <p>
+                    Under GDPR (Articles 15 through 22), the Serbian ZZPL, and the CCPA/CPRA, you possess comprehensive
+                    enforceable rights regarding your personal data:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Right of Access (Art. 15):</strong> Right to obtain confirmation and a copy of any
+                        personal data we hold about you.
+                    </li>
+                    <li>
+                        <strong>Right to Rectification (Art. 16):</strong> Right to correct inaccurate or incomplete
+                        email records.
+                    </li>
+                    <li>
+                        <strong>Right to Erasure / Right to be Forgotten (Art. 17):</strong> Right to request total
+                        deletion of your Pro email record from our database.
+                    </li>
+                    <li>
+                        <strong>Right to Restriction of Processing (Art. 18):</strong> Right to restrict data processing
+                        under specific statutory criteria.
+                    </li>
+                    <li>
+                        <strong>Right to Data Portability (Art. 20):</strong> Right to receive your personal data in a
+                        structured, commonly used, machine-readable format.
+                    </li>
+                    <li>
+                        <strong>Right to Object (Art. 21):</strong> Right to object to any data processing grounded in
+                        legitimate interests.
+                    </li>
+                    <li>
+                        <strong>Right to Withdraw Consent:</strong> You can withdraw cookie consent at any time by
+                        clearing your browser cookies or clicking the cookie settings trigger.
+                    </li>
+                    <li>
+                        <strong>Right to Lodge a Complaint:</strong> You have the right to lodge a complaint with a
+                        supervisory authority (e.g., the Commissioner for Information of Public Importance and Personal
+                        Data Protection in Serbia, or your local EU Data Protection Authority).
+                    </li>
+                </ul>
+                <p>
+                    To exercise any of these statutory rights, email our Data Protection Desk at
+                    <a href="mailto:contact@milanwebportal.com">contact@milanwebportal.com</a>. We respond to all
+                    verified requests within 30 calendar days at zero cost to the user.
+                </p>
+
+                <h2 class="legal-section-h2">6. Children's Online Privacy Protection</h2>
+                <p>
+                    GEO Ride does not knowingly solicit or collect personal information from individuals under the age
+                    of 16. If we discover that a user under 16 has submitted personal information without verifiable
+                    parental consent, we will promptly purge that information from our records.
+                </p>
+
+                <div class="legal-operator-card">
+                    <h3 class="legal-operator-title">Data Controller &amp; Privacy Contact Directory</h3>
+                    <div class="legal-operator-grid">
+                        <div class="legal-operator-item">
+                            <span>Data Controller</span>
+                            Milan Petkovski (Milan Web Portal)<br />
+                            Belgrade, Republic of Serbia<br />
+                            <a href="https://milanwebportal.com" target="_blank" rel="noopener">milanwebportal.com</a>
+                        </div>
+                        <div class="legal-operator-item">
+                            <span>Data Protection &amp; DPO Desk</span>
+                            Direct Email: <a href="mailto:contact@milanwebportal.com">contact@milanwebportal.com</a
+                            ><br />
+                            Subject Line: "GDPR / Privacy Request - GEO Ride"<br />
+                            Statutory Response Window: Max 30 Days
+                        </div>
+                        <div class="legal-operator-item">
+                            <span>Merchant of Record (Payment Data)</span>
+                            Fungies.io Support Desk<br />
+                            PCI-DSS Level 1 Certified<br />
+                            Self-Service Billing Portal in Email Invoices
+                        </div>
+                        <div class="legal-operator-item">
+                            <span>Consent Management</span>
+                            Google Consent Mode v2: Active<br />
+                            Default State: Denied (Opt-in strictly required)<br />
+                            Third-Party Ad Profiling: None
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </main>
+
+        <footer>
+            <div class="footer-main-grid">
+                <div class="footer-brand-col">
+                    <div class="header-left-wrap">
+                        <div class="header-left">
+                            <a href="/" class="logo" aria-label="GEO Ride Home">GEO <span>RIDE</span></a>
+                            <a
+                                href="https://milanwebportal.com"
+                                target="_blank"
+                                rel="noopener"
+                                class="author-link"
+                                aria-label="Created by Milan Web Portal"
+                                >BY MILANWEBPORTAL.COM</a
+                            >
+                        </div>
+                        <span class="nav-live-pill" aria-label="Simulator release version v1.2.1">
+                            <span class="live-indicator-dot" aria-hidden="true"></span>
+                            <span class="version-text-aligned">v1.2.1</span>
+                        </span>
+                    </div>
+                    <p class="footer-brand-desc">
+                        Next-generation 3D real-world driving simulator built on Mapbox GL JS &amp; Three.js WebGL 2.0.
+                        Spawn on any street on Earth and drive directly in your browser.
+                    </p>
+                    <div class="footer-cta-row">
+                        <a href="/play" class="btn btn-primary btn-sm">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                width="14"
+                                height="14"
+                                aria-hidden="true"
+                            >
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Play Free
+                        </a>
+                        <a href="/#pricing" class="btn btn-pro-outline btn-sm">Unlock Pro</a>
+                    </div>
+                </div>
+
+                <nav class="footer-nav-col" aria-label="Simulator navigation">
+                    <h3 class="footer-col-title">Simulator</h3>
+                    <ul class="footer-link-list">
+                        <li><a href="/play" class="footer-nav-link">Launch 3D Simulator</a></li>
+                        <li><a href="/#gameplay" class="footer-nav-link">5 Map Perspectives</a></li>
+                        <li><a href="/#fleet" class="footer-nav-link">3D Vehicle Garage</a></li>
+                        <li><a href="/#controls" class="footer-nav-link">Controls &amp; Mobile PWA</a></li>
+                        <li><a href="/#pricing" class="footer-nav-link">Free vs Pro Plans</a></li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-nav-col" aria-label="Popular spawn destinations">
+                    <h3 class="footer-col-title">Popular Spawns</h3>
+                    <ul class="footer-link-list">
+                        <li>
+                            <a
+                                href="/play?lat=43.7347&amp;lng=7.4206&amp;zoom=16.5&amp;place=Monaco"
+                                class="footer-nav-link"
+                                >Monaco Grand Prix</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=50.3356&amp;lng=6.9475&amp;zoom=15.5&amp;place=Nurburgring"
+                                class="footer-nav-link"
+                                >Nürburgring Nordschleife</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=35.6595&amp;lng=139.7004&amp;zoom=16.8&amp;place=Tokyo"
+                                class="footer-nav-link"
+                                >Tokyo Shibuya Crossing</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=46.5286&amp;lng=10.4531&amp;zoom=15.8&amp;place=Stelvio"
+                                class="footer-nav-link"
+                                >Stelvio Pass (48 Hairpins)</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=44.8125&amp;lng=20.4489&amp;zoom=16.5&amp;place=Belgrade"
+                                class="footer-nav-link"
+                                >Belgrade Waterfront</a
+                            >
+                        </li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-nav-col" aria-label="Legal and technical documentation">
+                    <h3 class="footer-col-title">Legal &amp; Docs</h3>
+                    <ul class="footer-link-list">
+                        <li><a href="/privacy" class="footer-nav-link" aria-current="page">Privacy Policy</a></li>
+                        <li><a href="/terms" class="footer-nav-link">Terms of Service</a></li>
+                        <li><a href="/refund" class="footer-nav-link">Cancellation Policy</a></li>
+                        <li><a href="/sitemap.xml" class="footer-nav-link">XML Sitemap</a></li>
+                        <li><a href="/llms.txt" class="footer-nav-link">AI Context (llms.txt)</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="footer-bottom-bar">
+                <p class="footer-copyright">
+                    &copy; 2026 GEO Ride. Engineered by
+                    <a href="https://milanwebportal.com" target="_blank" rel="noopener" class="footer-inline-link"
+                        >Milan Web Portal</a
+                    >. All rights reserved.
+                </p>
+                <div class="footer-tech-badges" aria-label="Engine Architecture">
+                    <span class="footer-tech-pill">Mapbox GL v3.3</span>
+                    <span class="footer-tech-pill">Three.js r147</span>
+                    <span class="footer-tech-pill">60 Hz WebGL 2.0</span>
+                </div>
+            </div>
+        </footer>
+
+        <button type="button" id="back-to-top" class="back-to-top-btn" aria-label="Back to top" title="Back to top">
+            <svg class="btt-progress-svg" viewBox="0 0 48 48" aria-hidden="true">
+                <circle class="btt-track-circle" cx="24" cy="24" r="20"></circle>
+                <circle class="btt-progress-circle" cx="24" cy="24" r="20"></circle>
+            </svg>
+            <svg
+                class="btt-arrow-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        </button>
+
+        <script src="/js/back-to-top.js" defer></script>
+    </body>
+</html>

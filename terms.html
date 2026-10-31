@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en" style="background-color: #020205; color: #ffffff">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <script src="/js/gtag-init.js" defer></script>
+
+        <title>Terms of Service | GEO Ride 3D Driving Simulator</title>
+        <meta
+            name="description"
+            content="Official Terms of Service for GEO Ride 3D real-world driving simulator at playgeoride.com. Understand user rights, acceptable use, Pro subscription terms, and legal governing laws."
+        />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://playgeoride.com/terms" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="GEO Ride" />
+        <meta property="og:url" content="https://playgeoride.com/terms" />
+        <meta property="og:title" content="Terms of Service | GEO Ride 3D Driving Simulator" />
+        <meta
+            property="og:description"
+            content="Official Terms of Service for GEO Ride 3D Real-World Browser Driving Simulator."
+        />
+        <meta property="og:image" content="https://playgeoride.com/images/og.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="GEO Ride 3D Real-World Driving Simulator Terms of Service" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Terms of Service | GEO Ride 3D Driving Simulator" />
+        <meta
+            name="twitter:description"
+            content="Official Terms of Service for GEO Ride 3D Real-World Browser Driving Simulator."
+        />
+        <meta name="twitter:image" content="https://playgeoride.com/images/og.jpg" />
+
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="preload" href="/fonts/rajdhani-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/outfit-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+        <script src="/js/cookie-consent.js" defer></script>
+
+        <style>
+            @font-face {
+                font-family: 'Outfit Fallback';
+                src: local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), local('Arial');
+                size-adjust: 100.6%;
+                ascent-override: 98%;
+                descent-override: 22%;
+                line-gap-override: 0%;
+            }
+            @font-face {
+                font-family: 'Rajdhani Fallback';
+                src: local('Segoe UI Semibold'), local('Roboto Condensed'), local('Arial');
+                size-adjust: 91.5%;
+                ascent-override: 102%;
+                descent-override: 24%;
+                line-gap-override: 0%;
+            }
+            @font-face {
+                font-family: 'Outfit';
+                font-style: normal;
+                font-weight: 400 700;
+                font-display: optional;
+                src: url('/fonts/outfit-400-latin.woff2') format('woff2');
+            }
+            @font-face {
+                font-family: 'Rajdhani';
+                font-style: normal;
+                font-weight: 600;
+                font-display: optional;
+                src: url('/fonts/rajdhani-600-latin.woff2') format('woff2');
+            }
+            @font-face {
+                font-family: 'Rajdhani';
+                font-style: normal;
+                font-weight: 700;
+                font-display: optional;
+                src: url('/fonts/rajdhani-700-latin.woff2') format('woff2');
+            }
+            :root {
+                --primary: #00f2ff;
+                --primary-hover: #38f8ff;
+                --primary-glow: rgba(0, 242, 255, 0.52);
+                --primary-dim: rgba(0, 242, 255, 0.1);
+                --primary-border: rgba(0, 242, 255, 0.34);
+                --neon-blue: #0077ff;
+                --pro: #c470f0;
+                --pro-bright: #e599ff;
+                --pro-glow: rgba(196, 112, 240, 0.5);
+                --pro-dim: rgba(196, 112, 240, 0.14);
+                --pro-border: rgba(196, 112, 240, 0.42);
+                --bg: #020205;
+                --bg-surface: #050711;
+                --bg-card: rgba(8, 12, 26, 0.84);
+                --border: rgba(255, 255, 255, 0.1);
+                --border-bright: rgba(255, 255, 255, 0.2);
+                --text: #ffffff;
+                --text-dim: #b4c6dc;
+                --text-muted: #94a8c4;
+                --success: #10b981;
+                --r-card: 20px;
+                --r-pill: 9999px;
+                --font-main: 'Outfit', 'Outfit Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                --font-body: 'Outfit', 'Outfit Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                --font-hud: 'Rajdhani', 'Rajdhani Fallback', 'Outfit', sans-serif;
+            }
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body {
+                background-color: var(--bg);
+                color: var(--text);
+                font-family: var(--font-main);
+                line-height: 1.7;
+                min-height: 100vh;
+                overflow-x: hidden;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(0, 242, 255, 0.45) #02030a;
+            }
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #02030a;
+                border-left: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            ::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, rgba(0, 242, 255, 0.5) 0%, rgba(0, 119, 255, 0.6) 100%);
+                border-radius: 999px;
+                border: 2px solid #02030a;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(180deg, #00f2ff 0%, #0088ff 100%);
+                box-shadow: 0 0 10px rgba(0, 242, 255, 0.6);
+            }
+            ::-webkit-scrollbar-thumb:active {
+                background: #38f8ff;
+            }
+            ::-webkit-scrollbar-corner {
+                background: #02030a;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+            .skip-link {
+                position: fixed;
+                top: -120px;
+                left: 16px;
+                z-index: 10000;
+                background: var(--primary);
+                color: #020205;
+                font-family: var(--font-hud);
+                font-weight: 800;
+                font-size: 0.95rem;
+                padding: 12px 20px;
+                min-height: 44px;
+                min-width: 44px;
+                border-radius: 10px;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                transition: top 0.2s ease;
+            }
+            .skip-link:focus-visible {
+                top: 14px;
+                outline: 3px solid #ffffff;
+                outline-offset: 2px;
+            }
+            a:focus-visible,
+            button:focus-visible {
+                outline: 2px solid var(--primary);
+                outline-offset: 2px;
+            }
+            #nav-header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 72px;
+                padding: 0 clamp(16px, 4vw, 56px);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                z-index: 1000;
+                background: rgba(2, 3, 9, 0.82);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-bottom: 1px solid var(--border);
+            }
+            .header-left-wrap {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+            .header-left {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+            .logo {
+                font-family: var(--font-hud);
+                font-size: 2.05rem;
+                font-weight: 700;
+                color: var(--text);
+                text-transform: uppercase;
+                line-height: 0.85;
+                letter-spacing: 1px;
+                text-decoration: none;
+                cursor: pointer;
+                display: inline-block;
+                margin-left: -1px;
+                transition: opacity 0.22s ease;
+                text-shadow:
+                    0 4px 20px rgba(0, 0, 0, 1),
+                    0 0 26px var(--primary-glow);
+            }
+            .logo:hover {
+                opacity: 0.9;
+            }
+            .logo span {
+                color: var(--primary);
+            }
+            .author-link {
+                font-family: var(--font-main);
+                font-size: 0.48rem;
+                color: var(--primary);
+                text-decoration: none;
+                letter-spacing: 1.35px;
+                font-weight: 600;
+                opacity: 0.78;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                transition:
+                    opacity 0.22s ease,
+                    color 0.22s ease;
+                margin-left: 0;
+                display: inline-flex;
+                align-items: center;
+                line-height: 1;
+                min-height: 44px;
+                min-width: 44px;
+                padding: 16px 0;
+                margin-top: -16px;
+                margin-bottom: -16px;
+            }
+            .author-link:hover {
+                opacity: 1;
+                color: #ffffff;
+            }
+            .nav-live-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                padding: 5px 11px;
+                border-radius: var(--r-pill);
+                background: rgba(16, 185, 129, 0.14);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                font-family: var(--font-hud);
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 1.2px;
+                line-height: 1;
+                color: #34d399;
+                flex-shrink: 0;
+            }
+            .live-indicator-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #10b981;
+                box-shadow: 0 0 8px #10b981;
+                flex-shrink: 0;
+            }
+            .version-text-aligned {
+                display: inline-block;
+                line-height: 1;
+                transform: translateY(-0.5px);
+            }
+            .nav-actions {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                min-height: 48px;
+                min-width: 44px;
+                padding: 12px 26px;
+                border-radius: var(--r-pill);
+                font-family: var(--font-hud);
+                font-size: 0.96rem;
+                font-weight: 800;
+                letter-spacing: 1.6px;
+                text-transform: uppercase;
+                text-decoration: none;
+                cursor: pointer;
+                border: 1px solid transparent;
+                white-space: nowrap;
+            }
+            .btn-sm {
+                min-height: 44px;
+                padding: 10px 20px;
+                font-size: 0.86rem;
+            }
+            .btn-primary {
+                background: linear-gradient(135deg, #00f2ff 0%, #00b7ff 100%);
+                color: #02040a;
+                border-color: #67f7ff;
+                box-shadow: 0 0 26px rgba(0, 242, 255, 0.38);
+            }
+            .btn-pro-outline {
+                background: rgba(196, 112, 240, 0.12);
+                color: #f3d4ff;
+                border-color: var(--pro-border);
+            }
+            @media (max-width: 640px) {
+                .nav-actions .btn-pro-outline {
+                    display: none;
+                }
+            }
+            @media (max-width: 480px) {
+                .header-left-wrap {
+                    gap: 8px;
+                }
+                .logo {
+                    font-size: 1.55rem;
+                }
+                .author-link {
+                    font-size: 0.4rem;
+                    letter-spacing: 1px;
+                }
+                .nav-live-pill {
+                    padding: 4px 7px;
+                    font-size: 0.65rem;
+                }
+                .nav-actions .btn-sm {
+                    padding: 8px 12px;
+                    font-size: 0.76rem;
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="/landing.css" />
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@graph": [
+                    {
+                        "@type": "WebPage",
+                        "@id": "https://playgeoride.com/terms#webpage",
+                        "url": "https://playgeoride.com/terms",
+                        "name": "Terms of Service | GEO Ride 3D Driving Simulator",
+                        "description": "Official Terms of Service, user agreement, and Pro subscription licensing for GEO Ride 3D Real-World Browser Driving Simulator.",
+                        "inLanguage": "en",
+                        "isPartOf": {
+                            "@type": "WebSite",
+                            "@id": "https://playgeoride.com/#website",
+                            "name": "GEO Ride",
+                            "url": "https://playgeoride.com/"
+                        },
+                        "publisher": {
+                            "@type": "Organization",
+                            "name": "Milan Web Portal",
+                            "url": "https://milanwebportal.com/"
+                        },
+                        "breadcrumb": {
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [
+                                {
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "name": "Home",
+                                    "item": "https://playgeoride.com/"
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 2,
+                                    "name": "Terms of Service",
+                                    "item": "https://playgeoride.com/terms"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        </script>
+    </head>
+    <body>
+        <a href="#main-content" class="skip-link">Skip to main content</a>
+
+        <header id="nav-header">
+            <div class="header-left-wrap">
+                <div class="header-left">
+                    <a href="/" class="logo" aria-label="GEO Ride Home">GEO <span>RIDE</span></a>
+                    <a href="https://milanwebportal.com" target="_blank" rel="noopener" class="author-link"
+                        >BY MILANWEBPORTAL.COM</a
+                    >
+                </div>
+                <span id="nav-live-pill" class="nav-live-pill" title="Current Release Version v1.2.1">
+                    <span class="live-indicator-dot" aria-hidden="true"></span>
+                    <span id="nav-live-text" class="version-text-aligned">v1.2.1</span>
+                </span>
+            </div>
+
+            <div class="nav-actions">
+                <a href="/play" id="nav-play-btn" class="btn btn-primary btn-sm">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        width="14"
+                        height="14"
+                        aria-hidden="true"
+                    >
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Play Free
+                </a>
+                <a href="/#pricing" class="btn btn-pro-outline btn-sm">Go Pro</a>
+            </div>
+        </header>
+
+        <main id="main-content" class="legal-main">
+            <article class="legal-card">
+                <div class="legal-meta-row">
+                    <span class="legal-badge legal-badge-pro">Legally Binding Contract</span>
+                    <span class="legal-badge legal-badge-cyan">Standard Terms of Service</span>
+                    <span class="legal-meta-date">Last Updated: October 31, 2026 • Version 1.2.1</span>
+                </div>
+
+                <h1 class="legal-title">Terms of Service</h1>
+                <p class="legal-lead">
+                    These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you",
+                    or "your") and Milan Petkovski (Milan Web Portal) ("we", "us", or "our"), governing your access to
+                    and use of the GEO Ride 3D driving simulator website, software, and services at
+                    <a href="https://playgeoride.com">playgeoride.com</a>.
+                </p>
+
+                <div class="legal-alert-box alert-pro">
+                    <div class="legal-alert-title">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            width="20"
+                            height="20"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                        Important Notice: Binding Agreement &amp; Final Sales Policy
+                    </div>
+                    <p class="legal-alert-desc">
+                        By launching the simulator, accessing any map perspective, or purchasing GEO Ride Pro, you
+                        confirm that you have read, understood, and agreed to these Terms, our Privacy Policy, and our
+                        Digital Services Cancellation &amp; No-Refund Policy. All sales of digital content are strictly
+                        final and non-refundable.
+                    </p>
+                </div>
+
+                <h2 class="legal-section-h2">1. Legal Capacity &amp; Eligibility</h2>
+                <p>
+                    By accessing GEO Ride, you represent and warrant that you are of legal age in your jurisdiction (at
+                    least 18 years old or the age of majority in your place of residence) or possess legal parental or
+                    guardian consent to agree to these Terms. If you access the service on behalf of an entity, you
+                    warrant that you have full legal authority to bind that entity to these Terms.
+                </p>
+
+                <h2 class="legal-section-h2">2. License Grant &amp; Permitted Simulator Scope</h2>
+                <p>
+                    Subject to your ongoing compliance with these Terms, Milan Web Portal grants you a limited,
+                    personal, revocable, non-exclusive, non-sublicensable, and non-transferable license to execute and
+                    view the GEO Ride simulator within compatible modern web browsers supporting WebGL 2.0 strictly for
+                    personal, non-commercial entertainment purposes.
+                </p>
+
+                <h2 class="legal-section-h2">3. Strict Acceptable Use &amp; Prohibited Conduct</h2>
+                <p>
+                    You agree that you will not, under any circumstances, engage in or facilitate any of the following
+                    prohibited activities:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Map &amp; Data Scraping:</strong> Systematically harvesting, downloading, caching, or
+                        scraping Mapbox raster tiles, vector tiles, digital elevation models, or OpenStreetMap road
+                        geometries outside of normal in-browser gameplay rendering.
+                    </li>
+                    <li>
+                        <strong>Reverse Engineering &amp; Tampering:</strong> Decompiling, reverse-engineering,
+                        modifying, or injecting foreign scripts into client bundles, physics web workers
+                        (<code>physics.worker.js</code>), Three.js vehicle meshes, or WebSocket multiplayer protocols.
+                    </li>
+                    <li>
+                        <strong>Multiplayer Exploits &amp; Network Abuse:</strong> Flooding WebSocket brokers, sending
+                        malformed vehicle state packets, spoofing coordinates to crash rooms, exploiting collision
+                        models, or transmitting abusive, hateful, or harassing nicknames in public or private rooms.
+                    </li>
+                    <li>
+                        <strong>Unauthorized Monetization:</strong> Selling, sublicensing, reselling, or commercially
+                        broadcasting GEO Ride Pro access tokens, room codes, or digital memberships without express
+                        written authorization from Milan Web Portal.
+                    </li>
+                </ul>
+                <p>
+                    Violation of this Acceptable Use Policy results in immediate, permanent termination of access,
+                    revocation of any active Pro entitlements without reimbursement, and potential civil or criminal
+                    legal action.
+                </p>
+
+                <h2 class="legal-section-h2">4. Free Explorer Tier vs. Pro Subscription Terms</h2>
+                <p>GEO Ride operates on a dual-tier model:</p>
+                <ul>
+                    <li>
+                        <strong>Free Explorer Tier:</strong> Provided completely free of charge, with zero registration
+                        required. Includes unlimited gameplay across all 5 map perspectives (Flagship WOW 3D, Satellite,
+                        Hybrid, 3D Buildings, 2D Streets), 3 core vehicle classes (Sports Car, Heavy Truck, City Bus),
+                        17 destinations, and public multiplayer rooms (up to 5 drivers).
+                    </li>
+                    <li>
+                        <strong>GEO Ride Pro ($4.99/mo or $2.99/mo billed annually at $35.88/yr):</strong> An optional
+                        membership unlocking the 1,000+ km/h God Mode ghost hyper-vehicle, 10-player private multiplayer
+                        rooms, exclusive multiplayer crown badges, and custom backup tooling.
+                    </li>
+                    <li>
+                        <strong>Strict No-Refund Policy Incorporated:</strong> Pursuant to EU Directive 2011/83/EU
+                        Article 16(m), the Serbian Consumer Protection Law Article 37(1)(13), and our
+                        <a href="/refund">Digital Services Cancellation &amp; No-Refund Policy</a>, you acknowledge that
+                        performance begins immediately upon checkout completion and your statutory right of withdrawal
+                        is fully waived. All subscription fees are strictly non-refundable.
+                    </li>
+                </ul>
+
+                <h2 class="legal-section-h2">5. Third-Party Intellectual Property &amp; Map Attribution</h2>
+                <p>GEO Ride integrates third-party mapping technologies under sanctioned developer terms:</p>
+                <ul>
+                    <li>
+                        Mapbox GL JS and Mapbox Maps API technologies are copyrighted &copy; Mapbox, Inc. and its
+                        licensors. Satellite orthoimagery and 3D terrain elevation data are subject to Mapbox Terms of
+                        Service.
+                    </li>
+                    <li>
+                        Road networks, building polygon footprints, and geographic metadata are &copy; OpenStreetMap
+                        contributors under the Open Database License (ODbL).
+                    </li>
+                    <li>
+                        All proprietary vehicle physics engines, HUD interfaces, shader pipelines, and branding are the
+                        exclusive intellectual property of Milan Petkovski (Milan Web Portal).
+                    </li>
+                </ul>
+
+                <h2 class="legal-section-h2">6. Virtual Simulation &amp; Navigation Safety Disclaimer</h2>
+                <div class="legal-alert-box alert-danger">
+                    <div class="legal-alert-title">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            width="20"
+                            height="20"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                            ></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        Strict Virtual Entertainment Disclaimer
+                    </div>
+                    <p class="legal-alert-desc">
+                        GEO Ride is strictly an entertainment video game simulation. The virtual physics, speeds
+                        (including 1,000+ km/h God Mode), vehicle responses, and building collisions bear no relation to
+                        real-world vehicular dynamics. Map coordinates and street layouts must NEVER be used for
+                        real-world automotive navigation, route planning, emergency transit, or vehicular operation.
+                    </p>
+                </div>
+
+                <h2 class="legal-section-h2">7. Disclaimer of Warranties ("As Is")</h2>
+                <p>
+                    THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND,
+                    EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+                    PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT MAP DATA WILL BE
+                    UNINTERRUPTED, ACCURATE, ERROR-FREE, OR COMPATIBLE WITH SPECIFIC GRAPHICS DRIVERS.
+                </p>
+
+                <h2 class="legal-section-h2">8. Limitation of Liability</h2>
+                <p>
+                    TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL MILAN PETKOVSKI, MILAN WEB
+                    PORTAL, OR ITS AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
+                    DAMAGES, INCLUDING LOSS OF PROFITS, DATA, HARDWARE MALFUNCTION, OR BUSINESS INTERRUPTION ARISING
+                    FROM YOUR USE OF OR INABILITY TO USE THE SIMULATOR. OUR TOTAL AGGREGATE LIABILITY SHALL NOT EXCEED
+                    THE TOTAL AMOUNT ACTUALLY PAID BY YOU TO GEO RIDE IN THE PRECEDING TWELVE (12) MONTHS, OR FIFTY US
+                    DOLLARS ($50.00 USD), WHICHEVER IS LESS.
+                </p>
+
+                <h2 class="legal-section-h2">9. Governing Law &amp; Dispute Resolution</h2>
+                <p>
+                    These Terms shall be governed by and construed in accordance with the laws of the Republic of
+                    Serbia, without regard to conflict of law principles. Any dispute arising out of or related to these
+                    Terms shall first be addressed through good-faith informal negotiations via
+                    <a href="mailto:contact@milanwebportal.com">contact@milanwebportal.com</a>. If unresolved within 45
+                    days, the dispute shall fall under the exclusive jurisdiction of the competent courts in Belgrade,
+                    Serbia.
+                </p>
+
+                <div class="legal-operator-card">
+                    <h3 class="legal-operator-title">Legal Entity &amp; Official Contact Directory</h3>
+                    <div class="legal-operator-grid">
+                        <div class="legal-operator-item">
+                            <span>Platform Operator</span>
+                            Milan Petkovski (Milan Web Portal)<br />
+                            Belgrade, Republic of Serbia<br />
+                            <a href="https://milanwebportal.com" target="_blank" rel="noopener">milanwebportal.com</a>
+                        </div>
+                        <div class="legal-operator-item">
+                            <span>Legal &amp; Support Inquiries</span>
+                            Email: <a href="mailto:contact@milanwebportal.com">contact@milanwebportal.com</a><br />
+                            WhatsApp: +381 65 363 8621<br />
+                            Notice Service: Written Electronic Notice
+                        </div>
+                        <div class="legal-operator-item">
+                            <span>Merchant of Record</span>
+                            Fungies.io (Authorized Merchant of Record)<br />
+                            Digital Goods Invoicing &amp; Tax Compliance<br />
+                            One-Click Subscription Management Link in Receipt
+                        </div>
+                        <div class="legal-operator-item">
+                            <span>Applicable Jurisdiction</span>
+                            Governing Law: Republic of Serbia<br />
+                            Venue: Competent Courts in Belgrade<br />
+                            Dispute Protocol: 45-Day Informal Notice First
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </main>
+
+        <footer>
+            <div class="footer-main-grid">
+                <div class="footer-brand-col">
+                    <div class="header-left-wrap">
+                        <div class="header-left">
+                            <a href="/" class="logo" aria-label="GEO Ride Home">GEO <span>RIDE</span></a>
+                            <a
+                                href="https://milanwebportal.com"
+                                target="_blank"
+                                rel="noopener"
+                                class="author-link"
+                                aria-label="Created by Milan Web Portal"
+                                >BY MILANWEBPORTAL.COM</a
+                            >
+                        </div>
+                        <span class="nav-live-pill" aria-label="Simulator release version v1.2.1">
+                            <span class="live-indicator-dot" aria-hidden="true"></span>
+                            <span class="version-text-aligned">v1.2.1</span>
+                        </span>
+                    </div>
+                    <p class="footer-brand-desc">
+                        Next-generation 3D real-world driving simulator built on Mapbox GL JS &amp; Three.js WebGL 2.0.
+                        Spawn on any street on Earth and drive directly in your browser.
+                    </p>
+                    <div class="footer-cta-row">
+                        <a href="/play" class="btn btn-primary btn-sm">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                width="14"
+                                height="14"
+                                aria-hidden="true"
+                            >
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Play Free
+                        </a>
+                        <a href="/#pricing" class="btn btn-pro-outline btn-sm">Unlock Pro</a>
+                    </div>
+                </div>
+
+                <nav class="footer-nav-col" aria-label="Simulator navigation">
+                    <h3 class="footer-col-title">Simulator</h3>
+                    <ul class="footer-link-list">
+                        <li><a href="/play" class="footer-nav-link">Launch 3D Simulator</a></li>
+                        <li><a href="/#gameplay" class="footer-nav-link">5 Map Perspectives</a></li>
+                        <li><a href="/#fleet" class="footer-nav-link">3D Vehicle Garage</a></li>
+                        <li><a href="/#controls" class="footer-nav-link">Controls &amp; Mobile PWA</a></li>
+                        <li><a href="/#pricing" class="footer-nav-link">Free vs Pro Plans</a></li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-nav-col" aria-label="Popular spawn destinations">
+                    <h3 class="footer-col-title">Popular Spawns</h3>
+                    <ul class="footer-link-list">
+                        <li>
+                            <a
+                                href="/play?lat=43.7347&amp;lng=7.4206&amp;zoom=16.5&amp;place=Monaco"
+                                class="footer-nav-link"
+                                >Monaco Grand Prix</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=50.3356&amp;lng=6.9475&amp;zoom=15.5&amp;place=Nurburgring"
+                                class="footer-nav-link"
+                                >Nürburgring Nordschleife</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=35.6595&amp;lng=139.7004&amp;zoom=16.8&amp;place=Tokyo"
+                                class="footer-nav-link"
+                                >Tokyo Shibuya Crossing</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=46.5286&amp;lng=10.4531&amp;zoom=15.8&amp;place=Stelvio"
+                                class="footer-nav-link"
+                                >Stelvio Pass (48 Hairpins)</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="/play?lat=44.8125&amp;lng=20.4489&amp;zoom=16.5&amp;place=Belgrade"
+                                class="footer-nav-link"
+                                >Belgrade Waterfront</a
+                            >
+                        </li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-nav-col" aria-label="Legal and technical documentation">
+                    <h3 class="footer-col-title">Legal &amp; Docs</h3>
+                    <ul class="footer-link-list">
+                        <li><a href="/privacy" class="footer-nav-link">Privacy Policy</a></li>
+                        <li><a href="/terms" class="footer-nav-link" aria-current="page">Terms of Service</a></li>
+                        <li><a href="/refund" class="footer-nav-link">Cancellation Policy</a></li>
+                        <li><a href="/sitemap.xml" class="footer-nav-link">XML Sitemap</a></li>
+                        <li><a href="/llms.txt" class="footer-nav-link">AI Context (llms.txt)</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="footer-bottom-bar">
+                <p class="footer-copyright">
+                    &copy; 2026 GEO Ride. Engineered by
+                    <a href="https://milanwebportal.com" target="_blank" rel="noopener" class="footer-inline-link"
+                        >Milan Web Portal</a
+                    >. All rights reserved.
+                </p>
+                <div class="footer-tech-badges" aria-label="Engine Architecture">
+                    <span class="footer-tech-pill">Mapbox GL v3.3</span>
+                    <span class="footer-tech-pill">Three.js r147</span>
+                    <span class="footer-tech-pill">60 Hz WebGL 2.0</span>
+                </div>
+            </div>
+        </footer>
+
+        <button type="button" id="back-to-top" class="back-to-top-btn" aria-label="Back to top" title="Back to top">
+            <svg class="btt-progress-svg" viewBox="0 0 48 48" aria-hidden="true">
+                <circle class="btt-track-circle" cx="24" cy="24" r="20"></circle>
+                <circle class="btt-progress-circle" cx="24" cy="24" r="20"></circle>
+            </svg>
+            <svg
+                class="btt-arrow-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        </button>
+
+        <script src="/js/back-to-top.js" defer></script>
+    </body>
+</html>

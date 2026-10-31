@@ -122,6 +122,7 @@ const map = new mapboxgl.Map({
     pitch: 65,
     bearing: state.bearing,
     interactive: false,
+    attributionControl: false,
     pixelRatio: state.performance.eliteEnd
         ? Math.min(window.devicePixelRatio || 1, 2.0)
         : state.performance.lowEnd
@@ -129,6 +130,8 @@ const map = new mapboxgl.Map({
           : Math.min(window.devicePixelRatio || 1, 1.3),
     antialias: !state.performance.lowEnd
 });
+
+map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right');
 
 // Expose globally
 window.map = map;
@@ -159,6 +162,9 @@ setTimeout(() => {
     isMapFullyLoaded = true;
     if (window.setLoadingTarget) window.setLoadingTarget(100);
 }, 1200);
+
+// Distance milestones tracker
+const reachedDistanceMilestones = new Set();
 
 /**
  * Finalizes loading sequence, hides loading overlay banner, and launches requestAnimationFrame update loop.
@@ -192,6 +198,26 @@ function finishLoading() {
         const donationMilestones = [120000, 600000, 1800000, 3600000];
         donationMilestones.forEach((delay) => {
             setTimeout(triggerDonationPopup, delay);
+        });
+
+        // Track user retention & playtime milestones (1m, 5m, 15m, 30m, 60m)
+        const PLAYTIME_MILESTONES = [
+            { min: 1, delay: 60000 },
+            { min: 5, delay: 300000 },
+            { min: 15, delay: 900000 },
+            { min: 30, delay: 1800000 },
+            { min: 60, delay: 3600000 }
+        ];
+        PLAYTIME_MILESTONES.forEach(({ min, delay }) => {
+            setTimeout(() => {
+                if (state.loopStarted) {
+                    trackEvent('playtime_milestone', {
+                        minutes: min,
+                        vehicle: state.activeVehicle,
+                        map_style: state.mapStyle
+                    });
+                }
+            }, delay);
         });
     }, 600); // Wait for the 0.6s css transition to finish
 }
@@ -281,10 +307,21 @@ function update(time) {
             }
         }
 
-        // Periodic Save
+        // Periodic Save & Distance Milestones
         if (currentTime - state.lastSaveTime > 5000) {
             saveState();
             state.lastSaveTime = currentTime;
+
+            const totalKm = state.totalDistanceKm || 0;
+            [1, 5, 10, 25, 50, 100].forEach((km) => {
+                if (totalKm >= km && !reachedDistanceMilestones.has(km)) {
+                    reachedDistanceMilestones.add(km);
+                    trackEvent('distance_milestone', {
+                        km_reached: km,
+                        vehicle: state.activeVehicle
+                    });
+                }
+            });
         }
 
         // HUD Update (Only if speed changed)

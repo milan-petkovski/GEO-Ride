@@ -312,6 +312,16 @@ export function updatePhysics(dtFinal, map) {
 
                             // Collision resets unbanked drift points and penalizes combo duration
                             if (state.isDrifting) {
+                                const unbanked = Math.floor(
+                                    (state.currentDriftPoints || 0) * (state.driftMultiplier || 1)
+                                );
+                                if (
+                                    unbanked > 0 &&
+                                    typeof window !== 'undefined' &&
+                                    typeof window.onDriftFail === 'function'
+                                ) {
+                                    window.onDriftFail(unbanked, state.driftMultiplier || 1, 'collision');
+                                }
                                 state.currentDriftPoints = 0;
                                 state.driftComboDuration = Math.max(0, (state.driftComboDuration || 0) * 0.5);
                                 state.isDrifting = false;
@@ -377,13 +387,18 @@ export function updatePhysics(dtFinal, map) {
         }
     }
 
-    // Drift finish & banking (2.2s combo chaining grace period)
-    if (state.isDrifting && Date.now() - (state.lastDriftTime || 0) > 2200) {
-        if (state.currentDriftPoints > 5) {
-            const earned = Math.floor(state.currentDriftPoints * (state.driftMultiplier || 1));
+    // Drift finish & banking (1.5s combo chaining grace period)
+    if (state.isDrifting && Date.now() - (state.lastDriftTime || 0) > 1500) {
+        const earned = Math.floor((state.currentDriftPoints || 0) * (state.driftMultiplier || 1));
+        if (earned >= 1000) {
             state.driftScore = (state.driftScore || 0) + earned;
             if (typeof window !== 'undefined' && typeof window.onDriftComplete === 'function') {
                 window.onDriftComplete(earned, state.driftMultiplier || 1);
+            }
+        } else if (earned > 0) {
+            // Under 1,000 points: shatters and disappears, not remembered/saved at all
+            if (typeof window !== 'undefined' && typeof window.onDriftFail === 'function') {
+                window.onDriftFail(earned, state.driftMultiplier || 1, 'under_1000');
             }
         }
         state.isDrifting = false;

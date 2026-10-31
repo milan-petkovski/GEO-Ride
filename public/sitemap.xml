@@ -68,4 +68,22 @@
          <image:caption>High-framerate 2D top-down vector street mode with live multiplayer vehicle telemetry.</image:caption>
       </image:image>
    </url>
+   <url>
+      <loc>https://playgeoride.com/privacy</loc>
+      <lastmod>2026-10-31</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.5</priority>
+   </url>
+   <url>
+      <loc>https://playgeoride.com/terms</loc>
+      <lastmod>2026-10-31</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.5</priority>
+   </url>
+   <url>
+      <loc>https://playgeoride.com/refund</loc>
+      <lastmod>2026-10-31</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.5</priority>
+   </url>
 </urlset>

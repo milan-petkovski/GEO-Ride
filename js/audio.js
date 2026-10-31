@@ -234,6 +234,32 @@ export function playDriftBankSound(masterVolume = 0.5) {
     osc.stop(now + 0.36);
 }
 
+/**
+ * Procedural low dissonance / shatter crunch when a drift fails or is below 1,000 points.
+ * @param {number} [masterVolume=0.5] - Volume scalar.
+ * @returns {void}
+ */
+export function playDriftFailSound(masterVolume = 0.5) {
+    if (!isInitialized || !ctx || masterVolume <= 0) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(240, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.28);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.15 * masterVolume, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.32);
+}
+
 // In-Game Web Radio Stations
 export const RADIO_STATIONS = [
     { id: 'synthwave', name: 'SYNTHWAVE FM', genre: 'Retro / Cyber', url: 'https://stream.nightride.fm/nightride.mp3' },

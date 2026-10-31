@@ -10,7 +10,7 @@ import { haptics } from './haptics.js';
 import { initMultiplayer } from './multiplayer.js';
 import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js';
 import { INITIAL_CENTER, VEHICLE_CONFIG } from './config.js';
-import { toggleRadio, nextRadioStation, setRadioStation, playDriftBankSound } from './audio.js';
+import { toggleRadio, nextRadioStation, setRadioStation, playDriftBankSound, playDriftFailSound } from './audio.js';
 import { showDiscoveryCinematic } from './discovery.js';
 
 let activeMap = null;
@@ -242,13 +242,27 @@ export function updateDriftHUD() {
     if (!driftHud || !driftPointsEl) return;
 
     if (state.isDrifting && state.currentDriftPoints > 3) {
+        if (
+            driftHud.classList.contains('failed-shatter') ||
+            driftHud.classList.contains('shatter') ||
+            driftHud.classList.contains('shatter-done')
+        ) {
+            driftHud.classList.remove('failed-shatter', 'shatter', 'shatter-done');
+            driftHud.querySelectorAll('.drift-shard').forEach((s) => s.remove());
+            const driftBadge = driftHud.querySelector('.drift-badge');
+            if (driftBadge) driftBadge.textContent = 'DRIFT';
+        }
         driftHud.classList.add('active');
         driftPointsEl.textContent = '+' + state.currentDriftPoints.toLocaleString();
         if (driftMultiEl) {
             driftMultiEl.textContent = 'x' + (state.driftMultiplier || 1);
             driftMultiEl.className = 'drift-multiplier-pill mult-' + (state.driftMultiplier || 1);
         }
-    } else if (!state.isDrifting) {
+    } else if (
+        !state.isDrifting &&
+        !driftHud.classList.contains('failed-shatter') &&
+        !driftHud.classList.contains('shatter')
+    ) {
         driftHud.classList.remove('active');
     }
 }
@@ -299,7 +313,7 @@ export function checkSpeedTrap(speedVal) {
         } else if (speedVal >= (state.topSpeedRecord || 0)) {
             radarMsg += ' • NEW RECORD';
         }
-        showToast('SPEED RADAR', radarMsg, { duration: 2800 });
+        showToast('SPEED RADAR', radarMsg, { duration: 2500 });
         return;
     }
 
@@ -336,7 +350,12 @@ export function checkSpeedTrap(speedVal) {
             radarMsg += ' • NEW RECORD';
         }
 
-        showToast('SPEED RADAR', radarMsg, { duration: 2800 });
+        showToast('SPEED RADAR', radarMsg, { duration: 2500 });
+        trackEvent('speed_radar_clocked', {
+            speed: clockedSpeed,
+            unit,
+            vehicle: state.activeVehicle
+        });
         if (haptics) haptics.impact('medium');
     }
 }
@@ -344,9 +363,47 @@ export function checkSpeedTrap(speedVal) {
 if (typeof window !== 'undefined') {
     window.onDriftComplete = (banked, multiplier) => {
         playDriftBankSound(state.masterVolume);
-        showToast('DRIFT BANKED', `+${banked.toLocaleString()} PTS (x${multiplier})`, { duration: 2200 });
+        showToast('DRIFT BANKED', `+${banked.toLocaleString()} PTS (x${multiplier})`, { duration: 2500 });
         const totalScoreEl = document.getElementById('total-drift-score');
         if (totalScoreEl) totalScoreEl.textContent = (state.driftScore || 0).toLocaleString();
+        trackEvent('drift_banked', {
+            points: banked,
+            multiplier: multiplier,
+            total_score: state.driftScore || 0
+        });
+    };
+
+    window.onDriftFail = (lostPoints, multiplier = 1, reason = 'under_1000') => {
+        if (typeof document === 'undefined') return;
+        const driftHud = document.getElementById('drift-hud');
+        const driftContent = driftHud?.querySelector('.drift-hud-content');
+        const driftBadge = driftHud?.querySelector('.drift-badge');
+        if (!driftHud || !driftContent) return;
+
+        driftHud.classList.remove('shatter-done');
+        driftHud.classList.add('active', 'failed-shatter', 'shatter');
+
+        if (driftBadge) {
+            driftBadge.textContent = 'FAILED';
+        }
+
+        // Crisp audio & haptic shatter feedback
+        playDriftFailSound(state.masterVolume);
+        if (haptics) haptics.impact('heavy');
+
+        driftContent.querySelectorAll('.drift-shard').forEach((s) => s.remove());
+
+        trackEvent('drift_shattered', {
+            points: lostPoints,
+            reason: reason
+        });
+
+        // Crisp fail animation & clean fast exit - when finished, add shatter-done (display: none !important)
+        setTimeout(() => {
+            driftHud.classList.add('shatter-done');
+            driftHud.classList.remove('active');
+            driftContent.querySelectorAll('.drift-shard').forEach((s) => s.remove());
+        }, 1050);
     };
 }
 
@@ -474,12 +531,16 @@ export function initUI(map) {
 
     const setSettingsOpen = (open) => {
         if (!settingsPanel) return;
-        state.isSettingsOpen = !!open;
-        if (open) {
+        const willBeOpen = !!open;
+        if (state.isSettingsOpen !== willBeOpen) {
+            trackEvent(willBeOpen ? 'settings_open' : 'settings_close');
+        }
+        state.isSettingsOpen = willBeOpen;
+        if (willBeOpen) {
             state.velocity = 0;
             state.keys = {};
         }
-        settingsPanel.classList.toggle('active', open);
+        settingsPanel.classList.toggle('active', willBeOpen);
         syncMapInteractions(map);
     };
 
@@ -546,6 +607,9 @@ export function initUI(map) {
             }
             const body = settingsPanel.querySelector('.sx-body');
             if (body) body.scrollTop = 0;
+            if (name) {
+                trackEvent('settings_tab_view', { tab: name });
+            }
         };
         tabButtons.forEach((btn, idx) => {
             btn.addEventListener('click', () => {
@@ -574,8 +638,15 @@ export function initUI(map) {
         const searchInput = document.getElementById('settings-search');
         const searchEmpty = document.getElementById('settings-search-empty');
         const SEARCHABLE = ['general', 'driving', 'controls', 'map', 'multiplayer'];
+        let settingsSearchDebounce = null;
         const runSettingsSearch = (raw) => {
             const q = raw.trim().toLowerCase();
+            if (q.length >= 2) {
+                clearTimeout(settingsSearchDebounce);
+                settingsSearchDebounce = setTimeout(() => {
+                    trackEvent('search_settings', { query: q });
+                }, 600);
+            }
             if (!q) {
                 tabPanes.forEach((p) => {
                     p.classList.remove('sx-search-match');
@@ -641,12 +712,14 @@ export function initUI(map) {
         document.getElementById('settings-spots-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             activateTab('places');
+            trackEvent('spots_modal_open');
             if (haptics) haptics.tap();
         });
 
         const handleOpenChangelog = (e) => {
             e.stopPropagation();
             activateTab('changelog');
+            trackEvent('changelog_open');
             if (haptics) haptics.tap();
         };
         document.getElementById('settings-changelog-btn')?.addEventListener('click', handleOpenChangelog);
@@ -700,6 +773,7 @@ export function initUI(map) {
                 e.stopPropagation();
             }
             document.body.classList.add('portrait-hint-dismissed');
+            trackEvent('dismiss_portrait_hint');
             if (portraitHintBanner) {
                 portraitHintBanner.classList.add('dismissed');
                 portraitHintBanner.style.setProperty('display', 'none', 'important');
@@ -826,6 +900,7 @@ export function initUI(map) {
             setupVehicleMarker(map);
             updateToggleStates();
             saveState();
+            trackEvent('toggle_3d_vehicle', { enabled: state.is3D });
             haptics.select();
         };
     });
@@ -842,6 +917,7 @@ export function initUI(map) {
             add3DBuildings(map);
             updateToggleStates();
             saveState();
+            trackEvent('toggle_3d_buildings', { enabled: state.is3DBuildings });
             haptics.select();
         };
     });
@@ -853,6 +929,7 @@ export function initUI(map) {
             state.userPrefs.collisionsEnabled = state.collisionsEnabled; // Save to user preferences
             updateToggleStates();
             saveState();
+            trackEvent('toggle_collisions', { enabled: state.collisionsEnabled });
             haptics.select();
         };
     });
@@ -916,10 +993,15 @@ export function initUI(map) {
         // Initialize slider visually once
         volumeSlider.value = state.masterVolume !== undefined ? state.masterVolume : 0.5;
 
+        let volumeDebounce = null;
         volumeSlider.addEventListener('input', (e) => {
             state.masterVolume = parseFloat(e.target.value);
             updateToggleStates();
             saveState();
+            clearTimeout(volumeDebounce);
+            volumeDebounce = setTimeout(() => {
+                trackEvent('change_volume', { volume: Math.round(state.masterVolume * 100) });
+            }, 600);
         });
     }
 
@@ -929,6 +1011,7 @@ export function initUI(map) {
             state.hapticsEnabled = btn.dataset.haptics === 'on';
             updateToggleStates();
             saveState();
+            trackEvent('toggle_haptics', { enabled: state.hapticsEnabled });
             if (state.hapticsEnabled) haptics.success();
         };
     });
@@ -939,6 +1022,7 @@ export function initUI(map) {
             state.bodyRollEnabled = btn.dataset.bodyroll === 'on';
             updateToggleStates();
             saveState();
+            trackEvent('toggle_body_roll', { enabled: state.bodyRollEnabled });
             haptics.select();
         };
     });
@@ -950,6 +1034,7 @@ export function initUI(map) {
             if (!state.skidMarksEnabled) state.skidMarks = [];
             updateToggleStates();
             saveState();
+            trackEvent('toggle_skidmarks', { enabled: state.skidMarksEnabled });
             haptics.select();
         };
     });
@@ -960,6 +1045,7 @@ export function initUI(map) {
             state.driftAssist = btn.dataset.assist;
             updateToggleStates();
             saveState();
+            trackEvent('change_drift_assist', { assist: state.driftAssist });
             haptics.select();
         };
     });
@@ -971,6 +1057,7 @@ export function initUI(map) {
             applyGraphicsQuality(map);
             updateToggleStates();
             saveState();
+            trackEvent('change_graphics_quality', { quality: state.graphicsQuality });
             haptics.select();
             const labels = {
                 ultra: 'ULTRA (Native 2K/4K, High Detail)',
@@ -988,6 +1075,7 @@ export function initUI(map) {
             applyMapLabels(map);
             updateToggleStates();
             saveState();
+            trackEvent('toggle_map_labels', { enabled: state.mapLabels });
             haptics.select();
         };
     });
@@ -999,6 +1087,7 @@ export function initUI(map) {
             applyHudVisibility();
             updateToggleStates();
             saveState();
+            trackEvent('change_hud_mode', { mode: state.hudVisibility });
             haptics.select();
         };
     });
@@ -1010,6 +1099,7 @@ export function initUI(map) {
             if (!state.cameraShakeEnabled) state.crashShake = 0;
             updateToggleStates();
             saveState();
+            trackEvent('toggle_camera_shake', { enabled: state.cameraShakeEnabled });
             haptics.select();
         };
     });
@@ -1021,6 +1111,7 @@ export function initUI(map) {
             applyFpsCounter();
             updateToggleStates();
             saveState();
+            trackEvent('toggle_fps', { enabled: state.showFps });
             haptics.select();
         };
     });
@@ -1046,6 +1137,7 @@ export function initUI(map) {
             e.stopPropagation();
             if (!requireProForBackup()) return;
             exportSettings();
+            trackEvent('settings_export');
             haptics.success();
         };
     }
@@ -1062,6 +1154,7 @@ export function initUI(map) {
             if (!file || !state.isPro) return;
             try {
                 await importSettings(await file.text(), map);
+                trackEvent('settings_import');
                 haptics.success();
             } catch {
                 showToast('IMPORT FAILED', 'Selected file is not a valid GEO Ride settings backup.');
@@ -1084,6 +1177,7 @@ export function initUI(map) {
                     });
                 updateToggleStates();
                 saveState();
+                trackEvent('camera_mode_change', { mode: cam, source: 'settings' });
                 haptics.select();
             }
         };
@@ -1094,6 +1188,7 @@ export function initUI(map) {
         btn.onclick = () => {
             setRadioStation(btn.dataset.station);
             updateToggleStates();
+            trackEvent('radio_station_select', { station: btn.dataset.station });
             haptics.select();
         };
     });
@@ -1105,6 +1200,7 @@ export function initUI(map) {
             e.preventDefault();
             e.stopPropagation();
             setSettingsOpen(false);
+            trackEvent('teleport_home', { location: 'Belgrade Waterfront' });
             teleportToCoordinates(INITIAL_CENTER[0], INITIAL_CENTER[1], 'Belgrade Waterfront', 107, 'Serbia');
             haptics.success();
         };
@@ -1117,6 +1213,7 @@ export function initUI(map) {
             e.preventDefault();
             e.stopPropagation();
             resetUserPreferences(map);
+            trackEvent('reset_preferences');
             haptics.success();
         };
     }
@@ -1125,6 +1222,7 @@ export function initUI(map) {
     document.querySelectorAll('.spot-filter-chip').forEach((chip) => {
         chip.onclick = () => {
             filterSpots(chip.dataset.filter);
+            trackEvent('spots_filter', { filter: chip.dataset.filter });
             haptics.select();
         };
     });
@@ -1132,9 +1230,16 @@ export function initUI(map) {
     // Multiplayer pilot callsign
     const mpPlayerNameInput = document.getElementById('mp-player-name');
     if (mpPlayerNameInput) {
+        let nameDebounce = null;
         mpPlayerNameInput.oninput = (e) => {
             state.playerName = (e.target.value || '').trim().slice(0, 16);
             saveState();
+            clearTimeout(nameDebounce);
+            nameDebounce = setTimeout(() => {
+                if (state.playerName) {
+                    trackEvent('multiplayer_nickname_change', { name_length: state.playerName.length });
+                }
+            }, 1000);
         };
     }
 
@@ -1143,6 +1248,7 @@ export function initUI(map) {
     if (mpQuickJoinBtn) {
         mpQuickJoinBtn.onclick = (e) => {
             e.stopPropagation();
+            trackEvent('multiplayer_quick_join');
             const joinPeerInput = document.getElementById('join-peer-id');
             if (joinPeerInput) joinPeerInput.value = '';
             document.getElementById('join-mp-btn')?.click();
@@ -1302,7 +1408,11 @@ export function initUI(map) {
             document.querySelector('.loading-content')?.classList.add('fonts-ready');
         }, 500);
     }
-    // Add tracking to external links
+    // Add tracking to external links & navigation
+    document.querySelector('.logo')?.addEventListener('click', () => {
+        trackEvent('click_logo', { destination: '/' });
+    });
+
     document.querySelector('.coffee-btn-link')?.addEventListener('click', () => {
         trackEvent('click_coffee_btn');
         haptics.tap();
@@ -1328,12 +1438,14 @@ export function initUI(map) {
     if (donationPopup && closeDonationBtn) {
         closeDonationBtn.addEventListener('click', () => {
             donationPopup.classList.remove('show');
+            trackEvent('donation_dismiss', { reason: 'close' });
             if (haptics) haptics.tap();
         });
     }
     if (donationPopup && laterDonationBtn) {
         laterDonationBtn.addEventListener('click', () => {
             donationPopup.classList.remove('show');
+            trackEvent('donation_dismiss', { reason: 'later' });
             if (haptics) haptics.tap();
         });
     }
@@ -1341,6 +1453,7 @@ export function initUI(map) {
         donatePaypalBtn.addEventListener('click', () => {
             donationPopup?.classList?.remove('show');
             localStorage.setItem('geo-ride-donation-dismissed', 'true');
+            trackEvent('donation_click', { provider: 'paypal' });
             if (haptics) haptics.success();
         });
     }
@@ -1408,6 +1521,7 @@ export function initUI(map) {
             settingsPanel?.classList.remove('active');
             spotsBackdrop.classList.add('active');
             syncMapInteractions(map);
+            trackEvent('spots_modal_open');
             if (haptics) haptics.tap();
         });
     }
@@ -1416,6 +1530,7 @@ export function initUI(map) {
         spotsClose.addEventListener('click', () => {
             spotsBackdrop.classList.remove('active');
             syncMapInteractions(map);
+            trackEvent('spots_modal_close');
             if (haptics) haptics.tap();
         });
     }
@@ -1434,6 +1549,7 @@ export function initUI(map) {
             if (e.target === spotsBackdrop) {
                 spotsBackdrop.classList.remove('active');
                 syncMapInteractions(map);
+                trackEvent('spots_modal_close');
             }
         });
 
@@ -1468,6 +1584,7 @@ export function initUI(map) {
     if (changelogClose && changelogBackdrop) {
         changelogClose.addEventListener('click', () => {
             closeChangelogModal();
+            trackEvent('changelog_modal_close');
             if (haptics) haptics.tap();
         });
     }
@@ -1476,6 +1593,7 @@ export function initUI(map) {
         changelogBackdrop.addEventListener('click', (e) => {
             if (e.target === changelogBackdrop) {
                 closeChangelogModal();
+                trackEvent('changelog_modal_close');
             }
         });
     }
@@ -1494,7 +1612,10 @@ export function initUI(map) {
     if (cameraToggleBtn) {
         cameraToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            import('./controls.js').then(({ cycleCameraMode }) => cycleCameraMode());
+            import('./controls.js').then(({ cycleCameraMode }) => {
+                cycleCameraMode();
+                trackEvent('camera_mode_change', { mode: state.cameraMode, source: 'hud_btn' });
+            });
         });
     }
 
@@ -1505,6 +1626,10 @@ export function initUI(map) {
         radioPlayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleRadio();
+            trackEvent('radio_toggle', {
+                active: !!state.isRadioActive,
+                station: state.currentRadioStation || 'default'
+            });
             if (haptics) haptics.tap();
         });
     }
@@ -1512,6 +1637,7 @@ export function initUI(map) {
         radioNextBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             nextRadioStation();
+            trackEvent('radio_next_station', { station: state.currentRadioStation || 'default' });
             if (haptics) haptics.select();
         });
     }
@@ -1568,6 +1694,7 @@ export function initUI(map) {
     if (proActivateBtn && proKeyInput) {
         const handleActivation = async () => {
             const val = proKeyInput.value.trim().toLowerCase();
+            trackEvent('pro_activation_attempt', { email_domain: val.split('@')[1] || '' });
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!val || !emailRegex.test(val)) {
                 showActivationStatus('Please enter a valid order email address.', 'error');
@@ -2337,7 +2464,7 @@ export function showToast(title, message, options = {}) {
         existing.classList.add('toast-pulse');
 
         if (activeToastTimeout) clearTimeout(activeToastTimeout);
-        const duration = options.duration || (iconType === 'camera' ? 1800 : 2500);
+        const duration = options.duration || (iconType === 'camera' ? 2000 : iconType === 'alert' ? 5000 : 2500);
         activeToastTimeout = setTimeout(() => {
             if (existing && existing.parentElement) {
                 existing.classList.add('hide');
@@ -2411,7 +2538,7 @@ export function showToast(title, message, options = {}) {
 
     container.appendChild(toast);
 
-    const defaultDuration = iconType === 'camera' ? 1800 : iconType === 'alert' ? 3400 : 2500;
+    const defaultDuration = iconType === 'camera' ? 2000 : iconType === 'alert' ? 5000 : 2500;
     const duration = options.duration || defaultDuration;
 
     if (activeToastTimeout) clearTimeout(activeToastTimeout);

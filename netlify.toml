@@ -13,6 +13,7 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Cross-Origin-Opener-Policy = "same-origin"
     Permissions-Policy = "accelerometer=(self), gyroscope=(self), magnetometer=(self), fullscreen=(self)"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob: https://api.mapbox.com https://unpkg.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com; img-src 'self' data: blob: https://api.mapbox.com https://*.mapbox.com https://www.google-analytics.com https://playgeoride.com; connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.mapbox.com https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://region1.google-analytics.com wss://broker.hivemq.com:8884 wss://broker.hivemq.com https://ice1.somafm.com https://ice2.somafm.com https://ice4.somafm.com https://ice6.somafm.com; media-src 'self' https://ice1.somafm.com https://ice2.somafm.com https://ice4.somafm.com https://ice6.somafm.com; font-src 'self' data: https://fonts.gstatic.com; worker-src 'self' blob:; object-src 'none';"
@@ -42,6 +43,11 @@
 
 [[headers]]
   for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
@@ -81,3 +87,23 @@
   from = "/play"
   to = "/play.html"
   status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/refund"
+  to = "/refund.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
