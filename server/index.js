@@ -103,7 +103,17 @@ export function createGameServer(options = {}) {
     const connsByIp = new Map();
     let messageCount = 0;
 
+    const AI_BOT_PATTERN =
+        /GPTBot|OAI-SearchBot|ChatGPT-User|PerplexityBot|Perplexity-User|ClaudeBot|Claude-Web|Google-Extended|Applebot-Extended|DuckAssistBot|YouBot|Meta-ExternalAgent|CCBot|Bytespider/i;
+
     const server = http.createServer((req, res) => {
+        const ua = String(req.headers['user-agent'] || '');
+        if (AI_BOT_PATTERN.test(ua)) {
+            const match = ua.match(AI_BOT_PATTERN);
+            console.log(
+                `[geo-ride:ai-bot] bot=${match ? match[0] : 'unknown'} method=${req.method} url=${req.url} ts=${new Date().toISOString()}`
+            );
+        }
         if (req.url === '/health') {
             res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
             res.end(JSON.stringify({ ok: true, ...stats() }));

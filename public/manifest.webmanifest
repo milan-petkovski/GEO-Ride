@@ -1,0 +1,74 @@
+{
+    "name": "GEO Ride: 3D Real-World Driving Simulator",
+    "short_name": "GEO Ride",
+    "description": "Free 3D browser driving simulator on real-world Mapbox satellite maps with Three.js WebGL physics, 17 famous destinations, and live multiplayer.",
+    "start_url": "/play?source=pwa",
+    "scope": "/",
+    "id": "georide-simulator",
+    "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "browser"],
+    "orientation": "any",
+    "background_color": "#03040a",
+    "theme_color": "#03040a",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": ["games", "simulation", "travel", "entertainment"],
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/favicon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/favicon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/favicon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/favicon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/images/og-play-1200x630.jpg",
+            "sizes": "1200x630",
+            "type": "image/jpeg",
+            "form_factor": "wide",
+            "label": "GEO Ride: 3D Real-World Browser Driving Simulator"
+        },
+        {
+            "src": "/images/wow.jpg",
+            "sizes": "1280x720",
+            "type": "image/jpeg",
+            "form_factor": "wide",
+            "label": "GEO Ride 3D Satellite & Extruded Buildings Gameplay"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Play 3D Simulator",
+            "short_name": "Play",
+            "description": "Launch the 3D driving simulator immediately",
+            "url": "/play?source=pwa",
+            "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }]
+        }
+    ]
+}

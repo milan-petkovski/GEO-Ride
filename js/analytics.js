@@ -41,13 +41,59 @@ export const trackWebVitals = () => {
                 paint.forEach((entry) => {
                     trackEvent('web_vitals', {
                         metric_name: entry.name,
-                        metric_value: entry.startTime,
+                        metric_value: Math.round(entry.startTime),
                         metric_id: entry.entryType
                     });
                 });
             }, 3000);
         });
     }
+};
+
+const AI_REFERRAL_DOMAINS = [
+    { match: 'chatgpt.com', engine: 'chatgpt' },
+    { match: 'chat.openai.com', engine: 'chatgpt' },
+    { match: 'openai.com', engine: 'openai' },
+    { match: 'perplexity.ai', engine: 'perplexity' },
+    { match: 'gemini.google.com', engine: 'gemini' },
+    { match: 'bard.google.com', engine: 'gemini' },
+    { match: 'copilot.microsoft.com', engine: 'copilot' },
+    { match: 'claude.ai', engine: 'claude' },
+    { match: 'you.com', engine: 'you' },
+    { match: 'phind.com', engine: 'phind' }
+];
+
+/**
+ * Detects visits originating from AI Answer Engines (ChatGPT, Perplexity, Gemini, Copilot, Claude)
+ * via document.referrer or utm_source and records a dedicated `ai_referral_visit` event.
+ * @returns {string|null} Detected AI engine identifier or null.
+ */
+export const trackAIReferral = () => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return null;
+    try {
+        let refHost = '';
+        if (document.referrer) {
+            refHost = new URL(document.referrer).hostname.toLowerCase();
+        }
+        const params = new URLSearchParams(window.location?.search || '');
+        const utmSource = (params.get('utm_source') || params.get('ref') || '').toLowerCase();
+
+        const matched = AI_REFERRAL_DOMAINS.find(
+            (item) =>
+                (refHost && (refHost === item.match || refHost.endsWith('.' + item.match))) ||
+                (utmSource && utmSource.includes(item.engine))
+        );
+
+        if (matched) {
+            trackEvent('ai_referral_visit', {
+                ai_engine: matched.engine,
+                referrer_host: refHost || utmSource,
+                landing_page: window.location?.pathname || '/play'
+            });
+            return matched.engine;
+        }
+    } catch (_e) {}
+    return null;
 };
 
 // Enhanced Event Tracking

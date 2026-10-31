@@ -7,7 +7,7 @@ import { state } from './state.js';
 import { closeAllPanels, showToast } from './ui.js';
 import { haptics } from './haptics.js';
 import { triggerVehicleReset } from './physics.js';
-import { playHornSound } from './audio.js';
+import { playHornSound, toggleRadio } from './audio.js';
 
 export const CAMERA_DESCRIPTIONS = {
     chase: 'Dynamic 3rd-person chase camera with drift compensation and speed tilt.',
@@ -166,7 +166,7 @@ export function initControls() {
         }
 
         if (mappedKey === 'm') {
-            import('./audio.js').then(({ toggleRadio }) => toggleRadio());
+            toggleRadio();
             return;
         }
 
@@ -256,6 +256,19 @@ export function initControls() {
 
     // Initialize premium mobile touch controls
     initTouchControls();
+
+    // Prevent accidental pinch-zoom / Ctrl+wheel browser zoom on the 3D viewport
+    window.addEventListener(
+        'wheel',
+        (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        },
+        { passive: false }
+    );
+    window.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
+    window.addEventListener('gesturechange', (e) => e.preventDefault(), { passive: false });
 
     // Initialize orientation change handler
     initOrientationHandler();
@@ -563,6 +576,11 @@ function updateOrientationLayout() {
         if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
             closeAllPanels();
         }
+    }
+
+    // Ensure MapLibre canvas resizes cleanly to match the new viewport dimensions
+    if (window.map && typeof window.map.resize === 'function') {
+        window.map.resize();
     }
 
     // Trigger layout recalculation

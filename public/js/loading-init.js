@@ -3,10 +3,19 @@
     let target = 25;
     const bar = document.getElementById('progress-bar');
     const pctText = document.getElementById('loading-pct');
+    const statusText = document.getElementById('loading-status-text');
 
     window.setLoadingTarget = function (newTarget) {
         target = Math.max(target, newTarget);
     };
+
+    function getStatusStage(val) {
+        if (val >= 99) return 'READY TO DRIVE';
+        if (val >= 82) return 'SYNCING GLOBAL TELEMETRY';
+        if (val >= 55) return 'CALIBRATING VEHICLE PHYSICS';
+        if (val >= 25) return 'STREAMING 3D SATELLITE TILES';
+        return 'INITIALIZING 3D ENGINE';
+    }
 
     function tick() {
         if (pct < 100) {
@@ -27,6 +36,12 @@
 
             if (bar) bar.style.width = pct.toFixed(1) + '%';
             if (pctText) pctText.innerText = Math.floor(pct) + '%';
+            if (statusText) {
+                const nextStage = getStatusStage(pct);
+                if (statusText.innerText !== nextStage) {
+                    statusText.innerText = nextStage;
+                }
+            }
             window.currentLoadingPct = pct;
             requestAnimationFrame(tick);
         }
@@ -75,5 +90,5 @@
         }, 400);
     }
 
-    setInterval(showNextTip, 4000);
+    window.loadingTipInterval = setInterval(showNextTip, 4000);
 })();

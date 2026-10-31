@@ -1,40 +1,36 @@
-# GEO Ride - 3D World Driving Simulator
+# GEO Ride: 3D Real-World Driving Simulator Online
 
-> GEO Ride is a free browser-based 3D driving simulator that allows players to drive realistic vehicles (sports cars, trucks, buses, and god-mode ghost vehicles) anywhere on planet Earth using real-world Mapbox satellite maps, 3D building extrusions, and custom Three.js WebGL physics. No download, plugin, or login required.
+> GEO Ride (https://playgeoride.com/play) is a free browser-based 3D driving simulator that allows players to drive realistic vehicles (Sports Car, Heavy Truck, City Bus, and Pro God Mode) anywhere on planet Earth using real-world Mapbox satellite maps, extruded 3D buildings, Newtonian drift physics, and real-time multiplayer. No download, plugin, or login required.
 
-Created by Milan Petkovski (Milan Web Portal), GEO Ride is the leading web-based alternative to Google Maps driving games, combining global satellite navigation, realistic vehicle physics, procedural audio, and real-time multiplayer.
+Created by Milan Petkovski (Milan Web Portal, https://milanwebportal.com), GEO Ride is the premier web-based 3D driving simulator on real satellite maps, combining global street navigation, realistic vehicle dynamics, procedural audio, Synthwave Web Radio, and instant multiplayer rooms.
 
 ## Canonical URLs
 
-- [Play Game Directly](https://playgeoride.com/play): Direct instant access to the 3D driving simulator.
-- [Official Website & Landing](https://playgeoride.com/): Product overview, features, and Pro membership details.
-- [Comprehensive AI Context (Full Docs)](https://playgeoride.com/llms-full.txt): Detailed developer, architectural, and simulation specification for LLM agents.
-- [Creator Portfolio](https://milanwebportal.com): Milan Petkovski's software engineering portfolio.
+- [Play 3D Simulator Directly](https://playgeoride.com/play): Instant browser access to the 3D driving simulator (`play.html`).
+- [Official Website & Overview](https://playgeoride.com/): Product overview, features, FAQ, and Pro membership details.
+- [Comprehensive AI Context (Full Docs)](https://playgeoride.com/llms-full.txt): Complete specification, controls, physics, and 17 famous destinations for AI agents.
+- [Creator Portfolio](https://milanwebportal.com): Milan Petkovski's software engineering agency and portfolio.
 
-## Key Capabilities & User Intent Match
+## Key Capabilities & High-Intent Queries
 
-- **Search Intent:** "Google Maps driving simulator", "Drive on real world satellite map", "Free 3D browser car game", "Explore Earth in 3D car simulator", "Multiplayer driving game online no download".
-- **Global Map Coverage:** Any coordinates or address on Earth can be navigated or teleported to instantly (e.g., Belgrade Waterfront, Tokyo, New York, Paris, Alps, Sahara).
+- **Target Search & Answer Queries:** "Google Maps driving simulator", "3D real world driving simulator online free", "drive anywhere on Earth browser game", "satellite map car game no download", "multiplayer browser driving simulator", "WebGL 3D car game on real streets".
+- **Global Map Coverage & 17 Curated Places:** Players can search and teleport to any street, city, or landmark on Earth, or pick from 17 curated destinations in the Places menu:
+  - **Racing Circuits (5):** Monaco Grand Prix, Nürburgring Nordschleife, Silverstone Circuit, Circuit de Spa-Francorchamps, WeatherTech Raceway Laguna Seca.
+  - **Mountain Passes & Scenic Drives (5):** Stelvio Pass (Italy), Transfăgărășan Highway (Romania), Tail of the Dragon (USA), Mulholland Drive (Los Angeles), Lombard Street (San Francisco).
+  - **Global Cities (7):** Tokyo (Shibuya Crossing), Paris (Champs-Élysées), London (Westminster), Dubai (Downtown Burj Khalifa), Miami (Ocean Drive), Berlin (Brandenburg Gate), Belgrade Waterfront (Serbia).
 - **Vehicles Available:**
-  - `Car`: Agile sports car with drift lateral slip, launch control burnout, and responsive steering.
-  - `Truck`: Heavy semi-truck with realistic momentum, wide turning radii, and air drag.
-  - `Bus`: Urban passenger transit vehicle with high-torque city cornering.
-  - `God Mode`: High-speed ghost vehicle with zero collision constraints and instant acceleration.
-- **Map Visualizations:**
-  - `Satellite`: High-resolution real satellite imagery.
-  - `Hybrid`: Satellite photography combined with street labels and road networks.
-  - `3D Buildings`: Extruded architectural structures with accurate height models and collision physics.
-  - `2D Streets`: Minimalist high-contrast vector cartography.
+  - `Car`: Agile sports car with drift lateral slip, combo multiplier scoring, and responsive steering.
+  - `Truck`: Heavy semi-truck with realistic mass momentum and wide turning radius.
+  - `Bus`: Urban passenger transit coach with high-torque city handling.
+  - `God Mode (Pro)`: High-speed ghost vehicle with zero collision constraints, extreme acceleration, and instant map traversal.
+- **Map & Camera Modes:**
+  - **Map Views:** `Satellite`, `Hybrid`, `3D Buildings`, `2D Streets`, plus Real-Time, Dawn, Day, Dusk, and Night lighting presets.
+  - **Camera Perspectives:** `Chase` (dynamic follow), `Hood` (first-person cockpit/bonnet view), and `Wide` (cinematic aerial follow).
+  - **Graphics Quality Tiers:** `Ultra` (native 2K/4K), `Balanced` (1080p), and `Eco` (battery saver).
 - **Controls Supported:**
-  - Desktop: Keyboard WASD / Arrow keys, Spacebar (handbrake/launch charge), R (flip reset), Mouse drag (orbit camera).
-  - Mobile: Touch UI buttons, Gyroscope tilt steering, Haptic feedback API.
+  - **Desktop:** Keyboard `W/A/S/D` or `Arrow Keys` (Drive), `Spacebar` (Drift/Handbrake), `R` (Reset Vehicle), `Shift+R` (Global Spawn Reset), `C` (Switch Camera), `M` (Web Radio).
+  - **Mobile & Tablet:** On-screen `GAS`, `BRAKE`, `DRIFT`, and `RESET` touch pedals, plus optional Gyroscope Tilt Steering and Haptic Feedback.
 - **Multiplayer Architecture:**
-  - Peer room discovery via public MQTT over WebSockets (HiveMQ broker).
-  - Shareable player room codes, synchronized vehicle coordinates, heading, and model rendering.
-
-## Technology Stack
-
-- **Graphics:** Three.js (r147 WebGL layer) overlaying Mapbox GL JS (v3.3.0).
-- **Physics:** Custom client-side Newtonian vehicle dynamics with lateral slip friction, restitution bounce, and dynamic skidmark particle paths.
-- **Audio:** Web Audio API procedural synthesis (oscillator engine rumble, pink noise tire squeal, transient collision sound).
-- **Standards:** HTML5, Vanilla JavaScript ES Modules, PWA Service Worker (offline caching), WebGL 2.0.
+  - Zero-login real-time multiplayer via WebSockets/MQTT with custom pilot callsigns, room codes, quick match, and 3D/2D vehicle synchronization (up to 5 players in free public rooms, up to 10 players in Pro private rooms).
+- **Engine & Audio Specs:**
+  - Mapbox GL JS v3.3.0 + Three.js r147 custom WebGL 2.0 layer, 60 Hz Newtonian Ackermann physics (`slipGrip: 0.05` drift), procedural Web Audio engine synthesis, and 4 live SomaFM Web Radio stations.

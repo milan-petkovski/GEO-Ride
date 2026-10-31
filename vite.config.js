@@ -34,6 +34,21 @@ export default defineConfig(({ mode }) => {
                     manualChunks(id) {
                         if (id.includes('mapbox-gl')) return 'mapbox-vendor';
                         if (id.includes('three')) return 'three-vendor';
+                        if (
+                            id.includes('multiplayer.js') ||
+                            id.includes('mp-client.js') ||
+                            id.includes('mp-interp.js') ||
+                            id.includes('mp-protocol.js')
+                        ) {
+                            return 'mp-engine';
+                        }
+                        if (
+                            id.includes('audio.js') ||
+                            id.includes('discovery.js') ||
+                            id.includes('supabase-georide.js')
+                        ) {
+                            return 'services-engine';
+                        }
                     }
                 }
             }

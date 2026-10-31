@@ -3,7 +3,7 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
    <url>
       <loc>https://playgeoride.com/</loc>
-      <lastmod>2026-10-29</lastmod>
+      <lastmod>2026-10-31</lastmod>
       <changefreq>daily</changefreq>
       <priority>1.0</priority>
       <image:image>
@@ -34,13 +34,38 @@
    </url>
    <url>
       <loc>https://playgeoride.com/play</loc>
-      <lastmod>2026-10-29</lastmod>
+      <lastmod>2026-10-31</lastmod>
       <changefreq>daily</changefreq>
-      <priority>0.9</priority>
+      <priority>1.0</priority>
+      <image:image>
+         <image:loc>https://playgeoride.com/images/og.jpg</image:loc>
+         <image:title>GEO Ride: 3D Real-World Browser Driving Simulator</image:title>
+         <image:caption>Official 1200x630 social preview of GEO Ride 3D driving simulator on real-world Mapbox satellite maps.</image:caption>
+      </image:image>
       <image:image>
          <image:loc>https://playgeoride.com/images/wow.jpg</image:loc>
-         <image:title>Play GEO Ride Online Driving Game</image:title>
-         <image:caption>Free online 3D simulator with instant driving across Earth.</image:caption>
+         <image:title>Play GEO Ride 3D Real World Driving Simulator Online Free</image:title>
+         <image:caption>Play the free online 3D driving simulator on real satellite maps anywhere on Earth with WebGL physics and live multiplayer.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://playgeoride.com/images/satellite.jpg</image:loc>
+         <image:title>GEO Ride Live 3D Satellite Driving Simulator</image:title>
+         <image:caption>Drive cars, trucks, and buses across real-world satellite maps in your browser.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://playgeoride.com/images/hybrid.jpg</image:loc>
+         <image:title>GEO Ride Hybrid Satellite &amp; Street Navigation</image:title>
+         <image:caption>Teleport to any street address or 17 famous racing circuits and mountain passes worldwide.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://playgeoride.com/images/3d-buildings.jpg</image:loc>
+         <image:title>GEO Ride 3D City Buildings &amp; Drift Physics</image:title>
+         <image:caption>Drift around extruded 3D city skylines with realistic collision physics and combo multipliers.</image:caption>
+      </image:image>
+      <image:image>
+         <image:loc>https://playgeoride.com/images/2d-streets.jpg</image:loc>
+         <image:title>GEO Ride 2D Vector Map Mode</image:title>
+         <image:caption>High-framerate 2D top-down vector street mode with live multiplayer vehicle telemetry.</image:caption>
       </image:image>
    </url>
 </urlset>

@@ -10,7 +10,7 @@ import { haptics } from './haptics.js';
 import { initMultiplayer } from './multiplayer.js';
 import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js';
 import { INITIAL_CENTER, VEHICLE_CONFIG } from './config.js';
-import { toggleRadio, nextRadioStation, setRadioStation } from './audio.js';
+import { toggleRadio, nextRadioStation, setRadioStation, playDriftBankSound } from './audio.js';
 import { showDiscoveryCinematic } from './discovery.js';
 
 let activeMap = null;
@@ -219,6 +219,7 @@ export function teleportToCoordinates(
             setup3DVehicleLayer(activeMap);
             saveState();
             trackEvent('teleport_spot', { location: locationName });
+            trackEvent('track_select', { location: locationName, country: countryName || '' });
 
             // Always display the arrived location cinematic overlay!
             let city = locationName;
@@ -342,7 +343,7 @@ export function checkSpeedTrap(speedVal) {
 
 if (typeof window !== 'undefined') {
     window.onDriftComplete = (banked, multiplier) => {
-        import('./audio.js').then(({ playDriftBankSound }) => playDriftBankSound(state.masterVolume));
+        playDriftBankSound(state.masterVolume);
         showToast('DRIFT BANKED', `+${banked.toLocaleString()} PTS (x${multiplier})`, { duration: 2200 });
         const totalScoreEl = document.getElementById('total-drift-score');
         if (totalScoreEl) totalScoreEl.textContent = (state.driftScore || 0).toLocaleString();
@@ -385,20 +386,55 @@ function initHiddenUiEdgeTrigger() {
     const settingsWrapper = document.querySelector('.settings-wrapper');
     if (edgeTrigger && settingsWrapper) {
         let edgeTimeout = null;
-        const revealSettings = () => {
+        const revealSettings = (durationMs = 2600) => {
             clearTimeout(edgeTimeout);
             settingsWrapper.classList?.add('edge-revealed');
+            edgeTrigger.classList?.add('edge-active');
+            if (durationMs > 0) {
+                edgeTimeout = setTimeout(() => {
+                    settingsWrapper.classList?.remove('edge-revealed');
+                    edgeTrigger.classList?.remove('edge-active');
+                }, durationMs);
+            }
         };
         const hideSettings = () => {
+            clearTimeout(edgeTimeout);
             edgeTimeout = setTimeout(() => {
                 settingsWrapper.classList?.remove('edge-revealed');
-            }, 500);
+                edgeTrigger.classList?.remove('edge-active');
+            }, 650);
         };
-        edgeTrigger.addEventListener?.('mouseenter', revealSettings);
+        edgeTrigger.addEventListener?.('mouseenter', () => revealSettings(0));
         edgeTrigger.addEventListener?.('mouseleave', hideSettings);
-        settingsWrapper.addEventListener?.('mouseenter', revealSettings);
+        edgeTrigger.addEventListener?.('click', (e) => {
+            e?.stopPropagation?.();
+            if (settingsWrapper.classList?.contains('edge-revealed')) {
+                openSettings();
+            } else {
+                revealSettings(3500);
+            }
+        });
+        edgeTrigger.addEventListener?.(
+            'touchstart',
+            () => {
+                revealSettings(3800);
+            },
+            { passive: true }
+        );
+        settingsWrapper.addEventListener?.('mouseenter', () => revealSettings(0));
         settingsWrapper.addEventListener?.('mouseleave', hideSettings);
     }
+
+    // Restore session-dismissed portrait orientation hint if previously closed
+    try {
+        if (
+            typeof sessionStorage !== 'undefined' &&
+            sessionStorage.getItem('georide_portrait_hint_dismissed') === '1'
+        ) {
+            document.body?.classList?.add('portrait-hint-dismissed');
+            document.getElementById('portrait-orientation-hint')?.classList?.add('dismissed');
+        }
+    } catch (_e) {}
 }
 
 export function initUI(map) {
@@ -1286,6 +1322,7 @@ export function initUI(map) {
     // Donation Popup Event Listeners
     const donationPopup = document.getElementById('donation-popup');
     const closeDonationBtn = document.getElementById('donation-close-btn');
+    const laterDonationBtn = document.getElementById('donation-later-btn');
     const donatePaypalBtn = document.getElementById('donation-paypal-btn');
 
     if (donationPopup && closeDonationBtn) {
@@ -1294,9 +1331,15 @@ export function initUI(map) {
             if (haptics) haptics.tap();
         });
     }
+    if (donationPopup && laterDonationBtn) {
+        laterDonationBtn.addEventListener('click', () => {
+            donationPopup.classList.remove('show');
+            if (haptics) haptics.tap();
+        });
+    }
     if (donatePaypalBtn) {
         donatePaypalBtn.addEventListener('click', () => {
-            donationPopup.classList.remove('show');
+            donationPopup?.classList?.remove('show');
             localStorage.setItem('geo-ride-donation-dismissed', 'true');
             if (haptics) haptics.success();
         });
@@ -2180,12 +2223,13 @@ export function openProModal() {
     const backdrop = document.getElementById('pro-modal-backdrop');
     if (backdrop) {
         backdrop.classList.add('active');
+        const modalEl = typeof backdrop.querySelector === 'function' ? backdrop.querySelector('.pro-modal') : null;
+        if (modalEl) modalEl.scrollTop = 0;
         state.isInputFocused = true;
         if (document.body && document.body.classList) {
             document.body.classList.remove('hide-cursor');
         }
         syncMapInteractions(activeMap);
-        const proKeyInput = document.getElementById('pro-key-input');
         const proStatusEl = document.getElementById('pro-activation-status');
         if (proStatusEl) {
             if (state.isPro) {
@@ -2197,9 +2241,6 @@ export function openProModal() {
                 proStatusEl.style.display = 'none';
                 proStatusEl.innerHTML = '';
             }
-        }
-        if (proKeyInput && typeof proKeyInput.focus === 'function') {
-            setTimeout(() => proKeyInput.focus(), 120);
         }
 
         // Dynamically fetch and sync latest plans & checkout URLs from Supabase
@@ -2315,19 +2356,19 @@ export function showToast(title, message, options = {}) {
 
     let iconSvg = '';
     if (iconType === 'pro') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>`;
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>`;
     } else if (iconType === 'camera') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
     } else if (iconType === 'radar') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2"/><circle cx="12" cy="12" r="2"/></svg>`;
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2"/><circle cx="12" cy="12" r="2"/></svg>`;
     } else if (iconType === 'drift') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M17.5 12.5c-.8-1.5-2.2-2.5-3.5-3.8-1.3-1.3-2.1-2.9-1.9-4.7C9.3 5.4 7 8 7 11.2c0 1.2.4 2.3 1.1 3.2.7.9 1.6 1.6 2.7 1.9-.3-.8-.3-1.6 0-2.4.4-.9 1.1-1.6 2-2 0 1.4.6 2.6 1.6 3.4 1 1 1.6 2.2 1.6 3.7.8-.8 1.4-1.8 1.6-2.9.2-1.2 0-2.4-.1-3.6z"/></svg>`;
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`;
     } else if (iconType === 'check') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="19 7 10 17 5 12"/></svg>`;
     } else if (iconType === 'alert') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
     } else {
-        iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="8"/></svg>`;
+        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
     }
 
     const toast = document.createElement('div');

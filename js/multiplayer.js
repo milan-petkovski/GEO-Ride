@@ -572,6 +572,10 @@ export function initMultiplayer() {
     const handleJoin = (targetCode, _activeBtn) => {
         isManualDisconnect = false;
         const cleanCode = targetCode && targetCode.trim() !== '' ? targetCode.trim().toLowerCase() : 'public';
+        trackEvent('multiplayer_join', {
+            room_type: cleanCode === 'public' ? 'public_lobby' : 'custom_room',
+            vehicle: state.activeVehicle
+        });
 
         const startMqtt = () => {
             if (joinBtn) joinBtn.textContent = 'CONNECTING...';
@@ -930,23 +934,50 @@ export function updateOtherPlayers(dtFinal, map) {
             }
         }
 
+        const peerName = String(p.name || p.id || 'PILOT')
+            .toUpperCase()
+            .slice(0, 14);
+        const vehKey = VEHICLE_CONFIG[p.vehicle] ? p.vehicle : 'car';
+        const config = VEHICLE_CONFIG[vehKey];
+
         if (!p.marker2d) {
-            const config = VEHICLE_CONFIG[p.vehicle || 'car'];
             const el = document.createElement('div');
-            el.className = 'other-player-marker';
-            el.dataset.vehicle = p.vehicle || 'car';
-            el.innerHTML = config.svg;
+            el.className = `other-player-marker peer-${vehKey}`;
+            el.dataset.vehicle = vehKey;
+            el.dataset.peerName = peerName;
+            if (el.style && typeof el.style.setProperty === 'function') {
+                el.style.setProperty('--peer-bearing', `${-(p.bearing || 0)}deg`);
+            }
+            el.innerHTML = `
+                <div class="mp-nametag">
+                    <span class="mp-nametag-dot"></span>
+                    <span class="mp-nametag-name">${peerName}</span>
+                    <span class="mp-nametag-veh">${vehKey.toUpperCase()}</span>
+                </div>
+                <div class="other-player-vehicle">${config.svg}</div>
+            `;
             p.marker2d = new mapboxgl.Marker({ element: el, rotationAlignment: 'map', pitchAlignment: 'map' })
                 .setLngLat([p.lng, p.lat])
                 .setRotation(p.bearing)
                 .addTo(map);
         } else {
-            // Update marker icon if vehicle type changed
+            // Update marker icon or callsign if vehicle type or name changed
             const el = p.marker2d.getElement();
-            if (el.dataset.vehicle !== p.vehicle) {
-                const config = VEHICLE_CONFIG[p.vehicle || 'car'];
-                el.innerHTML = config.svg;
-                el.dataset.vehicle = p.vehicle;
+            if (el && (el.dataset.vehicle !== vehKey || el.dataset.peerName !== peerName)) {
+                el.className = `other-player-marker peer-${vehKey}`;
+                el.dataset.vehicle = vehKey;
+                el.dataset.peerName = peerName;
+                el.innerHTML = `
+                    <div class="mp-nametag">
+                        <span class="mp-nametag-dot"></span>
+                        <span class="mp-nametag-name">${peerName}</span>
+                        <span class="mp-nametag-veh">${vehKey.toUpperCase()}</span>
+                    </div>
+                    <div class="other-player-vehicle">${config.svg}</div>
+                `;
+            }
+            if (el && el.style && typeof el.style.setProperty === 'function') {
+                el.style.setProperty('--peer-bearing', `${-(p.bearing || 0)}deg`);
             }
             p.marker2d.setLngLat([p.lng, p.lat]);
             p.marker2d.setRotation(p.bearing);

@@ -5,6 +5,31 @@ All notable changes to **GEO Ride** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] (2026-10-31)
+
+### Added
+
+- **Official Simulator Manual in Settings > About**: Added server-rendered `<h1 id="about-game-h1">`, technical and feature specifications table (`.sx-spec-table`), controls and Newtonian physics definitions (`<dl class="sx-defs-list">`), categorized 17 global destinations overview, 12 real search-intent FAQs, and version history directly inside `section[data-sx-pane="about"]`.
+- **Smart Single-Toast Notification Engine**: Redesigned `#toast-container` and `.toast-msg` with variant-colored SVG icon badges (`pro`, `camera`, `radar`, `drift`, `check`, `alert`), in-place pulse updates for rapid camera/radar events, and optically centered `Outfit` typography.
+- **Cinematic Loading & Discovery Overlays**: Upgraded `#loading-overlay` with a custom vector sports car illustration, animated wheel rims and headlights, glassmorphic telemetry progress card, and curated Pro Tips, plus proportional responsive scaling for `#location-discovery` and `#drift-hud`.
+- **Refined Secondary Popups & HUD Triggers**: Redesigned `#pro-modal-backdrop` (Monthly/Annual plans and instant email activation), `#donation-popup` (milestone scheduling), `#cookie-consent-banner` (compact 2-line Privacy Preferences), `#portrait-orientation-hint` (dismissible mobile pill), `#hidden-ui-edge-trigger` (top edge hover/touch reveal), and Multiplayer Nametags / 2D Vehicle Markers.
+- **2027 Technical SEO, AEO, GEO & AI Search Architecture**: Unified Schema.org JSON-LD `@graph` (`Organization`, `Person`, `WebSite`, `VideoGame` + `WebApplication`, `HowTo`, `FAQPage` synced 1:1 with About tab, `WebPage` + `SpeakableSpecification` + `BreadcrumbList`), `1200x630` Open Graph preview (`og.jpg`), `llms.txt` / `llms-full.txt`, `manifest.webmanifest`, IndexNow key & ping script (`npm run indexnow`), AI referral tracking (`ai_referral_visit`), and server-side AI bot visit logging.
+- **Modernized Favicon Suite & Asset Synchronization**: Re-engineered multi-resolution `favicon.ico` (16, 24, 32, 48, 64px), crisp high-contrast PNG favicons, apple touch icons, and complete WebP landing page picture assets with backward-compatible fallbacks.
+
+### Changed
+
+- **Bundle Code-Splitting & Core Web Vitals**: Configured `manualChunks` in `vite.config.js` (`mp-engine` and `services-engine`), preloaded all 4 local WOFF2 fonts, deferred analytics initialization, and eliminated redundant dynamic imports, reducing the main `play.js` entry bundle to `23.93 kB` and cutting Desktop FCP from `3148 ms` to `288 ms`.
+- **Clean Semantic DOM**: Removed legacy `1x1px` off-screen `<article>` and duplicate hidden `<h1>` tags in favor of visible, accessible DOM content inside `Settings > About` and an expanded `<noscript>` fallback.
+
+## [1.2.0] (2026-10-15)
+
+### Added
+
+- **Deep Settings Center**: Multi-tab glassmorphic Settings modal (`General`, `Driving`, `Places`, `Controls`, `Map & 3D`, `Multiplayer`, `About`, `Changelog`) with instant keyword search across all options and background physics sleep for 60 FPS scrolling.
+- **17 Curated Global Destinations**: Instant category filtering (`All`, `Circuits`, `Passes`, `Cities`) and one-click teleportation to Monaco, Nürburgring, Silverstone, Spa-Francorchamps, Laguna Seca, Stelvio Pass, Transfăgărășan, Tail of the Dragon, Mulholland Drive, Lombard Street, Tokyo, Paris, London, Dubai, Miami, Berlin, and Belgrade Waterfront.
+- **3-Tier Graphics Quality Scaling**: Live GPU scaling profiles (`Ultra` 2K/4K native, `Balanced` 1080p, `Eco` battery saver) adjusting WebGL pixel ratio, tire smoke particle budgets, and 3D building opacity.
+- **Segmented Camera Perspectives & Hidden UI Mode**: Instant switching between `Chase`, `Hood`, and `Wide` cameras plus full-screen `Hidden UI` mode.
+
 ## [1.0.2](https://github.com/milan-petkovski/GEO-Ride/compare/v1.0.1...v1.0.2) (2026-09-16)
 
 ### Bug Fixes

@@ -32,7 +32,7 @@ import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMa
 import { updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
 import { cleanMap, addSkidMarksLayer } from './js/utils.js';
-import { trackEvent, trackWebVitals } from './js/analytics.js';
+import { trackEvent, trackWebVitals, trackAIReferral } from './js/analytics.js';
 import { checkDiscovery } from './js/discovery.js';
 import { updateAudio } from './js/audio.js';
 
@@ -49,9 +49,10 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // Initialize Analytics & Performance Monitoring
 trackWebVitals();
+trackAIReferral();
 trackEvent('session_start', {
     platform: 'web',
-    version: '2026.1.0',
+    version: '1.2.1',
     resolution: `${window.innerWidth}x${window.innerHeight}`
 });
 
@@ -174,11 +175,17 @@ function finishLoading() {
     const overlayEl = document.getElementById('loading-overlay');
     if (overlayEl) {
         overlayEl.classList.add('fade-out');
+        overlayEl.classList.add('hidden');
     }
     setTimeout(() => {
         if (overlayEl) overlayEl.style.display = 'none';
         state.lastTime = performance.now();
         state.loopStarted = true;
+        trackEvent('play_click', {
+            vehicle: state.activeVehicle,
+            map_style: state.mapStyle,
+            graphics_quality: state.graphicsQuality || 'ultra'
+        });
         requestAnimationFrame(update);
 
         // Show PayPal donation popup at specific milestones (2m, 10m, 30m, 1h)

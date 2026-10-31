@@ -1,5 +1,5 @@
-const CACHE_NAME = 'georide-v6';
-const ASSETS = ['/', '/index.html', '/play.html', '/favicon.png', '/manifest.json'];
+const CACHE_NAME = 'georide-v7';
+const ASSETS = ['/', '/index.html', '/play.html', '/favicon.png', '/manifest.webmanifest', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
     self.skipWaiting();
@@ -28,8 +28,8 @@ self.addEventListener('fetch', (e) => {
     const url = e.request.url;
     const isLocal = url.startsWith(self.location.origin);
 
-    // ONLY cache local GET requests
-    if (e.request.method !== 'GET' || !isLocal) {
+    // ONLY cache local GET requests and never intercept multiplayer, socket, or API calls
+    if (e.request.method !== 'GET' || !isLocal || url.includes('/api/') || url.includes('/socket.io')) {
         return;
     }
 
