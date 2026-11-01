@@ -31,7 +31,7 @@ import { initControls, pollGamepad } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
 import { updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
-import { cleanMap, addSkidMarksLayer } from './js/utils.js';
+import { cleanMap, addSkidMarksLayer, setupTerrain } from './js/utils.js';
 import { trackEvent, trackWebVitals, trackAIReferral } from './js/analytics.js';
 import { checkDiscovery } from './js/discovery.js';
 import { updateAudio } from './js/audio.js';
@@ -228,6 +228,7 @@ map.on('load', () => {
     isInitialMapLoad = false;
     if (window.setLoadingTarget) window.setLoadingTarget(85);
     cleanMap(map);
+    setupTerrain(map);
     add3DBuildings(map);
     setup3DVehicleLayer(map);
     setupVehicleMarker(map);
@@ -248,6 +249,7 @@ map.on('load', () => {
 map.on('style.load', () => {
     if (isInitialMapLoad) return;
     cleanMap(map);
+    setupTerrain(map);
     add3DBuildings(map);
     setup3DVehicleLayer(map);
     setupVehicleMarker(map);
@@ -269,9 +271,17 @@ function update(time) {
     const dtFinal = isNaN(rawDt) ? 1 : Math.min(Math.max(rawDt, 0.6), 1.4);
 
     if (state.loopStarted) {
-        // While settings panel is open, pause heavy 3D redraw and physics to ensure buttery smooth 60fps scrolling
-        if (state.isSettingsOpen) {
+        // While settings panel or pilot hub is open, pause heavy 3D redraw and physics to ensure buttery smooth 60fps scrolling
+        if (state.isSettingsOpen || state.isProfileOpen) {
             updateAudio(state);
+            requestAnimationFrame(update);
+            return;
+        }
+
+        // In Photo Mode, pause physics update to freeze car motion while maintaining 3D rendering
+        if (state.isPhotoMode) {
+            updateAudio(state);
+            map.triggerRepaint();
             requestAnimationFrame(update);
             return;
         }

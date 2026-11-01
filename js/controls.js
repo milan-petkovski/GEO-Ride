@@ -7,7 +7,7 @@ import { state } from './state.js';
 import { closeAllPanels, showToast } from './ui.js';
 import { haptics } from './haptics.js';
 import { triggerVehicleReset } from './physics.js';
-import { playHornSound, toggleRadio } from './audio.js';
+import { playHornSound } from './audio.js';
 
 export const CAMERA_DESCRIPTIONS = {
     chase: 'Dynamic 3rd-person chase camera with drift compensation and speed tilt.',
@@ -67,16 +67,35 @@ let kbdElements = null;
 export function initControls() {
     kbdElements = document.querySelectorAll('kbd');
     window.addEventListener('keydown', (e) => {
+        const el = document.activeElement;
+        const isTyping =
+            state.isInputFocused ||
+            /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName) ||
+            /^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName) ||
+            el?.isContentEditable ||
+            !!document.querySelector('.search-box.expanded');
+
         // Prevent default Spacebar behavior (scrolling / clicking focused buttons) unless typing in input
-        if (e.code === 'Space' && document.activeElement && document.activeElement.tagName !== 'INPUT') {
+        if (e.code === 'Space' && !isTyping) {
             e.preventDefault();
-            if (document.activeElement.tagName === 'BUTTON') {
-                document.activeElement.blur(); // Remove focus from the button
+            if (el?.tagName === 'BUTTON') {
+                el.blur(); // Remove focus from the button
             }
         }
 
         const key = e.key.toLowerCase();
         if (e.ctrlKey || e.metaKey) return;
+
+        if (key === 'escape' || e.code === 'Escape') {
+            if (state.isPhotoMode && typeof window.togglePhotoMode === 'function') {
+                window.togglePhotoMode(false);
+                return;
+            }
+            closeAllPanels();
+            return;
+        }
+
+        if (isTyping) return;
 
         // Track shift state unconditionally whenever any key is pressed with Shift
         if (e.shiftKey || key === 'shift' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -100,7 +119,9 @@ export function initControls() {
             'arrowright',
             'shift',
             'escape',
-            'tab'
+            'tab',
+            'p',
+            'l'
         ];
 
         // Also check by physical code to prevent keyboard layout or multi-key conflicts
@@ -111,6 +132,8 @@ export function initControls() {
         else if (e.code === 'KeyD' || e.code === 'ArrowRight') mappedKey = 'd';
         else if (e.code === 'KeyR') mappedKey = 'r';
         else if (e.code === 'KeyC') mappedKey = 'c';
+        else if (e.code === 'KeyP') mappedKey = 'p';
+        else if (e.code === 'KeyL') mappedKey = 'l';
         else if (e.code === 'KeyH') mappedKey = 'h';
         else if (e.code === 'KeyF') mappedKey = 'f';
         else if (e.code === 'KeyM') mappedKey = 'm';
@@ -119,24 +142,25 @@ export function initControls() {
 
         if (!drivingKeys.includes(mappedKey) && !drivingKeys.includes(key)) return;
 
-        if (key === 'escape' || mappedKey === 'escape') {
-            closeAllPanels();
-            return;
-        }
-
         const isProModalOpen = document.getElementById('pro-modal-backdrop')?.classList.contains('active');
         const isSettingsOpen = document.getElementById('settings-panel')?.classList.contains('active');
         const isSpotsOpen = document.getElementById('spots-modal-backdrop')?.classList.contains('active');
         const isChangelogOpen = document.getElementById('changelog-modal-backdrop')?.classList.contains('active');
-        if (
-            isProModalOpen ||
-            isSettingsOpen ||
-            isSpotsOpen ||
-            isChangelogOpen ||
-            state.isInputFocused ||
-            document.activeElement?.tagName === 'INPUT' ||
-            document.activeElement?.tagName === 'TEXTAREA'
-        ) {
+        const isProfileOpen =
+            state.isProfileOpen || document.getElementById('profile-modal-backdrop')?.classList.contains('active');
+
+        if (mappedKey === 'l') {
+            if (isProModalOpen || isSpotsOpen || isChangelogOpen) return;
+            e.preventDefault();
+            if (isProfileOpen || isSettingsOpen) {
+                closeAllPanels();
+            } else if (typeof window.openProfile === 'function') {
+                window.openProfile('profile');
+            }
+            return;
+        }
+
+        if (isProfileOpen || isProModalOpen || isSettingsOpen || isSpotsOpen || isChangelogOpen) {
             return;
         }
 
@@ -157,6 +181,14 @@ export function initControls() {
             return;
         }
 
+        if (mappedKey === 'p') {
+            e.preventDefault();
+            if (typeof window.togglePhotoMode === 'function') {
+                window.togglePhotoMode();
+            }
+            return;
+        }
+
         if (mappedKey === 'h') {
             triggerHorn();
         }
@@ -166,7 +198,7 @@ export function initControls() {
         }
 
         if (mappedKey === 'm') {
-            toggleRadio();
+            document.getElementById('radio-play-btn')?.click();
             return;
         }
 

@@ -3,14 +3,36 @@
  * @description HUD UI manager for GEO Ride, controlling settings panels, vehicle selector tabs, map styles, speedometer display, and user interaction synchronization.
  */
 
-import { state, saveState, loadState, setProStatus } from './state.js';
+import { state, saveState, loadState, setProStatus, subscribeState } from './state.js';
+import {
+    loadProgress,
+    saveProgress,
+    tick as progressTick,
+    evaluate as evaluateProgress,
+    getSnapshot as getProgressSnapshot,
+    onProgressEvent,
+    describeChallenge,
+    trackDriftBank,
+    trackSpot,
+    trackPhoto
+} from './progress.js';
+import { submitProgress } from './leaderboard.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getThreeLayer } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
 import { initMultiplayer } from './multiplayer.js';
 import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js';
 import { INITIAL_CENTER, VEHICLE_CONFIG } from './config.js';
-import { toggleRadio, nextRadioStation, setRadioStation, playDriftBankSound, playDriftFailSound } from './audio.js';
+import { setupTerrain } from './utils.js';
+import {
+    toggleRadio,
+    nextRadioStation,
+    setRadioStation,
+    playDriftBankSound,
+    playDriftFailSound,
+    pauseAudioForPhoto,
+    resumeAudioFromPhoto
+} from './audio.js';
 import { showDiscoveryCinematic } from './discovery.js';
 
 let activeMap = null;
@@ -183,6 +205,7 @@ export function teleportToCoordinates(
     if (!activeMap || state.isTeleporting) return;
     state.velocity = 0;
     state.isTeleporting = true;
+    if (locationName !== 'Custom Location') trackSpot(locationName);
     state.isCameraAnimating = true;
     state.teleportStartTime = Date.now();
     state.teleportDuration = 3200;
@@ -363,6 +386,8 @@ export function checkSpeedTrap(speedVal) {
 if (typeof window !== 'undefined') {
     window.onDriftComplete = (banked, multiplier) => {
         playDriftBankSound(state.masterVolume);
+        trackDriftBank(banked, multiplier);
+        submitProgress();
         showToast('DRIFT BANKED', `+${banked.toLocaleString()} PTS (x${multiplier})`, { duration: 2500 });
         const totalScoreEl = document.getElementById('total-drift-score');
         if (totalScoreEl) totalScoreEl.textContent = (state.driftScore || 0).toLocaleString();
@@ -373,7 +398,7 @@ if (typeof window !== 'undefined') {
         });
     };
 
-    window.onDriftFail = (lostPoints, multiplier = 1, reason = 'under_1000') => {
+    window.onDriftFail = (lostPoints, _multiplier = 1, reason = 'under_1000') => {
         if (typeof document === 'undefined') return;
         const driftHud = document.getElementById('drift-hud');
         const driftContent = driftHud?.querySelector('.drift-hud-content');
@@ -501,6 +526,7 @@ export function initUI(map) {
     if (map) applyMapLabels(map);
     applyGraphicsQuality(map);
     initHiddenUiEdgeTrigger();
+    initProgressUI();
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('settings-panel');
@@ -603,7 +629,15 @@ export function initUI(map) {
             });
             const searchBar = settingsPanel.querySelector('.sx-searchbar');
             if (searchBar) {
-                searchBar.hidden = ['places', 'about', 'changelog'].includes(name);
+                searchBar.hidden = ['places', 'about', 'changelog', 'career'].includes(name);
+            }
+            if (name === 'career') {
+                loadProfileModule()
+                    .then((mod) => {
+                        mod.initSettingsPilotHub(settingsPanel);
+                        mod.renderSettingsCareerTab();
+                    })
+                    .catch((err) => console.error('Failed to render Pilot Hub tab:', err));
             }
             const body = settingsPanel.querySelector('.sx-body');
             if (body) body.scrollTop = 0;
@@ -1039,6 +1073,34 @@ export function initUI(map) {
         };
     });
 
+    // 3D Terrain relief toggle (Roadmap Level 25 or Pro)
+    document.querySelectorAll('.terrain-toggle button').forEach((btn) => {
+        btn.onclick = () => {
+            const requestedOn = btn.dataset.terrain === 'on';
+            const snap = getProgressSnapshot();
+            const hasAccess = state.isPro || (snap?.level?.level || 1) >= 25;
+            if (requestedOn && !hasAccess) {
+                lastSettingsTab = 'map';
+                const panel = document.getElementById('settings-panel');
+                if (panel) panel.classList.remove('active');
+                state.isSettingsOpen = false;
+                openProModal();
+                showToast('LEVEL 25 REQUIRED', 'Reach Level 25 or unlock Pro for 3D Satellite Terrain Elevation.', {
+                    isPro: true
+                });
+                if (haptics) haptics.tap();
+                return;
+            }
+            state.terrainEnabled = requestedOn;
+            setupTerrain(map);
+            updateToggleStates();
+            saveState();
+            trackEvent('toggle_terrain', { enabled: state.terrainEnabled });
+            showToast('3D TERRAIN', state.terrainEnabled ? 'Elevation Active' : 'Elevation Disabled');
+            haptics.select();
+        };
+    });
+
     // Drift steer assist toggle
     document.querySelectorAll('.drift-assist-toggle button').forEach((btn) => {
         btn.onclick = () => {
@@ -1183,9 +1245,17 @@ export function initUI(map) {
         };
     });
 
-    // Direct radio station select buttons
+    const checkRadioAccess = () => {
+        if (state.isPro || (getProgressSnapshot()?.level?.level || 1) >= 5) return true;
+        showToast('LEVEL 5 REQUIRED', 'Reach Level 5 or unlock Pro to tune into Web Radio stations.');
+        if (haptics) haptics.tap();
+        return false;
+    };
+
+    // Direct radio station select buttons (Roadmap Level 5 or Pro)
     document.querySelectorAll('.radio-station-btn').forEach((btn) => {
         btn.onclick = () => {
+            if (!checkRadioAccess()) return;
             setRadioStation(btn.dataset.station);
             updateToggleStates();
             trackEvent('radio_station_select', { station: btn.dataset.station });
@@ -1625,6 +1695,7 @@ export function initUI(map) {
     if (radioPlayBtn) {
         radioPlayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (!checkRadioAccess()) return;
             toggleRadio();
             trackEvent('radio_toggle', {
                 active: !!state.isRadioActive,
@@ -1636,6 +1707,7 @@ export function initUI(map) {
     if (radioNextBtn) {
         radioNextBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (!checkRadioAccess()) return;
             nextRadioStation();
             trackEvent('radio_next_station', { station: state.currentRadioStation || 'default' });
             if (haptics) haptics.select();
@@ -1673,22 +1745,20 @@ export function initUI(map) {
     const showActivationStatus = (msg, type = 'info') => {
         if (!proStatusEl) return;
         proStatusEl.style.display = 'flex';
-        let color = '#00f2ff';
-        let icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-
-        if (type === 'success') {
-            color = '#22c55e';
-            icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        } else if (type === 'error') {
-            color = '#ef4444';
-            icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-        } else if (type === 'loading') {
-            color = '#c470f0';
-            icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>`;
-        }
-
-        proStatusEl.style.color = color;
-        proStatusEl.innerHTML = `${icon} <span>${msg}</span>`;
+        const cfg = {
+            info: [
+                '#00f2ff',
+                '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'
+            ],
+            success: ['#22c55e', '<polyline points="20 6 9 17 4 12"/>'],
+            error: [
+                '#ef4444',
+                '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'
+            ],
+            loading: ['#c470f0', '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>', 'animation:spin 1s linear infinite;']
+        }[type] || ['#00f2ff', ''];
+        proStatusEl.style.color = cfg[0];
+        proStatusEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;${cfg[2] || ''}">${cfg[1]}</svg> <span>${msg}</span>`;
     };
 
     if (proActivateBtn && proKeyInput) {
@@ -1745,6 +1815,10 @@ export function initUI(map) {
 
     // Start periodic smart game notifications
     initGameNotifications();
+
+    // Initialize Photo Mode & First-Visit Tutorial
+    initPhotoMode(map);
+    initTutorialModal();
 }
 
 export function openSettings(tabName = null) {
@@ -1803,11 +1877,17 @@ export function closeChangelogModal() {
 
 export function closeAllPanels() {
     state.isSettingsOpen = false;
+    state.isProfileOpen = false;
     document.getElementById('settings-panel')?.classList.remove('active');
     document.getElementById('spots-modal-backdrop')?.classList.remove('active');
     closeChangelogModal();
+    closeTutorialModal();
+    if (state.isPhotoMode) {
+        togglePhotoMode(false);
+    }
     document.querySelector('.search-box')?.classList.remove('expanded');
     closeProModal();
+    closeProfile();
     state.isInputFocused = false;
     const searchInput = document.getElementById('location-search');
     if (searchInput && typeof searchInput.blur === 'function') {
@@ -1837,33 +1917,11 @@ export function updateToggleStates() {
     // Reflect Pro HUD status via CSS class + structured inner HTML
     const proOpenBtn = document.getElementById('pro-open-btn');
     if (proOpenBtn) {
-        if (state.isPro) {
-            proOpenBtn.classList?.add('is-active');
-            proOpenBtn.title = 'GEO Ride Pro Active';
-            proOpenBtn.setAttribute?.('aria-label', 'GEO Ride Pro Active');
-            proOpenBtn.innerHTML = `
-                <span class="pro-btn-shimmer"></span>
-                <span class="pro-btn-inner">
-                    <svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
-                    </svg>
-                    <span class="pro-btn-label">ACTIVE</span>
-                </span>
-            `;
-        } else {
-            proOpenBtn.classList?.remove('is-active');
-            proOpenBtn.title = 'Unlock GEO Ride Pro';
-            proOpenBtn.setAttribute?.('aria-label', 'Unlock GEO Ride Pro');
-            proOpenBtn.innerHTML = `
-                <span class="pro-btn-shimmer"></span>
-                <span class="pro-btn-inner">
-                    <svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
-                    </svg>
-                    <span class="pro-btn-label">GO PRO</span>
-                </span>
-            `;
-        }
+        const lbl = state.isPro ? 'GEO Ride Pro Active' : 'Unlock GEO Ride Pro';
+        proOpenBtn.classList?.toggle?.('is-active', !!state.isPro);
+        proOpenBtn.title = lbl;
+        proOpenBtn.setAttribute?.('aria-label', lbl);
+        proOpenBtn.innerHTML = `<span class="pro-btn-shimmer"></span><span class="pro-btn-inner"><svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path></svg><span class="pro-btn-label">${state.isPro ? 'ACTIVE' : 'GO PRO'}</span></span>`;
     }
 
     // Show/hide PRO badge on God Mode toggle in Settings
@@ -1974,6 +2032,26 @@ export function updateToggleStates() {
     document
         .querySelectorAll('.skidmarks-toggle button')
         .forEach((b) => b.classList.toggle('active', b.dataset.skidmarks === (state.skidMarksEnabled ? 'on' : 'off')));
+    const curLv = getProgressSnapshot()?.level?.level || 1;
+    const radOk = state.isPro || curLv >= 5;
+    const terOk = state.isPro || curLv >= 25;
+    const radBadge = document.getElementById('radio-roadmap-badge');
+    if (radBadge) radBadge.hidden = radOk;
+    const terBadge = document.getElementById('terrain-roadmap-badge');
+    if (terBadge) terBadge.hidden = terOk;
+    const radWidget = document.getElementById('radio-widget');
+    const radTag = document.getElementById('radio-status-tag');
+    if (radWidget) radWidget.classList?.toggle?.('is-locked', !radOk);
+    if (radTag) radTag.textContent = radOk ? 'NOW TUNED' : 'UNLOCK AT LEVEL 5 OR PRO';
+    document.querySelectorAll('.radio-station-btn').forEach((b, idx) => {
+        b.classList?.toggle?.('disabled-btn', !radOk);
+        if (!radOk) b.classList?.remove?.('active');
+        else if (idx === 0 && !document.querySelector('.radio-station-btn.active')) b.classList?.add?.('active');
+    });
+    document.querySelectorAll('.terrain-toggle button').forEach((b) => {
+        b.classList.toggle('active', b.dataset.terrain === (state.terrainEnabled ? 'on' : 'off'));
+        if (b.dataset.terrain === 'on') b.classList?.toggle?.('disabled-btn', !terOk);
+    });
     document
         .querySelectorAll('.bodyroll-toggle button')
         .forEach((b) => b.classList.toggle('active', b.dataset.bodyroll === (state.bodyRollEnabled ? 'on' : 'off')));
@@ -2046,20 +2124,6 @@ export function updateToggleStates() {
         camDesc.textContent = camDescriptions[camMode];
     }
 
-    // Driver Telemetry Statistics
-    const statSpeed = document.getElementById('stat-top-speed');
-    const statDrift = document.getElementById('stat-drift-score');
-    const statDist = document.getElementById('stat-distance');
-    if (statSpeed) {
-        statSpeed.textContent = `${Math.round(state.topSpeedRecord || 0)} ${state.unit === 'mi' ? 'MPH' : 'KM/H'}`;
-    }
-    if (statDrift) {
-        statDrift.textContent = `${Math.round(state.driftScore || 0).toLocaleString()} PTS`;
-    }
-    if (statDist) {
-        statDist.textContent = `${(state.totalDistanceKm || 0).toFixed(1)} KM`;
-    }
-
     const playerNameInput = document.getElementById('mp-player-name');
     if (playerNameInput && document.activeElement !== playerNameInput) {
         playerNameInput.value = state.playerName || 'Pilot';
@@ -2130,6 +2194,7 @@ const EXPORTABLE_KEYS = [
     'cameraMode',
     'hapticsEnabled',
     'skidMarksEnabled',
+    'terrainEnabled',
     'bodyRollEnabled',
     'driftAssist',
     'underglowColor',
@@ -2187,6 +2252,7 @@ export async function importSettings(text, map) {
     applyFpsCounter();
     applyHudVisibility();
     applyGraphicsQuality(map);
+    if (map) setupTerrain(map);
     if (map) applyMapLabels(map);
     saveState();
     showToast('SETTINGS IMPORTED', 'Preferences restored from backup.');
@@ -2243,6 +2309,7 @@ export function resetUserPreferences(map) {
     state.is3DBuildings = true;
     state.hapticsEnabled = true;
     state.skidMarksEnabled = true;
+    state.terrainEnabled = false;
     state.bodyRollEnabled = true;
     state.driftAssist = 'assisted';
     state.tiltSensitivity = 'normal';
@@ -2261,6 +2328,7 @@ export function resetUserPreferences(map) {
     applyFpsCounter();
     applyHudVisibility();
     applyGraphicsQuality(map);
+    if (map) setupTerrain(map);
     if (map) applyMapLabels(map);
     saveState();
     showToast('PREFERENCES RESET', 'All options restored to factory defaults.');
@@ -2427,7 +2495,10 @@ export function showToast(title, message, options = {}) {
     let iconType = 'info';
     let variantClass = '';
 
-    if (options.isPro || lowerTitle.includes('pro') || lowerTitle.includes('god mode')) {
+    if (lowerTitle.includes('achievement')) {
+        iconType = 'trophy';
+        variantClass = options.isPro ? 'toast-pro' : 'toast-achievement';
+    } else if (options.isPro || lowerTitle.includes('pro') || lowerTitle.includes('god mode')) {
         iconType = 'pro';
         variantClass = 'toast-pro';
     } else if (lowerTitle.includes('camera')) {
@@ -2481,22 +2552,16 @@ export function showToast(title, message, options = {}) {
         setTimeout(() => t.remove(), 260);
     });
 
-    let iconSvg = '';
-    if (iconType === 'pro') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>`;
-    } else if (iconType === 'camera') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
-    } else if (iconType === 'radar') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2"/><circle cx="12" cy="12" r="2"/></svg>`;
-    } else if (iconType === 'drift') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`;
-    } else if (iconType === 'check') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="19 7 10 17 5 12"/></svg>`;
-    } else if (iconType === 'alert') {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
-    } else {
-        iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
-    }
+    const toastPaths = {
+        trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+        pro: '<path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>',
+        camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+        radar: '<circle cx="12" cy="12" r="9"/><path d="M12 12l4-2"/><circle cx="12" cy="12" r="2"/>',
+        drift: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+        check: '<polyline points="19 7 10 17 5 12"/>',
+        alert: '<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+    };
+    const iconSvg = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${toastPaths[iconType] || '<circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'}</svg>`;
 
     const toast = document.createElement('div');
     toast.className = `toast-msg ${variantClass}`.trim();
@@ -2538,7 +2603,8 @@ export function showToast(title, message, options = {}) {
 
     container.appendChild(toast);
 
-    const defaultDuration = iconType === 'camera' ? 2000 : iconType === 'alert' ? 5000 : 2500;
+    const defaultDuration =
+        iconType === 'trophy' ? 10000 : iconType === 'camera' ? 2000 : iconType === 'alert' ? 5000 : 2500;
     const duration = options.duration || defaultDuration;
 
     if (activeToastTimeout) clearTimeout(activeToastTimeout);
@@ -2553,4 +2619,556 @@ export function initGameNotifications() {
     notificationsInitialized = true;
     // Unsolicited spam loops and unsolicited marketing timers are permanently disabled
     // to keep the driving experience focused, clean, and distraction-free.
+}
+
+/* ==========================================================================
+   PHOTO MODE (FOTO MOD) ENGINE
+   ========================================================================== */
+
+export const PHOTO_FILTERS = {
+    none: 'none',
+    cyberpunk: 'contrast(1.3) saturate(1.7) hue-rotate(-15deg)',
+    warm: 'sepia(0.35) saturate(1.4) contrast(1.1) brightness(1.05)',
+    noir: 'grayscale(1) contrast(1.45) brightness(0.95)',
+    vivid: 'saturate(1.85) contrast(1.2)',
+    vintage: 'sepia(0.28) contrast(0.92) brightness(1.05) saturate(1.25)'
+};
+
+export function applyPhotoFilter(filter) {
+    const filterVal = PHOTO_FILTERS[filter] || 'none';
+    const canvas = document.querySelector('#map canvas');
+    if (canvas) {
+        canvas.style.filter = filterVal;
+    }
+}
+
+export function capturePhoto(map = activeMap) {
+    if (!map) return;
+    const canvas = map.getCanvas();
+    if (!canvas) return;
+
+    const flashEl = document.getElementById('photo-flash-overlay');
+    if (flashEl) {
+        flashEl.classList.remove('flash-anim');
+        void flashEl.offsetWidth;
+        flashEl.classList.add('flash-anim');
+    }
+
+    map.triggerRepaint();
+
+    requestAnimationFrame(() => {
+        try {
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = canvas.width;
+            outCanvas.height = canvas.height;
+            const ctx = outCanvas.getContext('2d');
+
+            const filterCss = PHOTO_FILTERS[state.photoFilter] || 'none';
+            if (filterCss !== 'none') {
+                ctx.filter = filterCss;
+            }
+            ctx.drawImage(canvas, 0, 0);
+            ctx.filter = 'none';
+
+            if (state.photoWatermark !== false) {
+                const pad = Math.round(outCanvas.width * 0.03);
+                ctx.save();
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'bottom';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+
+                ctx.font = `bold ${Math.round(outCanvas.width * 0.024)}px Rajdhani, sans-serif`;
+                ctx.fillStyle = '#00f2ff';
+                ctx.fillText(
+                    'GEO RIDE',
+                    outCanvas.width - pad,
+                    outCanvas.height - pad - Math.round(outCanvas.width * 0.018)
+                );
+
+                ctx.font = `600 ${Math.round(outCanvas.width * 0.013)}px Outfit, sans-serif`;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                const subtitle = `3D SIMULATOR • ${new Date().toLocaleDateString()}`;
+                ctx.fillText(subtitle, outCanvas.width - pad, outCanvas.height - pad);
+                ctx.restore();
+            }
+
+            const dataUrl = outCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `georide-photo-${Date.now()}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('PHOTO CAPTURED', 'Screenshot exported in full resolution!');
+            if (haptics) haptics.success();
+            trackEvent('photo_captured', {
+                filter: state.photoFilter,
+                watermark: state.photoWatermark
+            });
+            trackPhoto();
+        } catch (err) {
+            console.error('Photo capture error:', err);
+            showToast('CAPTURE ERROR', 'Could not export screenshot.');
+        }
+    });
+}
+
+export function togglePhotoMode(forceState = null) {
+    if (typeof document === 'undefined') return;
+    const shouldBeOpen = forceState !== null ? Boolean(forceState) : !state.isPhotoMode;
+    state.isPhotoMode = shouldBeOpen;
+
+    const overlay = document.getElementById('photo-mode-overlay');
+    const zoomSlider = document.getElementById('photo-zoom-slider');
+    const pitchSlider = document.getElementById('photo-pitch-slider');
+    const orbitSlider = document.getElementById('photo-orbit-slider');
+
+    if (shouldBeOpen) {
+        document.body?.classList.add('photo-mode-active');
+        if (overlay) overlay.classList.add('active');
+        pauseAudioForPhoto();
+
+        if (activeMap) {
+            if (zoomSlider) zoomSlider.value = activeMap.getZoom().toFixed(1);
+            if (pitchSlider) pitchSlider.value = Math.round(activeMap.getPitch());
+            if (orbitSlider) orbitSlider.value = Math.round(activeMap.getBearing());
+        }
+
+        showToast('PHOTO MODE', 'Physics paused. Frame your shot and capture! (P / ESC to exit)');
+        trackEvent('open_photo_mode');
+    } else {
+        document.body?.classList.remove('photo-mode-active');
+        if (overlay) overlay.classList.remove('active');
+        applyPhotoFilter('none');
+        resumeAudioFromPhoto();
+        trackEvent('close_photo_mode');
+    }
+}
+
+export function initPhotoMode(map) {
+    if (typeof window !== 'undefined') {
+        window.togglePhotoMode = togglePhotoMode;
+        window.capturePhoto = capturePhoto;
+    }
+
+    const photoExitBtn = document.getElementById('photo-exit-btn');
+    if (photoExitBtn) {
+        photoExitBtn.onclick = () => {
+            togglePhotoMode(false);
+            if (haptics) haptics.tap();
+        };
+    }
+
+    const photoCaptureBtn = document.getElementById('photo-capture-btn');
+    if (photoCaptureBtn) {
+        photoCaptureBtn.onclick = () => {
+            capturePhoto(map);
+        };
+    }
+
+    document.querySelectorAll('.photo-filter-chip').forEach((chip) => {
+        chip.onclick = () => {
+            const filter = chip.dataset.filter || 'none';
+            state.photoFilter = filter;
+            document.querySelectorAll('.photo-filter-chip').forEach((c) => c.classList.toggle('active', c === chip));
+            applyPhotoFilter(filter);
+            if (haptics) haptics.select();
+        };
+    });
+
+    const gridBtn = document.getElementById('photo-grid-toggle');
+    if (gridBtn) {
+        gridBtn.onclick = () => {
+            state.photoGrid = !state.photoGrid;
+            gridBtn.classList.toggle('active', state.photoGrid);
+            const gridEl = document.getElementById('photo-grid-overlay');
+            if (gridEl) gridEl.style.display = state.photoGrid ? 'block' : 'none';
+            if (haptics) haptics.select();
+        };
+    }
+
+    const wmBtn = document.getElementById('photo-wm-toggle');
+    if (wmBtn) {
+        wmBtn.onclick = () => {
+            state.photoWatermark = !state.photoWatermark;
+            wmBtn.classList.toggle('active', state.photoWatermark);
+            const wmPreview = document.getElementById('photo-watermark-preview');
+            if (wmPreview) wmPreview.style.display = state.photoWatermark ? 'flex' : 'none';
+            if (haptics) haptics.select();
+        };
+    }
+
+    const zoomSlider = document.getElementById('photo-zoom-slider');
+    if (zoomSlider) {
+        zoomSlider.oninput = (e) => {
+            if (map) map.setZoom(parseFloat(e.target.value));
+        };
+    }
+
+    const pitchSlider = document.getElementById('photo-pitch-slider');
+    if (pitchSlider) {
+        pitchSlider.oninput = (e) => {
+            if (map) map.setPitch(parseFloat(e.target.value));
+        };
+    }
+
+    const orbitSlider = document.getElementById('photo-orbit-slider');
+    if (orbitSlider) {
+        orbitSlider.oninput = (e) => {
+            if (map) map.setBearing(parseFloat(e.target.value));
+        };
+    }
+}
+
+/* ==========================================================================
+   TUTORIAL MODAL (TUTORIJAL PRI PRVOM ULASKU)
+   ========================================================================== */
+
+let currentTutorialStep = 1;
+const TOTAL_TUTORIAL_STEPS = 5;
+const tutKeysDone = new Set();
+let tutAdvanceTimer = null;
+const TUT_TAGS = [
+    'WELCOME BRIEFING',
+    'STEP 1/4 • THROTTLE',
+    'STEP 2/4 • STEERING',
+    'STEP 3/4 • DRIFT',
+    'STEP 4/4 • SYSTEMS'
+];
+
+function setTutProgress(step, pct, msg, done = false) {
+    const bar = document.querySelector(`[data-tut-bar="${step}"]`);
+    const statusEl = document.querySelector(`[data-tut-status="${step}"]`);
+    if (bar) bar.style.width = `${pct}%`;
+    if (statusEl && msg) {
+        statusEl.textContent = msg;
+        statusEl.classList.toggle('is-done', done);
+    }
+}
+
+export function setTutorialStep(step) {
+    if (tutAdvanceTimer) {
+        clearTimeout(tutAdvanceTimer);
+        tutAdvanceTimer = null;
+    }
+    currentTutorialStep = Math.max(1, Math.min(TOTAL_TUTORIAL_STEPS, step));
+    document.querySelectorAll('.tutorial-slide').forEach((slide) => {
+        slide.classList.toggle('active', Number(slide.dataset.step) === currentTutorialStep);
+    });
+    document.querySelectorAll('.tutorial-dot').forEach((dot) => {
+        dot.classList.toggle('active', Number(dot.dataset.step) === currentTutorialStep);
+    });
+    const tag = document.getElementById('tutorial-step-tag');
+    if (tag) tag.textContent = TUT_TAGS[currentTutorialStep - 1] || '';
+
+    const prevBtn = document.getElementById('tutorial-prev-btn');
+    const nextBtn = document.getElementById('tutorial-next-btn');
+    if (prevBtn) prevBtn.style.display = currentTutorialStep === 1 ? 'none' : 'inline-flex';
+    if (nextBtn) {
+        nextBtn.textContent = currentTutorialStep === TOTAL_TUTORIAL_STEPS ? 'DONE' : 'SKIP';
+    }
+}
+
+function handleTutorialInput(rawKey) {
+    if (tutAdvanceTimer) return;
+    const map = { arrowup: 'w', arrowdown: 's', arrowleft: 'a', arrowright: 'd', ' ': 'space', enter: 'start' };
+    let k = map[rawKey] || rawKey;
+    if (currentTutorialStep === 1 && k === 'w') k = 'start';
+    const slide = document.querySelector(`.tutorial-slide[data-step="${currentTutorialStep}"]`);
+    const btn = slide?.querySelector?.(`[data-tut-key="${k}"]`);
+    if (!btn) return;
+
+    btn.classList.add('is-done');
+    if (haptics) haptics.tap();
+
+    const advance = (next) => {
+        if (haptics) haptics.success();
+        tutAdvanceTimer = setTimeout(() => {
+            tutAdvanceTimer = null;
+            if (next > TOTAL_TUTORIAL_STEPS) closeTutorialModal();
+            else setTutorialStep(next);
+        }, 520);
+    };
+
+    if (currentTutorialStep === 1 && k === 'start') {
+        setTutProgress(1, 100, 'STARTING LIVE TRAINING...', true);
+        advance(2);
+    } else if (currentTutorialStep === 2 && k === 'w') {
+        setTutProgress(2, 100, 'THROTTLE ENGAGED!', true);
+        advance(3);
+    } else if (currentTutorialStep === 3 && (k === 'a' || k === 'd')) {
+        tutKeysDone.add(k);
+        if (tutKeysDone.has('a') && tutKeysDone.has('d')) {
+            setTutProgress(3, 100, 'STEERING CALIBRATED!', true);
+            advance(4);
+        } else {
+            setTutProgress(3, 50, k === 'a' ? 'LEFT OK - NOW PRESS [D]' : 'RIGHT OK - NOW PRESS [A]');
+        }
+    } else if (currentTutorialStep === 4 && k === 'space') {
+        playDriftBankSound?.(1);
+        setTutProgress(4, 100, 'DRIFT SYSTEM READY!', true);
+        advance(5);
+    } else if (currentTutorialStep === 5 && (k === 'c' || k === 'r')) {
+        setTutProgress(5, 100, 'ALL SET - ENJOY THE RIDE!', true);
+        advance(6);
+    }
+}
+
+export function openTutorialModal() {
+    if (typeof document === 'undefined') return;
+    const backdrop = document.getElementById('tutorial-modal-backdrop');
+    if (backdrop) {
+        tutKeysDone.clear();
+        document.querySelectorAll('.tut-key-btn').forEach((b) => b.classList?.remove?.('is-done'));
+        setTutProgress(1, 0, 'PRESS [W] OR CLICK START');
+        setTutProgress(2, 0, 'WAITING FOR [W] THROTTLE...');
+        setTutProgress(3, 0, 'PRESS [A] AND [D]');
+        setTutProgress(4, 0, 'WAITING FOR [SPACEBAR]...');
+        setTutProgress(5, 0, 'PRESS [C] OR [R] TO FINISH');
+        backdrop.classList.add('active');
+        setTutorialStep(1);
+        trackEvent('tutorial_opened');
+    }
+}
+
+export function closeTutorialModal() {
+    if (typeof document === 'undefined') return;
+    if (tutAdvanceTimer) {
+        clearTimeout(tutAdvanceTimer);
+        tutAdvanceTimer = null;
+    }
+    const backdrop = document.getElementById('tutorial-modal-backdrop');
+    if (backdrop) {
+        backdrop.classList.remove('active');
+        const dontShow = document.getElementById('tutorial-dont-show-cb');
+        if (!dontShow || dontShow.checked) {
+            localStorage.setItem('geo_ride_tutorial_seen', 'true');
+        }
+        trackEvent('tutorial_closed');
+    }
+}
+
+export function initTutorialModal() {
+    if (typeof window !== 'undefined') {
+        window.openTutorialModal = openTutorialModal;
+        window.closeTutorialModal = closeTutorialModal;
+    }
+
+    const backdrop = document.getElementById('tutorial-modal-backdrop');
+    if (!backdrop) return;
+
+    const closeBtn = document.getElementById('tutorial-close-btn');
+    if (closeBtn) closeBtn.onclick = () => closeTutorialModal();
+
+    const prevBtn = document.getElementById('tutorial-prev-btn');
+    if (prevBtn) {
+        prevBtn.onclick = () => {
+            setTutorialStep(currentTutorialStep - 1);
+            if (haptics) haptics.select();
+        };
+    }
+
+    const nextBtn = document.getElementById('tutorial-next-btn');
+    if (nextBtn) {
+        nextBtn.onclick = () => {
+            if (currentTutorialStep === TOTAL_TUTORIAL_STEPS) {
+                closeTutorialModal();
+                if (haptics) haptics.success();
+            } else {
+                setTutorialStep(currentTutorialStep + 1);
+                if (haptics) haptics.select();
+            }
+        };
+    }
+
+    document.querySelectorAll('.tutorial-dot').forEach((dot) => {
+        dot.onclick = () => {
+            setTutorialStep(Number(dot.dataset.step));
+            if (haptics) haptics.select();
+        };
+    });
+
+    document.querySelectorAll('.tut-key-btn').forEach((btn) => {
+        btn.onclick = () => handleTutorialInput(btn.dataset.tutKey);
+    });
+
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('keydown', (e) => {
+            if (!backdrop.classList.contains('active') || state.isInputFocused || state.isSettingsOpen) return;
+            const k = (e.key || '').toLowerCase();
+            if (k === 'escape') {
+                closeTutorialModal();
+                return;
+            }
+            handleTutorialInput(k);
+        });
+    }
+
+    const replayBtn = document.getElementById('settings-replay-tutorial-btn');
+    if (replayBtn) {
+        replayBtn.onclick = () => {
+            closeSettings();
+            openTutorialModal();
+        };
+    }
+
+    // Auto-launch tutorial on first visit
+    try {
+        const tutorialSeen = localStorage.getItem('geo_ride_tutorial_seen');
+        if (!tutorialSeen) {
+            setTimeout(() => {
+                openTutorialModal();
+            }, 900);
+        }
+    } catch (_e) {}
+}
+/* --------------------------------------------------------------------------
+   Pilot profile, challenges, ranks and achievements
+   -------------------------------------------------------------------------- */
+
+let profileApi = null;
+let profileLoading = null;
+let progressUiStarted = false;
+
+function loadProfileModule() {
+    if (profileApi) return Promise.resolve(profileApi);
+    if (!profileLoading) {
+        profileLoading = import('./profile-ui.js').then((mod) => {
+            profileApi = mod;
+            return mod;
+        });
+    }
+    return profileLoading;
+}
+
+export async function openProfile(tab = 'profile') {
+    if (typeof document === 'undefined') return;
+    if (state.isPhotoMode) togglePhotoMode(false);
+    openSettings('career');
+    const subtab = tab === 'career' ? 'profile' : tab;
+    loadProfileModule()
+        .then((mod) => {
+            const panel = document.getElementById('settings-panel');
+            if (panel) mod.initSettingsPilotHub(panel);
+            mod.renderSettingsCareerTab(subtab);
+        })
+        .catch(() => {});
+}
+
+export function closeProfile() {
+    closeSettings();
+}
+
+function updateProfileChip() {
+    if (typeof document === 'undefined' || !document || typeof document.getElementById !== 'function') return;
+    const chip = document.getElementById('profile-level-chip');
+    if (!chip) return;
+    chip.textContent = String(getProgressSnapshot().level.level);
+    chip.classList.toggle('is-pro', !!state.isPro);
+}
+
+function handleProgressEvent(ev) {
+    switch (ev.type) {
+        case 'challenge':
+            showToast(
+                ev.scope === 'weekly' ? 'WEEKLY CLEARED' : 'DAILY CLEARED',
+                `${describeChallenge(ev.item)} (+${ev.xp} XP)`,
+                { duration: 4000, isPro: ev.bonus }
+            );
+            if (haptics) haptics.success();
+            break;
+        case 'achievement':
+            showToast('ACHIEVEMENT UNLOCKED', `${ev.def.name} (+${ev.xp} XP)`, {
+                duration: 10000,
+                isPro: ev.def.tier === 'pro'
+            });
+            if (haptics) haptics.success();
+            break;
+        case 'level':
+            showToast('LEVEL UP', `Level ${ev.level}: ${ev.title}`, { duration: 4500 });
+            updateProfileChip();
+            break;
+        case 'streak':
+            if (ev.count > 1)
+                showToast('STREAK', `${ev.count} day streak. Keep it alive tomorrow.`, { duration: 3500 });
+            break;
+        case 'freeze':
+            showToast('PRO STREAK FREEZE', 'A missed day was forgiven. Your streak is safe.', { isPro: true });
+            break;
+        case 'proReady':
+            showToast('PRO REWARD READY', `${ev.name} is complete. Go Pro to claim it.`, {
+                duration: 5500,
+                isPro: true
+            });
+            break;
+        default:
+            break;
+    }
+    if (profileApi?.refreshSettingsPilotHubIfOpen) profileApi.refreshSettingsPilotHubIfOpen();
+}
+
+function initProgressUI() {
+    if (typeof document === 'undefined' || !document || progressUiStarted) return;
+    progressUiStarted = true;
+    loadProgress();
+    updateProfileChip();
+
+    const settingsPanel = document.getElementById('settings-panel');
+    if (settingsPanel) {
+        loadProfileModule()
+            .then((mod) => mod.initSettingsPilotHub(settingsPanel))
+            .catch(() => {});
+    }
+
+    onProgressEvent(handleProgressEvent);
+    if (typeof window !== 'undefined') {
+        window.openProfile = openProfile;
+        // Warm up the pilot hub module during idle so first open is instant
+        const warmUp = () => loadProfileModule().catch(() => {});
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(warmUp, { timeout: 2000 });
+        } else {
+            setTimeout(warmUp, 800);
+        }
+    }
+
+    const isTest = typeof process !== 'undefined' && Boolean(process.versions?.node);
+    if (!isTest) {
+        let seconds = 0;
+        const secondTimer = setInterval(() => {
+            if (typeof document === 'undefined' || !document || typeof document.getElementById !== 'function') return;
+            seconds += 1;
+            const isHidden = typeof document !== 'undefined' && Boolean(document.hidden);
+            progressTick(!!state.loopStarted && !state.isPhotoMode && !isHidden);
+            if (seconds % 5 === 0) {
+                updateProfileChip();
+            }
+        }, 1000);
+        const submitTimer = setInterval(() => {
+            if (typeof document === 'undefined' || !document) return;
+            submitProgress();
+        }, 30000);
+        if (typeof secondTimer?.unref === 'function') secondTimer.unref();
+        if (typeof submitTimer?.unref === 'function') submitTimer.unref();
+    }
+
+    if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                saveProgress();
+                submitProgress({ force: true });
+            }
+        });
+    }
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('pagehide', saveProgress);
+    }
+    subscribeState('isPro', () => {
+        evaluateProgress();
+        updateProfileChip();
+    });
 }

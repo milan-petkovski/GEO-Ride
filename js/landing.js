@@ -884,6 +884,15 @@ function initPricing() {
         });
     });
 
+    const founderCheckoutBtn = document.getElementById('founder-checkout-btn');
+    founderCheckoutBtn?.addEventListener('click', () => {
+        trackLandingEvent('pro_checkout_start', {
+            cycle: 'lifetime',
+            price_billed: 49.99,
+            checkout_url: founderCheckoutBtn.getAttribute('href') || ''
+        });
+    });
+
     // Fire pricing_view GA4 event once when #pricing enters viewport
     const pricingSection = document.getElementById('pricing');
     if (pricingSection && 'IntersectionObserver' in window) {
@@ -1072,7 +1081,7 @@ function initAdvancedLandingAnalytics() {
         connection_type: navigator.connection?.effectiveType || 'unknown',
         reduced_motion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
         referrer_type: referrerType,
-        landing_version: '1.2.1'
+        landing_version: '1.2.2'
     });
 
     // 4. Scroll Depth Milestones (25%, 50%, 75%, 90%, 100%)

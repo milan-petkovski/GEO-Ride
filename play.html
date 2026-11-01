@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
         <!-- Google Tag & Consent Mode -->
-        <script src="/js/gtag-init.js" defer></script>
+        <script src="./js/gtag-init.js" defer></script>
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-C33HV1QV3S"></script>
 
         <title>GEO Ride: Play 3D Real World Driving Simulator Online Free</title>
@@ -152,7 +152,7 @@
                         "mainEntityOfPage": "https://playgeoride.com/play",
                         "datePublished": "2026-05-08",
                         "dateModified": "2026-10-31",
-                        "softwareVersion": "1.2.1",
+                        "softwareVersion": "1.2.2",
                         "image": [
                             "https://playgeoride.com/images/og.jpg",
                             "https://playgeoride.com/images/wow.jpg",
@@ -509,10 +509,12 @@
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
 
-        <link rel="stylesheet" href="style.css" />
         <script src="/js/cookie-consent.js" defer></script>
+        <!-- GEO Ride Stylesheet -->
+        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="./js/profile.css" />
     </head>
 
     <body>
@@ -1064,7 +1066,7 @@
             </div>
         </div>
 
-        <script src="/js/loading-init.js"></script>
+        <script src="./js/loading-init.js"></script>
 
         <div id="map"></div>
 
@@ -1357,7 +1359,7 @@
                                 type="button"
                                 title="View Changelog"
                             >
-                                v1.2.1 &bull; CHANGELOG
+                                v1.2.2 &bull; CHANGELOG
                             </button>
                         </div>
                     </div>
@@ -1410,6 +1412,25 @@
                 </div>
 
                 <nav class="sx-tabs" role="tablist" aria-label="Settings sections">
+                    <div class="sx-tab-group">
+                        <span class="sx-tab-category">PILOT HUB</span>
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="career">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>PILOT HUB</span>
+                        </button>
+                    </div>
+
                     <div class="sx-tab-group">
                         <span class="sx-tab-category">GAMEPLAY</span>
                         <button
@@ -1605,6 +1626,16 @@
                     <p id="settings-search-empty" class="sx-hint sx-search-empty" hidden>
                         No settings match your search.
                     </p>
+
+                    <!-- PILOT HUB CAREER PANE -->
+                    <section
+                        class="sx-pane sx-pane-hub sx-span-2"
+                        role="tabpanel"
+                        data-sx-pane="career"
+                        hidden
+                        id="sx-pane-career"
+                    ></section>
+
                     <!-- GENERAL -->
                     <section class="sx-pane active" role="tabpanel" data-sx-pane="general">
                         <div class="sx-card sx-span-2">
@@ -1682,7 +1713,10 @@
                         </div>
 
                         <div class="sx-card sx-span-2">
-                            <span class="sx-label">WEB RADIO</span>
+                            <div class="sx-label sx-label-split">
+                                <span>WEB RADIO</span>
+                                <span id="radio-roadmap-badge" class="pro-badge-pill">LVL 5 / PRO</span>
+                            </div>
                             <div id="radio-widget" class="sx-radio" title="Web Radio (M)">
                                 <button
                                     id="radio-play-btn"
@@ -1704,7 +1738,7 @@
                                     </svg>
                                 </button>
                                 <div class="sx-radio-text">
-                                    <span class="sx-radio-tag">NOW TUNED</span>
+                                    <span id="radio-status-tag" class="sx-radio-tag">NOW TUNED</span>
                                     <span id="radio-station-title" class="sx-radio-name">SYNTHWAVE FM</span>
                                 </div>
                                 <button
@@ -2402,6 +2436,10 @@
                                     ><span>Camera view toggle</span>
                                 </li>
                                 <li>
+                                    <span class="sx-keycaps"><kbd>P</kbd></span
+                                    ><span>Photo Mode toggle</span>
+                                </li>
+                                <li>
                                     <span class="sx-keycaps"><kbd>M</kbd></span
                                     ><span>Radio on or off</span>
                                 </li>
@@ -2525,6 +2563,17 @@
                             <div class="toggle-group d3b-toggle">
                                 <button class="active" data-d3b="on" type="button">ON</button>
                                 <button data-d3b="off" type="button">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="sx-card">
+                            <div class="sx-label sx-label-split">
+                                <span>3D TERRAIN ELEVATION</span>
+                                <span id="terrain-roadmap-badge" class="pro-badge-pill">LVL 25 / PRO</span>
+                            </div>
+                            <div class="toggle-group terrain-toggle">
+                                <button data-terrain="on" type="button">ON</button>
+                                <button class="active" data-terrain="off" type="button">OFF</button>
                             </div>
                         </div>
 
@@ -2747,24 +2796,6 @@
                             </div>
                         </div>
 
-                        <div class="sx-card sx-span-2">
-                            <span class="sx-label">DRIVER TELEMETRY &amp; RECORDS</span>
-                            <div class="sx-stats-grid">
-                                <div class="sx-stat-box">
-                                    <span class="sx-stat-label">TOP SPEED RECORD</span>
-                                    <span id="stat-top-speed" class="sx-stat-num">0 KM/H</span>
-                                </div>
-                                <div class="sx-stat-box">
-                                    <span class="sx-stat-label">DRIFT SCORE</span>
-                                    <span id="stat-drift-score" class="sx-stat-num">0 PTS</span>
-                                </div>
-                                <div class="sx-stat-box">
-                                    <span class="sx-stat-label">DISTANCE TRAVELED</span>
-                                    <span id="stat-distance" class="sx-stat-num">0.0 KM</span>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="sx-card sx-pro-showcase-card">
                             <div class="sx-label sx-label-split">
                                 <span>GEO RIDE PRO</span>
@@ -2812,6 +2843,32 @@
                                 </svg>
                                 <span>BUY ME A COFFEE</span>
                             </a>
+                        </div>
+
+                        <div class="sx-card sx-span-2">
+                            <span class="sx-label">FIRST-TIME PILOT TUTORIAL</span>
+                            <button
+                                id="settings-replay-tutorial-btn"
+                                class="sx-btn sx-btn-ghost"
+                                type="button"
+                                style="width: 100%; justify-content: center"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                    style="width: 18px; height: 18px"
+                                >
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <span>REPLAY PILOT TUTORIAL BRIEFING</span>
+                            </button>
                         </div>
 
                         <div class="sx-card sx-span-2">
@@ -3166,6 +3223,15 @@
                             <span class="sx-label">RELEASE CHANGELOG &amp; VERSION HISTORY</span>
                             <div class="sx-about-changelog">
                                 <div class="sx-about-cl-row">
+                                    <span class="sx-about-cl-ver">v1.2.2 (November 2026)</span>
+                                    <span class="sx-about-cl-txt"
+                                        >Pilot Hub (Profile &amp; Stats, Daily/Weekly Challenges, Global Leaderboards,
+                                        30+ Achievements), Level Progression Roadmap (Levels 5, 10, 25, 50, 75, 100
+                                        &amp; Pro Instant Unlock), Shareable Pilot Card, and Interactive Floating
+                                        Tutorial Bubbles.</span
+                                    >
+                                </div>
+                                <div class="sx-about-cl-row">
                                     <span class="sx-about-cl-ver">v1.2.1 (October 2026)</span>
                                     <span class="sx-about-cl-txt"
                                         >Complete UI &amp; Modal Polish (Loading Screen, Toast System, Pro Modal,
@@ -3208,10 +3274,53 @@
                                 <article class="changelog-entry">
                                     <div class="changelog-entry-head">
                                         <div class="changelog-tags">
-                                            <span class="changelog-version">v1.2.1</span>
+                                            <span class="changelog-version">v1.2.2</span>
                                             <span class="changelog-tag-latest">LATEST</span>
                                         </div>
                                         <time class="changelog-date">Current Release</time>
+                                    </div>
+                                    <h3 class="changelog-heading">
+                                        Pilot Hub, Achievements, Daily &amp; Weekly Challenges, Global Leaderboards,
+                                        Level Roadmap &amp; Interactive Tutorial
+                                    </h3>
+                                    <ul class="changelog-items">
+                                        <li>
+                                            <strong>Pilot Hub Career Center:</strong> Dedicated career progression hub
+                                            with 4 tabs (Profile &amp; Stats, Challenges, Leaderboard, Achievements),
+                                            custom Pilot callsigns, country flags, live telemetry stats, and
+                                            downloadable PNG Pilot Cards.
+                                        </li>
+                                        <li>
+                                            <strong>Level Roadmap &amp; Pro Unlocks:</strong> Progressive XP leveling
+                                            unlocking Web Radio Stations (Level 5), Live City Speed Radar (Level 10), 3D
+                                            Satellite Terrain Elevation (Level 25), and elite titles (Grand Master,
+                                            Supreme Pilot, GEO Immortal), with instant Level 1 full roadmap unlock for
+                                            Pro pilots.
+                                        </li>
+                                        <li>
+                                            <strong>Daily &amp; Weekly Challenges + Streak Freeze:</strong> Rotating
+                                            daily and weekly driving objectives with streak XP multipliers, bonus VIP
+                                            challenges, and automatic Pro Streak Freeze protection.
+                                        </li>
+                                        <li>
+                                            <strong>Global &amp; Weekly Leaderboards:</strong> Live rankings for Best
+                                            Drift, Top Speed (250 km/h road limit / 1,000 km/h Pro God Mode), and Total
+                                            Distance with rival delta tracking.
+                                        </li>
+                                        <li>
+                                            <strong>30+ Pilot Achievements &amp; Interactive Tutorial:</strong> Tiered
+                                            achievements across Driving, Drift, Speed, World, and Pro categories, plus
+                                            clean floating HUD tutorial bubbles that react to live driving inputs.
+                                        </li>
+                                    </ul>
+                                </article>
+
+                                <article class="changelog-entry">
+                                    <div class="changelog-entry-head">
+                                        <div class="changelog-tags">
+                                            <span class="changelog-version">v1.2.1</span>
+                                        </div>
+                                        <time class="changelog-date">October 2026</time>
                                     </div>
                                     <h3 class="changelog-heading">
                                         UI &amp; HUD Polish, Toast &amp; Modal Redesign, Simulator Manual &amp; Speed
@@ -3548,6 +3657,19 @@
                         </svg>
                         <span>Zero Advertisements</span>
                     </div>
+                    <div class="pro-perk-item">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Purple Tire Skidmarks &amp; Smoke</span>
+                    </div>
                 </div>
 
                 <div class="pro-plans-grid">
@@ -3576,6 +3698,22 @@
                         <div class="pro-plan-price">$2.99 <span>/ mo</span></div>
                         <div class="pro-plan-note">$35.88 billed yearly</div>
                         <div class="pro-plan-cta">Subscribe Annual</div>
+                    </a>
+
+                    <a
+                        href="https://milanwebportal.app.fungies.io/subscribe/578272f8-f871-45ba-8575-2ffbe8b4d4fb?plan=founder-lifetime"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="pro-plan-card founder"
+                        id="pro-modal-lifetime-btn"
+                    >
+                        <div class="pro-plan-pill founder-pill">Founder Offer</div>
+                        <div class="pro-plan-name">Lifetime</div>
+                        <div class="pro-plan-price">
+                            <span class="price-strikethrough">$79.99</span> $49.99 <span>once</span>
+                        </div>
+                        <div class="pro-plan-note">One-time payment • Lifetime access (later $79.99)</div>
+                        <div class="pro-plan-cta">Claim Founder Deal</div>
                     </a>
                 </div>
 
@@ -3612,6 +3750,319 @@
                         gap: 6px;
                     "
                 ></div>
+            </div>
+        </div>
+
+        <!-- Photo Mode Flash Overlay -->
+        <div id="photo-flash-overlay" class="photo-flash-overlay" aria-hidden="true"></div>
+
+        <!-- Photo Mode Viewfinder & Overlay -->
+        <div id="photo-mode-overlay" class="photo-mode-overlay" aria-label="Photo Mode Interface">
+            <!-- 3x3 Rule-of-Thirds Grid (Toggleable) -->
+            <div id="photo-grid-overlay" class="photo-grid-overlay" style="display: none" aria-hidden="true">
+                <div class="grid-line grid-v-1"></div>
+                <div class="grid-line grid-v-2"></div>
+                <div class="grid-line grid-h-1"></div>
+                <div class="grid-line grid-h-2"></div>
+            </div>
+
+            <!-- On-screen Watermark Preview -->
+            <div id="photo-watermark-preview" class="photo-watermark-preview" aria-hidden="true">
+                <span class="photo-wm-brand">GEO RIDE</span>
+                <span class="photo-wm-sub">3D SIMULATOR</span>
+            </div>
+
+            <!-- Top Floating Bar -->
+            <div class="photo-top-bar">
+                <div class="photo-mode-badge">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        style="width: 16px; height: 16px"
+                    >
+                        <path
+                            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                        ></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span>PHOTO MODE</span>
+                </div>
+                <div class="photo-top-actions">
+                    <button
+                        type="button"
+                        id="photo-grid-toggle"
+                        class="photo-icon-btn"
+                        title="Toggle 3x3 Composition Grid"
+                        aria-label="Toggle Grid"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="width: 16px; height: 16px"
+                        >
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="3" y1="15" x2="21" y2="15"></line>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                            <line x1="15" y1="3" x2="15" y2="21"></line>
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        id="photo-wm-toggle"
+                        class="photo-icon-btn active"
+                        title="Toggle Watermark Stamp"
+                        aria-label="Toggle Watermark"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="width: 16px; height: 16px"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </button>
+                    <button type="button" id="photo-exit-btn" class="photo-exit-btn" aria-label="Exit Photo Mode">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="width: 16px; height: 16px"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="18" x2="18" y2="6"></line>
+                        </svg>
+                        <span>EXIT</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Floating Dock -->
+            <div class="photo-dock">
+                <!-- Filters Row -->
+                <div class="photo-filters-bar">
+                    <span class="photo-dock-label">FILTERS:</span>
+                    <div class="photo-chips-scroll">
+                        <button type="button" class="photo-filter-chip active" data-filter="none">NORMAL</button>
+                        <button type="button" class="photo-filter-chip" data-filter="cyberpunk">CYBERPUNK</button>
+                        <button type="button" class="photo-filter-chip" data-filter="warm">GOLDEN HOUR</button>
+                        <button type="button" class="photo-filter-chip" data-filter="noir">NOIR</button>
+                        <button type="button" class="photo-filter-chip" data-filter="vivid">VIVID</button>
+                        <button type="button" class="photo-filter-chip" data-filter="vintage">VINTAGE</button>
+                    </div>
+                </div>
+
+                <!-- Sliders & Capture Action -->
+                <div class="photo-controls-row">
+                    <div class="photo-slider-group">
+                        <label for="photo-zoom-slider">FOV / ZOOM</label>
+                        <input type="range" id="photo-zoom-slider" min="14" max="21" step="0.1" value="18" />
+                    </div>
+                    <div class="photo-slider-group">
+                        <label for="photo-pitch-slider">PITCH / ANGLE</label>
+                        <input type="range" id="photo-pitch-slider" min="15" max="85" step="1" value="65" />
+                    </div>
+                    <div class="photo-slider-group">
+                        <label for="photo-orbit-slider">ORBIT BEARING</label>
+                        <input type="range" id="photo-orbit-slider" min="-180" max="180" step="1" value="0" />
+                    </div>
+                    <button type="button" id="photo-capture-btn" class="photo-capture-btn">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style="width: 20px; height: 20px"
+                        >
+                            <path
+                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                            ></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span>TAKE PHOTO</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- First-Time Pilot Tutorial Floating Bubbles -->
+        <div
+            id="tutorial-modal-backdrop"
+            class="tutorial-modal-backdrop"
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby="tutorial-modal-title"
+        >
+            <div class="tutorial-modal">
+                <div class="tutorial-top-bar">
+                    <div class="tutorial-badge">
+                        <span class="tutorial-badge-dot"></span>
+                        <span id="tutorial-step-tag">WELCOME BRIEFING</span>
+                    </div>
+                    <div class="tutorial-top-right">
+                        <div class="tutorial-dots">
+                            <button
+                                type="button"
+                                class="tutorial-dot active"
+                                data-step="1"
+                                aria-label="Step 1"
+                            ></button>
+                            <button type="button" class="tutorial-dot" data-step="2" aria-label="Step 2"></button>
+                            <button type="button" class="tutorial-dot" data-step="3" aria-label="Step 3"></button>
+                            <button type="button" class="tutorial-dot" data-step="4" aria-label="Step 4"></button>
+                            <button type="button" class="tutorial-dot" data-step="5" aria-label="Step 5"></button>
+                        </div>
+                        <button type="button" id="tutorial-prev-btn" class="tutorial-skip-pill" style="display: none">
+                            BACK
+                        </button>
+                        <button type="button" id="tutorial-next-btn" class="tutorial-skip-pill">NEXT</button>
+                        <button id="tutorial-close-btn" class="tutorial-close-btn" aria-label="Close tutorial">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                style="width: 14px; height: 14px"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="18" x2="18" y2="6"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bubble 1: Welcome to GEO Ride -->
+                <div class="tutorial-slide active" data-step="1">
+                    <div class="tut-bubble-row">
+                        <div class="tut-bubble-copy">
+                            <h2 id="tutorial-modal-title" class="tutorial-title">Welcome to <span>GEO Ride</span></h2>
+                            <p class="tutorial-lead">
+                                Drive 3D vehicles anywhere on Earth. Ready for a quick live controls check?
+                            </p>
+                            <span class="tut-task-label" data-tut-status="1">PRESS [W] OR CLICK START</span>
+                        </div>
+                        <div class="tut-bubble-keys">
+                            <button type="button" class="tut-key-btn tut-key-start is-target" data-tut-key="start">
+                                <kbd>START</kbd>
+                                <span class="tut-key-caption">BEGIN</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="1"></div></div>
+                </div>
+
+                <!-- Bubble 2: Throttle (W) -->
+                <div class="tutorial-slide" data-step="2">
+                    <div class="tut-bubble-row">
+                        <div class="tut-bubble-copy">
+                            <h2 class="tutorial-title">Press <span>W</span> to Accelerate</h2>
+                            <p class="tutorial-lead">
+                                Hold <strong>W</strong> or <strong>Up Arrow</strong> to drive your vehicle forward on
+                                the map.
+                            </p>
+                            <span class="tut-task-label" data-tut-status="2">WAITING FOR [W] THROTTLE...</span>
+                        </div>
+                        <div class="tut-bubble-keys">
+                            <button type="button" class="tut-key-btn is-target" data-tut-key="w">
+                                <kbd>W</kbd>
+                                <span class="tut-key-caption">GAS</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="2"></div></div>
+                </div>
+
+                <!-- Bubble 3: Steering (A & D) -->
+                <div class="tutorial-slide" data-step="3">
+                    <div class="tut-bubble-row">
+                        <div class="tut-bubble-copy">
+                            <h2 class="tutorial-title">Steer with <span>A &amp; D</span></h2>
+                            <p class="tutorial-lead">
+                                Press both <strong>A</strong> (left) and <strong>D</strong> (right) while driving to
+                                test steering.
+                            </p>
+                            <span class="tut-task-label" data-tut-status="3">PRESS [A] AND [D]</span>
+                        </div>
+                        <div class="tut-bubble-keys">
+                            <button type="button" class="tut-key-btn is-target" data-tut-key="a">
+                                <kbd>A</kbd>
+                                <span class="tut-key-caption">LEFT</span>
+                            </button>
+                            <button type="button" class="tut-key-btn is-target" data-tut-key="d">
+                                <kbd>D</kbd>
+                                <span class="tut-key-caption">RIGHT</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="3"></div></div>
+                </div>
+
+                <!-- Bubble 4: Handbrake Drift (SPACE) -->
+                <div class="tutorial-slide" data-step="4">
+                    <div class="tut-bubble-row">
+                        <div class="tut-bubble-copy">
+                            <h2 class="tutorial-title">Pull <span>SPACE</span> to Drift</h2>
+                            <p class="tutorial-lead">
+                                Tap or hold <strong>SPACEBAR</strong> while turning to slide and build drift combos.
+                            </p>
+                            <span class="tut-task-label" data-tut-status="4">WAITING FOR [SPACEBAR]...</span>
+                        </div>
+                        <div class="tut-bubble-keys">
+                            <button type="button" class="tut-key-btn tut-key-wide is-target" data-tut-key="space">
+                                <kbd>SPACE</kbd>
+                                <span class="tut-key-caption">DRIFT</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="4"></div></div>
+                </div>
+
+                <!-- Bubble 5: Camera & Reset (C / R) -->
+                <div class="tutorial-slide" data-step="5">
+                    <div class="tut-bubble-row">
+                        <div class="tut-bubble-copy">
+                            <h2 class="tutorial-title">Camera <span>&amp; Reset</span></h2>
+                            <p class="tutorial-lead">
+                                Press <strong>C</strong> to switch camera view or <strong>R</strong> to reset your car
+                                upright.
+                            </p>
+                            <span class="tut-task-label" data-tut-status="5">PRESS [C] OR [R] TO FINISH</span>
+                        </div>
+                        <div class="tut-bubble-keys">
+                            <button type="button" class="tut-key-btn is-target" data-tut-key="c">
+                                <kbd>C</kbd>
+                                <span class="tut-key-caption">CAM</span>
+                            </button>
+                            <button type="button" class="tut-key-btn is-target" data-tut-key="r">
+                                <kbd>R</kbd>
+                                <span class="tut-key-caption">RESET</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="5"></div></div>
+                </div>
+
+                <input type="checkbox" id="tutorial-dont-show-cb" checked hidden />
             </div>
         </div>
 

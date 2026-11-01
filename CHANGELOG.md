@@ -5,6 +5,22 @@ All notable changes to **GEO Ride** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] (2026-11-01)
+
+### Added
+
+- **Pilot Hub in Settings (Profile & Stats, Challenges, Leaderboard, Achievements)**: Integrated the complete Pilot Hub progression center directly inside Settings with 4 dedicated sub-tabs (`Profile & Stats`, `Challenges`, `Leaderboard`, `Achievements`), persistent Pilot callsign and country selector, live XP bar, and PNG Pilot Card export (`js/profile-ui.js`, `js/progress.js`, `js/share-card.js`).
+- **Level Progression Roadmap & Feature Unlocks**: Added a 6-milestone Pilot Roadmap (`Level 5: Web Radio Stations`, `Level 10: Live City Speed Radar`, `Level 25: 3D Satellite Terrain Elevation`, `Level 50: Grand Master`, `Level 75: Supreme Pilot`, `Level 100: GEO Immortal`) with scaled 500 XP-per-level progression and instant Level 1 unlock for all roadmap features with GEO Ride Pro.
+- **Daily & Weekly Challenges + Streak Freeze**: Added deterministic daily and weekly driving challenges (drift banking, speed traps, distance cruising, clean runs, and multi-spot exploration) with daily streak multipliers and automatic Pro Streak Freeze protection.
+- **Global & Weekly Supabase Leaderboards**: Added live ranked leaderboards across `Best Drift`, `Top Speed`, and `Distance` (Weekly & All-Time) with rival delta tracking, country filtering, and realistic Top Speed caps (`250 km/h` for standard road vehicles and `1,000 km/h` for Pro God Mode).
+- **30+ Tiered Pilot Achievements**: Added multi-category achievements (`Driving`, `Drift`, `Speed`, `World`, `Social`, and `Pro VIP`) with instant toast notifications and claimable Pro reward banking.
+- **Interactive Live Floating Tutorial Bubbles**: Replaced the static full-screen tutorial popup with 5 non-blocking floating HUD bubbles (`Welcome to GEO Ride`, `W` Throttle, `A & D` Steering, `SPACE` Handbrake Drift, and `C / R` Camera & Reset) that track real-time keyboard and touch inputs while driving live on the map.
+
+### Changed
+
+- **Unified Pro Visual Identity & Settings Sync**: Standardized all Pilot Hub Pro cards, badges, and CTAs to the signature neon purple theme without hover layout shifts, removed redundant telemetry cards from the About tab, and synchronized Web Radio and 3D Terrain settings toggles with Roadmap unlock levels.
+- **Input-Safe Keyboard Shortcuts**: Prevented global simulator hotkeys (`L`, `R`, `C`, `P`, `M`, `Space`) from firing while typing inside the location search bar or any text input.
+
 ## [1.2.1] (2026-10-31)
 
 ### Added

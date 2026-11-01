@@ -4,6 +4,7 @@
  */
 
 import { trackEvent } from './analytics.js';
+import { getSnapshot } from './progress.js';
 
 let lastDiscoveredCity = null;
 let lastCheckTime = 0;
@@ -77,6 +78,18 @@ export function checkDiscovery(lng, lat, force = false) {
     // Only proceed if mapbox token is available and we aren't already checking
     if (!window.mapboxgl || !window.mapboxgl.accessToken || isDiscovering) return;
     if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat)) return;
+
+    // Dynamic cruising discovery is unlocked at Level 10 or with Pro.
+    // Teleport, refresh, and initial load (force = true) work for all players.
+    if (!force) {
+        try {
+            const snap = getSnapshot();
+            const canDiscoverDynamically = snap.isPro || snap.level.level >= 10;
+            if (!canDiscoverDynamically) return;
+        } catch {
+            // Safe fallback if progress is uninitialized
+        }
+    }
 
     const gridKey = `${lat.toFixed(2)},${lng.toFixed(2)}`;
 

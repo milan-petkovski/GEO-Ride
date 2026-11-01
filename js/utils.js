@@ -3,6 +3,8 @@
  * @description Helper functions for Mapbox map layer cleanup, progress bar DOM updates, and skidmark GeoJSON rendering.
  */
 
+import { state } from './state.js';
+
 /**
  * Removes cluttering POI and transit symbols from Mapbox style to improve visual clarity.
  * @param {Object} map - Mapbox GL JS map instance.
@@ -45,6 +47,7 @@ export function setProgress(p) {
 
 /**
  * Adds skidmarks GeoJSON source and line layer to Mapbox map.
+ * Supports dynamic tire mark coloration (purple for Pro, black for standard).
  * @param {Object} map - Mapbox GL JS map instance.
  * @returns {void}
  */
@@ -56,17 +59,46 @@ export function addSkidMarksLayer(map) {
             data: { type: 'FeatureCollection', features: [] }
         });
     }
+    const colorExpr = ['coalesce', ['get', 'color'], '#050505'];
     if (!map.getLayer('skid-marks-layer')) {
         map.addLayer({
             id: 'skid-marks-layer',
             type: 'line',
             source: 'skid-marks',
             paint: {
-                'line-color': '#050505',
+                'line-color': colorExpr,
                 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 1.5, 18, 4, 22, 10],
                 'line-blur': ['interpolate', ['linear'], ['zoom'], 14, 0, 18, 1, 22, 3],
                 'line-opacity': ['get', 'opacity']
             }
         });
+    } else if (typeof map.setPaintProperty === 'function') {
+        try {
+            map.setPaintProperty('skid-marks-layer', 'line-color', colorExpr);
+        } catch (_e) {}
     }
+}
+
+/**
+ * Configures Mapbox 3D DEM terrain relief.
+ * @param {Object} map - Mapbox GL JS map instance.
+ * @returns {void}
+ */
+export function setupTerrain(map) {
+    if (!map || typeof map.addSource !== 'function') return;
+    try {
+        if (!map.getSource('mapbox-dem')) {
+            map.addSource('mapbox-dem', {
+                type: 'raster-dem',
+                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                tileSize: 512,
+                maxzoom: 14
+            });
+        }
+        if (state.isPro && state.terrainEnabled && typeof map.setTerrain === 'function') {
+            map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.25 });
+        } else if (typeof map.setTerrain === 'function') {
+            map.setTerrain(null);
+        }
+    } catch (_e) {}
 }

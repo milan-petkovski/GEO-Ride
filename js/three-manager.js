@@ -608,7 +608,8 @@ export function setup3DVehicleLayer(map) {
                     const THREE = getThree();
                     if (THREE) {
                         const pGeom = new THREE.SphereGeometry(0.22, 6, 6);
-                        const pMat = new THREE.MeshBasicMaterial({ color: 0xd8d8d8, transparent: true, opacity: 0.45 });
+                        const pColor = state.isPro ? 0xd980fa : 0xd8d8d8;
+                        const pMat = new THREE.MeshBasicMaterial({ color: pColor, transparent: true, opacity: 0.45 });
                         const p = new THREE.Mesh(pGeom, pMat);
                         const side = Math.random() > 0.5 ? 0.8 : -0.8;
                         p.position.set(side, 0.2, -1.8);
@@ -655,7 +656,16 @@ export function setup3DVehicleLayer(map) {
                 -this.modelTransform.scale * 5.0,
                 this.modelTransform.scale * 5.0
             );
-            const coord = mapboxgl.MercatorCoordinate.fromLngLat([state.lng, state.lat], altitude);
+            let elevation = 0;
+            if (
+                state.isPro &&
+                state.terrainEnabled &&
+                this.map &&
+                typeof this.map.queryTerrainElevation === 'function'
+            ) {
+                elevation = this.map.queryTerrainElevation([state.lng, state.lat]) || 0;
+            }
+            const coord = mapboxgl.MercatorCoordinate.fromLngLat([state.lng, state.lat], elevation + altitude);
             this.translation
                 .makeTranslation(coord.x, coord.y, coord.z)
                 .scale(this.scaleVec)
@@ -706,9 +716,11 @@ export function updateSkidMarks(map) {
                 // Remove jitter for a perfectly smooth tire track curve
                 const jitter = 0;
 
+                const trackColor = state.isPro ? '#bc13fe' : '#050505';
+
                 return {
                     type: 'Feature',
-                    properties: { opacity: isBurnout ? 0.7 : 0.85, life: isBurnout ? 3.0 : 4.5 },
+                    properties: { opacity: isBurnout ? 0.7 : 0.85, life: isBurnout ? 3.0 : 4.5, color: trackColor },
                     geometry: {
                         type: 'LineString',
                         coordinates: [

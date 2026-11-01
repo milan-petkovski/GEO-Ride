@@ -549,12 +549,18 @@ html {
 }
 
 .pricing-cards-grid {
-    max-width: 1020px;
+    max-width: 1220px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
     align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+    .pricing-cards-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .pricing-card {
@@ -570,6 +576,43 @@ html {
 .pricing-card.pro-card-featured {
     border-color: var(--pro-border);
     background: linear-gradient(160deg, rgba(196, 112, 240, 0.12) 0%, rgba(8, 12, 26, 0.96) 70%);
+}
+
+.pricing-card.founder-card-featured {
+    border-color: rgba(0, 242, 255, 0.5);
+    background: linear-gradient(
+        160deg,
+        rgba(0, 242, 255, 0.12) 0%,
+        rgba(196, 112, 240, 0.08) 50%,
+        rgba(8, 12, 26, 0.96) 85%
+    );
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.5),
+        0 0 25px rgba(0, 242, 255, 0.15);
+}
+
+.founder-popular-ribbon {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 16px;
+    border-radius: var(--r-pill);
+    background: linear-gradient(135deg, #00f2ff, #a855f7);
+    color: #040610;
+    font-family: var(--font-hud);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    white-space: nowrap;
+}
+
+.founder-old-price {
+    text-decoration: line-through;
+    opacity: 0.45;
+    font-size: 1.2rem;
+    margin-right: 6px;
+    font-weight: 600;
 }
 
 .pricing-card-top-badge {

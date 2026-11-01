@@ -97,6 +97,12 @@ if (typeof document !== 'undefined') {
 export function updateAudio(state) {
     if (!isInitialized || !ctx || ctx.state !== 'running') return;
 
+    if (state && state.isPhotoMode) {
+        if (engineGain) engineGain.gain.value = 0;
+        if (driftGain) driftGain.gain.value = 0;
+        return;
+    }
+
     const absVel = Math.abs(state.velocity);
     let baseFreq = 50;
     let volMult = 1.0;
@@ -347,5 +353,25 @@ export function setRadioStation(indexOrId) {
 export function setRadioVolume(vol) {
     if (radioAudio) {
         radioAudio.volume = Math.max(0, Math.min(1, vol));
+    }
+}
+
+let radioWasPlayingBeforePhoto = false;
+
+export function pauseAudioForPhoto() {
+    if (engineGain) engineGain.gain.value = 0;
+    if (driftGain) driftGain.gain.value = 0;
+    if (radioAudio && !radioAudio.paused) {
+        radioWasPlayingBeforePhoto = true;
+        radioAudio.pause();
+    } else {
+        radioWasPlayingBeforePhoto = false;
+    }
+}
+
+export function resumeAudioFromPhoto() {
+    if (radioWasPlayingBeforePhoto && radioAudio) {
+        radioAudio.play().catch(() => {});
+        radioWasPlayingBeforePhoto = false;
     }
 }

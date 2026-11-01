@@ -9,6 +9,7 @@ import { VEHICLE_CONFIG, INITIAL_CENTER, INITIAL_ZOOM, AIR_DRAG_FACTOR } from '.
 import { setup3DVehicleLayer } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
+import { trackFrame } from './progress.js';
 
 let lastCollisionTrackTime = 0;
 
@@ -410,9 +411,11 @@ export function updatePhysics(dtFinal, map) {
     if (currentKmh > (state.topSpeedRecord || 0)) {
         state.topSpeedRecord = currentKmh;
     }
-    if (currentKmh > 1) {
-        state.totalDistanceKm = (state.totalDistanceKm || 0) + (currentKmh * (dtFinal / 60)) / 3600;
+    const frameKm = currentKmh > 1 ? (currentKmh * (dtFinal / 60)) / 3600 : 0;
+    if (frameKm > 0) {
+        state.totalDistanceKm = (state.totalDistanceKm || 0) + frameKm;
     }
+    trackFrame(frameKm, currentKmh, state.activeVehicle, state.activeVehicle === 'god');
 }
 
 /**

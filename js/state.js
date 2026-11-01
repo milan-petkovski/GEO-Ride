@@ -118,6 +118,7 @@ export const state = {
     hapticsEnabled: true,
     skidMarksEnabled: true,
     bodyRollEnabled: true,
+    terrainEnabled: false,
     driftAssist: 'assisted', // 'assisted' | 'pro'
     underglowColor: 'cyan', // 'cyan' | 'pink' | 'lime' | 'amber' | 'off'
     tiltSensitivity: 'normal', // 'low' | 'normal' | 'high'
@@ -129,6 +130,12 @@ export const state = {
     cameraShakeEnabled: true,
     showFps: false,
     isSettingsOpen: false,
+    isProfileOpen: false,
+    isPhotoMode: false,
+    photoFilter: 'none', // 'none' | 'cyberpunk' | 'warm' | 'noir' | 'vivid' | 'vintage'
+    photoWatermark: true,
+    photoGrid: false,
+    tutorialSeen: false,
     playerName: 'Pilot',
     totalDistanceKm: 0
 };
@@ -200,6 +207,7 @@ export function saveState() {
             hapticsEnabled: state.hapticsEnabled,
             skidMarksEnabled: state.skidMarksEnabled,
             bodyRollEnabled: state.bodyRollEnabled,
+            terrainEnabled: state.terrainEnabled,
             driftAssist: state.driftAssist,
             underglowColor: state.underglowColor,
             tiltSensitivity: state.tiltSensitivity,
@@ -275,6 +283,7 @@ export function loadState() {
         setStateKey('hapticsEnabled', validateBool(parsed.hapticsEnabled, true));
         setStateKey('skidMarksEnabled', validateBool(parsed.skidMarksEnabled, true));
         setStateKey('bodyRollEnabled', validateBool(parsed.bodyRollEnabled, true));
+        setStateKey('terrainEnabled', validateBool(parsed.terrainEnabled, false));
         setStateKey('driftAssist', validateStr(parsed.driftAssist, ['assisted', 'pro'], 'assisted'));
         setStateKey(
             'underglowColor',
@@ -303,6 +312,9 @@ export function loadState() {
         if (!state.isPro && state.activeVehicle === 'god') {
             state.activeVehicle = 'car';
             state.godMode = false;
+        }
+        if (!state.isPro && state.terrainEnabled) {
+            state.terrainEnabled = false;
         }
     } catch (e) {
         console.warn('Security Alert: State corruption detected or load failure', e);

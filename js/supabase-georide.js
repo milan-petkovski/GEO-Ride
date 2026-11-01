@@ -19,6 +19,28 @@ const HEADERS = {
     'Content-Type': 'application/json'
 };
 
+/** @returns {boolean} True when Supabase credentials are configured for this build. */
+export function isBackendConfigured() {
+    return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('your-project'));
+}
+
+/**
+ * Calls a Supabase Postgres RPC function.
+ * @param {string} fn - Function name in the public schema.
+ * @param {Object} body - JSON arguments.
+ * @returns {Promise<any>}
+ */
+export async function georideRpc(fn, body) {
+    if (!isBackendConfigured()) throw new Error('backend_not_configured');
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+}
+
 /**
  * Fetches all active plans for GEO Ride from Supabase.
  * @returns {Promise<Array|null>}
