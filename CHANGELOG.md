@@ -5,6 +5,19 @@ All notable changes to **GEO Ride** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] (2026-11-01)
+
+### Added
+
+- **Cross-Device Cloud Account Sync (Email + PIN/Password)**: Added two-way cloud synchronization (`georide_cloud_auth` and `georide_cloud_sync`) linking a player's Pilot profile to their email and 4+ character PIN/password, automatically merging career XP, personal records, unlocked vehicles, achievements, daily/weekly challenge progress, streak counters, Pro status, and all 26 simulator settings across PC and mobile devices (`js/progress.js`, `js/profile-ui.js`, `js/leaderboard.js`).
+- **Unique Pilot Callsigns (`Pilot-XXXX` & Database Enforcement)**: Every new player receives a unique deterministic `Pilot-XXXX` callsign upon initialization, backed by a case-insensitive unique database index (`idx_georide_players_unique_name_ci`) and atomic RPC validation (`georide_claim_username`) that prevents duplicate usernames and alerts the player when a callsign is already taken.
+- **Founder Lifetime Pro Plan & Instant Fungies Webhook Activation**: Added the `$49.99` Founder Lifetime one-time Pro tier alongside Monthly (`$4.99/mo`) and Annual (`$2.99/mo` billed `$35.88/yr`) across `index.html`, `play.html`, and `public.georide_plans`, with automated Fungies webhook provisioning (`supabase-fungies-webhook`) and real-time database verification (`check_georide_pro_status`).
+- **Pilot Hub Default Settings View & Inline Cloud Feedback**: Configured Settings to open directly into the Pilot Hub (`data-sx-tab="career"`), added live inline status messages (`#pf-cloud-msg`) inside the Cloud Sync card, and elevated `.toast-container` above all modal layers (`z-index: 65000`).
+
+### Changed
+
+- **Centralized Supabase Architecture & Security Hardening**: Consolidated the database into 5 RLS-protected tables (`georide_accounts`, `georide_subscriptions`, `georide_plans`, `georide_players`, `georide_scores`) with `SECURITY DEFINER` RPC functions, brute-force PIN lockout protection, server-side Pro status verification on startup and checkout redirects (`app.js`), and hardened `Content-Security-Policy` directives in `netlify.toml`.
+
 ## [1.2.2] (2026-11-01)
 
 ### Added

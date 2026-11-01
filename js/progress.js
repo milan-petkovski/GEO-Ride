@@ -4,7 +4,7 @@
  * challenges, streaks and achievements. Pure logic with localStorage persistence, no DOM access.
  */
 
-import { state } from './state.js';
+import { state, saveState, setStateKey } from './state.js';
 
 const STORAGE_KEY = 'geo_ride_progress_v1';
 const MAX_LEVEL = 100;
@@ -644,6 +644,17 @@ export function loadProgress() {
 
     if (!model.country) model.country = guessCountry();
 
+    if (!state.playerName || state.playerName === 'Pilot') {
+        const tag = String(model.playerId || '')
+            .replace(/-/g, '')
+            .slice(0, 4)
+            .toUpperCase();
+        if (tag.length === 4) {
+            setStateKey('playerName', `Pilot-${tag}`);
+            saveState();
+        }
+    }
+
     if (!model.migrated) {
         const s = model.stats;
         s.totalDrift = Math.max(s.totalDrift, Number(state.driftScore) || 0);
@@ -1142,4 +1153,197 @@ export function getSnapshot(now = Date.now()) {
         unlockedCount: achievements.filter((x) => x.status === 'unlocked').length,
         isPro: isProNow()
     };
+}
+
+export function exportCloudPayload() {
+    ensurePeriods();
+    const tutSeen =
+        typeof localStorage !== 'undefined' ? localStorage.getItem('geo_ride_tutorial_seen') === '1' : false;
+    return {
+        v: 1,
+        updatedAt: Date.now(),
+        model,
+        prefs: {
+            playerName: state.playerName || 'Pilot',
+            activeVehicle: state.activeVehicle || 'car',
+            unit: state.unit || 'km',
+            cameraMode: state.cameraMode || 'chase',
+            underglowColor: state.underglowColor || 'cyan',
+            mapStyle: state.mapStyle || 'standard',
+            lightPreset: state.lightPreset || 'realtime',
+            controlsMode: state.controlsMode || 'tilt',
+            masterVolume: typeof state.masterVolume === 'number' ? state.masterVolume : 0.5,
+            collisionsEnabled: Boolean(state.collisionsEnabled),
+            is3D: Boolean(state.is3D),
+            is3DBuildings: Boolean(state.is3DBuildings),
+            hapticsEnabled: Boolean(state.hapticsEnabled),
+            skidMarksEnabled: Boolean(state.skidMarksEnabled),
+            bodyRollEnabled: Boolean(state.bodyRollEnabled),
+            terrainEnabled: Boolean(state.terrainEnabled),
+            driftAssist: state.driftAssist || 'assisted',
+            tiltSensitivity: state.tiltSensitivity || 'normal',
+            cameraFovMode: state.cameraFovMode || 'dynamic',
+            cameraAutoCenter: Boolean(state.cameraAutoCenter),
+            graphicsQuality: state.graphicsQuality || 'ultra',
+            mapLabels: Boolean(state.mapLabels),
+            hudVisibility: state.hudVisibility || 'full',
+            cameraShakeEnabled: Boolean(state.cameraShakeEnabled),
+            showFps: Boolean(state.showFps),
+            radioStationIndex: Number(state.radioStationIndex) || 0,
+            lng: Number(state.lng) || 0,
+            lat: Number(state.lat) || 0,
+            topSpeedRecord: Math.max(Number(state.topSpeedRecord) || 0, Number(model.stats.topSpeed) || 0),
+            driftScore: Math.max(Number(state.driftScore) || 0, Number(model.stats.totalDrift) || 0),
+            totalDistanceKm: Math.max(Number(state.totalDistanceKm) || 0, Number(model.stats.km) || 0),
+            tutorialSeen: Boolean(state.tutorialSeen || tutSeen)
+        }
+    };
+}
+
+export function mergeCloudPayload(remote, remotePlayerId = null) {
+    if (!remote || typeof remote !== 'object') return false;
+    ensurePeriods();
+    const rm = remote.model || remote;
+    if (typeof remotePlayerId === 'string' && remotePlayerId.length >= 32) {
+        model.playerId = remotePlayerId;
+    } else if (typeof rm.playerId === 'string' && rm.playerId.length >= 32) {
+        model.playerId = rm.playerId;
+    }
+
+    model.xp = Math.max(Number(model.xp) || 0, Number(rm.xp) || 0);
+    if (rm.country && COUNTRIES.some(([c]) => c === rm.country)) {
+        model.country = rm.country;
+    }
+
+    if (rm.stats && typeof rm.stats === 'object') {
+        const s = model.stats;
+        const rs = rm.stats;
+        Object.keys(s).forEach((k) => {
+            if (k === 'spots') {
+                s.spots = Array.from(new Set([...(s.spots || []), ...(Array.isArray(rs.spots) ? rs.spots : [])])).slice(
+                    0,
+                    MAX_SPOTS_STORED
+                );
+            } else if (k === 'vehicleKm') {
+                ['car', 'truck', 'bus'].forEach((v) => {
+                    s.vehicleKm[v] = Math.max(Number(s.vehicleKm[v]) || 0, Number(rs.vehicleKm?.[v]) || 0);
+                });
+            } else if (k === 'bestRank') {
+                const a = Number(s.bestRank) || 0;
+                const b = Number(rs.bestRank) || 0;
+                s.bestRank = a > 0 && b > 0 ? Math.min(a, b) : a || b;
+            } else if (typeof s[k] === 'number') {
+                s[k] = Math.max(Number(s[k]) || 0, Number(rs[k]) || 0);
+            }
+        });
+    }
+
+    model.unlocked = { ...(rm.unlocked || {}), ...model.unlocked };
+    model.notified = { ...(rm.notified || {}), ...model.notified };
+
+    if (rm.streak && typeof rm.streak === 'object') {
+        if ((rm.streak.last || '') > (model.streak.last || '')) {
+            model.streak = { ...model.streak, ...rm.streak };
+        } else if (rm.streak.last === model.streak.last) {
+            model.streak.count = Math.max(model.streak.count || 0, rm.streak.count || 0);
+        }
+    }
+
+    ['daily', 'weekly'].forEach((scope) => {
+        const loc = model[scope];
+        const rem = rm[scope];
+        if (loc && rem && loc.key === rem.key && rem.counters) {
+            Object.keys(loc.counters).forEach((ck) => {
+                if (ck === 'spots') {
+                    loc.counters.spots = Array.from(
+                        new Set([
+                            ...(loc.counters.spots || []),
+                            ...(Array.isArray(rem.counters.spots) ? rem.counters.spots : [])
+                        ])
+                    );
+                } else if (typeof loc.counters[ck] === 'number') {
+                    loc.counters[ck] = Math.max(Number(loc.counters[ck]) || 0, Number(rem.counters[ck]) || 0);
+                }
+            });
+            if (Array.isArray(rem.items)) {
+                loc.items.forEach((it, idx) => {
+                    const rIt = rem.items[idx];
+                    if (rIt && rIt.metric === it.metric) {
+                        if (rIt.status === 'claimed') it.status = 'claimed';
+                        else if (rIt.status === 'pro_ready' && it.status !== 'claimed') it.status = 'pro_ready';
+                    }
+                });
+            }
+        }
+    });
+
+    const prefs = remote.prefs;
+    if (prefs && typeof prefs === 'object') {
+        if (prefs.playerName && prefs.playerName !== 'Pilot') {
+            state.playerName = String(prefs.playerName).trim().slice(0, 16) || 'Pilot';
+        }
+        const strKeys = {
+            activeVehicle: ['car', 'truck', 'bus', 'god'],
+            cameraMode: ['chase', 'hood', 'wide'],
+            unit: ['km', 'mi'],
+            underglowColor: ['cyan', 'pink', 'lime', 'amber', 'off'],
+            mapStyle: ['streets-v12', 'satellite-v9', 'satellite-streets-v12', 'standard'],
+            lightPreset: ['realtime', 'day', 'night', 'dusk', 'dawn'],
+            controlsMode: ['tilt', 'off'],
+            driftAssist: ['assisted', 'pro'],
+            tiltSensitivity: ['low', 'normal', 'high'],
+            cameraFovMode: ['dynamic', 'close', 'wide'],
+            graphicsQuality: ['ultra', 'balanced', 'eco'],
+            hudVisibility: ['full', 'hidden']
+        };
+        Object.entries(strKeys).forEach(([k, allowed]) => {
+            if (typeof prefs[k] === 'string' && allowed.includes(prefs[k])) state[k] = prefs[k];
+        });
+        [
+            'collisionsEnabled',
+            'is3D',
+            'is3DBuildings',
+            'hapticsEnabled',
+            'skidMarksEnabled',
+            'bodyRollEnabled',
+            'terrainEnabled',
+            'cameraAutoCenter',
+            'mapLabels',
+            'cameraShakeEnabled',
+            'showFps'
+        ].forEach((bk) => {
+            if (typeof prefs[bk] === 'boolean') state[bk] = prefs[bk];
+        });
+        if (typeof prefs.masterVolume === 'number' && !isNaN(prefs.masterVolume)) {
+            state.masterVolume = Math.max(0, Math.min(1, prefs.masterVolume));
+        }
+        if (typeof prefs.radioStationIndex === 'number') {
+            state.radioStationIndex = prefs.radioStationIndex;
+        }
+        state.topSpeedRecord = Math.max(
+            Number(state.topSpeedRecord) || 0,
+            Number(prefs.topSpeedRecord) || 0,
+            Number(model.stats.topSpeed) || 0
+        );
+        state.driftScore = Math.max(
+            Number(state.driftScore) || 0,
+            Number(prefs.driftScore) || 0,
+            Number(model.stats.totalDrift) || 0
+        );
+        state.totalDistanceKm = Math.max(
+            Number(state.totalDistanceKm) || 0,
+            Number(prefs.totalDistanceKm) || 0,
+            Number(model.stats.km) || 0
+        );
+        if (prefs.tutorialSeen) {
+            state.tutorialSeen = true;
+            if (typeof localStorage !== 'undefined') localStorage.setItem('geo_ride_tutorial_seen', '1');
+        }
+        if (typeof localStorage !== 'undefined') saveState();
+    }
+
+    dirty = true;
+    evaluate();
+    saveProgress();
+    return exportCloudPayload();
 }

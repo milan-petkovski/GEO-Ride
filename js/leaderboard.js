@@ -4,9 +4,19 @@
  * and enriched with a deterministic smart-seed pilot pool so rankings are always bustling and competitive.
  */
 
-import { state } from './state.js';
+import { state, setProStatus, setStateKey, saveState } from './state.js';
 import { georideRpc, isBackendConfigured } from './supabase-georide.js';
-import { getScorePayload, getIdentity, noteLeaderboardRank, isoWeekKey, utcDayKey } from './progress.js';
+import {
+    getScorePayload,
+    getIdentity,
+    noteLeaderboardRank,
+    isoWeekKey,
+    utcDayKey,
+    exportCloudPayload,
+    mergeCloudPayload
+} from './progress.js';
+
+const CLOUD_AUTH_KEY = 'geo_ride_cloud_auth';
 
 export const BOARDS = [
     { id: 'daily', label: 'Today', unit: 'PTS', hint: 'Drift points banked today' },
@@ -242,13 +252,20 @@ export async function submitProgress({ force = false } = {}) {
             p_player: identity.playerId,
             p_name: state.playerName || 'Pilot',
             p_country: identity.country || null,
-            p_email: state.isPro ? email : null,
+            p_email: email || getCloudSession()?.email || null,
             p_level: identity.level,
             p_xp: identity.xp,
             p_scores: scores
         });
         lastSubmitAt = Date.now();
         if (result && result.ok) {
+            if (result.player_name && result.player_name !== state.playerName) {
+                setStateKey('playerName', result.player_name);
+                saveState();
+            }
+            if (result.is_pro && !state.isPro) {
+                setProStatus(true);
+            }
             lastSubmitSignature = signature;
             cache.clear();
             return true;
@@ -308,4 +325,129 @@ export async function fetchLeaderboard({ board, scope, limit = FREE_ROWS }) {
 
     cache.set(key, { at: Date.now(), data: blended });
     return blended;
+}
+
+export async function claimPilotUsername(desiredName) {
+    const clean = (desiredName || '')
+        .replace(/[^\p{L}\p{N} _.-]/gu, '')
+        .trim()
+        .slice(0, 16);
+    if (clean.length < 2 || clean.toLowerCase() === 'pilot') {
+        return { ok: false, error: 'invalid_name' };
+    }
+    if (SEED_PILOTS.some((p) => p.name.toLowerCase() === clean.toLowerCase())) {
+        return { ok: false, error: 'username_taken' };
+    }
+    if (!isBackendConfigured()) {
+        return { ok: true, name: clean };
+    }
+    try {
+        const res = await georideRpc('georide_claim_username', {
+            p_player_id: getIdentity().playerId,
+            p_desired_name: clean
+        });
+        return res || { ok: false, error: 'network_error' };
+    } catch {
+        return { ok: false, error: 'network_error' };
+    }
+}
+
+export function getCloudSession() {
+    try {
+        if (typeof localStorage === 'undefined') return null;
+        const raw = localStorage.getItem(CLOUD_AUTH_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed?.email && parsed?.token ? parsed : null;
+    } catch {
+        return null;
+    }
+}
+
+export function clearCloudSession() {
+    try {
+        if (typeof localStorage !== 'undefined') localStorage.removeItem(CLOUD_AUTH_KEY);
+    } catch {}
+}
+
+export async function cloudAuth(email, pin) {
+    if (!isBackendConfigured()) return { ok: false, error: 'backend_not_configured' };
+    try {
+        const res = await georideRpc('georide_cloud_auth', {
+            p_email: (email || '').trim().toLowerCase(),
+            p_pin: (pin || '').trim(),
+            p_player_id: getIdentity().playerId,
+            p_progress: exportCloudPayload()
+        });
+        if (!res?.ok) return res || { ok: false, error: 'auth_failed' };
+
+        const session = {
+            email: res.email,
+            token: res.sync_token,
+            playerId: res.player_id,
+            syncedAt: Date.now()
+        };
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify(session));
+            if (res.is_pro) localStorage.setItem('geo_ride_pro_email', res.email);
+        }
+        if (res.is_pro) setProStatus(true);
+        if (res.progress) mergeCloudPayload(res.progress, res.player_id);
+        if (res.player_name && res.player_name !== state.playerName) {
+            setStateKey('playerName', res.player_name);
+            saveState();
+        }
+        if (res.mode === 'loaded') await cloudSync({ pullFirst: false });
+        return res;
+    } catch (err) {
+        return { ok: false, error: err.message || 'network_error' };
+    }
+}
+
+export async function cloudSync({ pullFirst = false } = {}) {
+    const session = getCloudSession();
+    if (!session || !isBackendConfigured()) return null;
+    try {
+        if (pullFirst) {
+            const pulled = await georideRpc('georide_cloud_sync', {
+                p_email: session.email,
+                p_token: session.token,
+                p_progress: null
+            });
+            if (pulled?.ok && pulled.progress) {
+                mergeCloudPayload(pulled.progress, pulled.player_id);
+                if (pulled.player_name && pulled.player_name !== state.playerName) {
+                    setStateKey('playerName', pulled.player_name);
+                    saveState();
+                }
+                if (pulled.is_pro) {
+                    setProStatus(true);
+                    if (typeof localStorage !== 'undefined') localStorage.setItem('geo_ride_pro_email', session.email);
+                }
+            } else if (pulled?.error === 'unauthorized') {
+                clearCloudSession();
+                return pulled;
+            }
+        }
+        const pushed = await georideRpc('georide_cloud_sync', {
+            p_email: session.email,
+            p_token: session.token,
+            p_progress: exportCloudPayload()
+        });
+        if (pushed?.ok) {
+            session.syncedAt = Date.now();
+            if (typeof localStorage !== 'undefined') localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify(session));
+            if (pushed.player_name && pushed.player_name !== state.playerName) {
+                setStateKey('playerName', pushed.player_name);
+                saveState();
+            }
+            if (pushed.is_pro) {
+                setProStatus(true);
+                if (typeof localStorage !== 'undefined') localStorage.setItem('geo_ride_pro_email', session.email);
+            }
+        }
+        return pushed;
+    } catch {
+        return null;
+    }
 }

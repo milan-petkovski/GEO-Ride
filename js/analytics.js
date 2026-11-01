@@ -117,7 +117,7 @@ export const trackEvent = (eventName, params = {}) => {
     if (typeof window.gtag === 'function') {
         window.gtag('event', eventName, {
             ...eventParams,
-            send_to: 'G-C33HV1QV3S'
+            send_to: 'G-RK7YHSC0NN'
         });
     } else if (window.dataLayer) {
         window.dataLayer.push({

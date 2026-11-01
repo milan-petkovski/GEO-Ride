@@ -26,7 +26,6 @@ import {
     updateDriftHUD,
     checkSpeedTrap
 } from './js/ui.js';
-import { recordPurchase } from './js/supabase-georide.js';
 import { initControls, pollGamepad } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
 import { updateOtherPlayers } from './js/multiplayer.js';
@@ -60,40 +59,63 @@ trackEvent('session_start', {
 loadState();
 
 // Automatic Pro activation from Fungies redirect / URL parameters
-// Requires BOTH customerEmail AND orderId to prevent manual URL manipulation
+// Strictly verified against Supabase before granting Pro privileges
 try {
     const urlParams = new URLSearchParams(window.location.search);
     const proParam = urlParams.get('pro');
     const orderId = urlParams.get('order_id') || urlParams.get('checkout_id');
-    const customerEmail = urlParams.get('email') || urlParams.get('customer_email');
+    const customerEmail = (urlParams.get('email') || urlParams.get('customer_email') || '').trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Must have both email AND (pro=success/active OR orderId) to prevent ?pro=success spoofing
-    if (customerEmail && (proParam === 'success' || proParam === 'active' || orderId)) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (emailRegex.test(customerEmail)) {
-            // Optimistically activate Pro immediately for good UX, then verify in background
-            setProStatus(true);
-            updateToggleStates();
-            showToast('PRO ACTIVATED!', 'Thank you for upgrading! God Mode & VIP rooms are unlocked.', { isPro: true });
-            trackEvent('pro_activated_redirect', { order_id: orderId || 'unknown' });
-            localStorage.setItem('geo_ride_pro_email', customerEmail);
-            recordPurchase(customerEmail, 'pro_monthly', orderId);
-
-            // Background verification — revoke if email not found in Supabase
-            import('./js/supabase-georide.js')
-                .then(({ checkProStatusByEmail }) => {
-                    checkProStatusByEmail(customerEmail)
-                        .then((res) => {
-                            if (!res || !res.is_pro) {
-                                setProStatus(false);
-                                updateToggleStates();
-                                localStorage.removeItem('geo_ride_pro_email');
-                            }
-                        })
-                        .catch(() => {});
-                })
-                .catch(() => {});
-        }
+    if (
+        customerEmail &&
+        emailRegex.test(customerEmail) &&
+        (proParam === 'success' || proParam === 'active' || orderId)
+    ) {
+        import('./js/supabase-georide.js')
+            .then(({ checkProStatusByEmail, isBackendConfigured }) => {
+                if (!isBackendConfigured()) return;
+                checkProStatusByEmail(customerEmail)
+                    .then((res) => {
+                        if (res && res.is_pro) {
+                            setProStatus(true);
+                            localStorage.setItem('geo_ride_pro_email', customerEmail);
+                            updateToggleStates();
+                            showToast('PRO ACTIVATED!', 'Thank you for upgrading! God Mode & VIP rooms are unlocked.', {
+                                isPro: true
+                            });
+                            trackEvent('pro_activated_redirect', { order_id: orderId || 'verified' });
+                        } else {
+                            setProStatus(false);
+                            localStorage.removeItem('geo_ride_pro_email');
+                            updateToggleStates();
+                        }
+                    })
+                    .catch(() => {});
+            })
+            .catch(() => {});
+    } else if (state.isPro) {
+        // Re-verify existing localStorage Pro flag against Supabase so DevTools tampering is revoked
+        const savedEmail = (localStorage.getItem('geo_ride_pro_email') || '').trim().toLowerCase();
+        import('./js/supabase-georide.js')
+            .then(({ checkProStatusByEmail, isBackendConfigured }) => {
+                if (!isBackendConfigured()) return;
+                if (!savedEmail || !emailRegex.test(savedEmail)) {
+                    setProStatus(false);
+                    updateToggleStates();
+                    return;
+                }
+                checkProStatusByEmail(savedEmail)
+                    .then((res) => {
+                        if (res && res.status !== 'error' && !res.is_pro) {
+                            setProStatus(false);
+                            localStorage.removeItem('geo_ride_pro_email');
+                            updateToggleStates();
+                        }
+                    })
+                    .catch(() => {});
+            })
+            .catch(() => {});
     }
 
     // Clean query params from address bar regardless

@@ -8,6 +8,7 @@
  */
 
 import { trackEvent, trackWebVitals, trackAIReferral } from './analytics.js';
+import { fetchGeoRidePlans } from './supabase-georide.js';
 
 // Ensure deferred stylesheet is active in its own animation frame
 requestAnimationFrame(() => {
@@ -842,8 +843,11 @@ function initPricing() {
     const periodEl = document.getElementById('pro-period');
     const checkoutBtn = document.getElementById('pro-checkout-btn');
 
-    const URL_ANNUAL = 'https://pay.milanwebportal.com/checkout-element?id=057ae4b6-abef-4a0d-b770-c47a744d6328';
-    const URL_MONTHLY = 'https://pay.milanwebportal.com/checkout-element?id=80d22d55-432b-4780-81c9-4e6466d09c44';
+    let urlAnnual = 'https://pay.milanwebportal.com/checkout-element?id=057ae4b6-abef-4a0d-b770-c47a744d6328';
+    let urlMonthly = 'https://pay.milanwebportal.com/checkout-element?id=80d22d55-432b-4780-81c9-4e6466d09c44';
+    let priceAnnual = 2.99;
+    let priceMonthly = 4.99;
+    let priceLifetime = 49.99;
 
     let isAnnual = true;
 
@@ -853,21 +857,27 @@ function initPricing() {
             switchBtn.classList.toggle('annual', isAnnual);
             switchBtn.setAttribute('aria-checked', String(isAnnual));
         }
-        if (lblMonthly) lblMonthly.classList.toggle('active', !isAnnual);
-        if (lblAnnual) lblAnnual.classList.toggle('active', isAnnual);
-        if (priceEl) priceEl.textContent = isAnnual ? '2.99' : '4.99';
+        if (lblMonthly) {
+            lblMonthly.classList.toggle('active', !isAnnual);
+            lblMonthly.textContent = `Monthly ($${priceMonthly.toFixed(2)})`;
+        }
+        if (lblAnnual) {
+            lblAnnual.classList.toggle('active', isAnnual);
+            lblAnnual.textContent = `Annual ($${priceAnnual.toFixed(2)}/mo)`;
+        }
+        if (priceEl) priceEl.textContent = isAnnual ? priceAnnual.toFixed(2) : priceMonthly.toFixed(2);
         if (periodEl) {
             periodEl.textContent = isAnnual
-                ? 'per month, billed annually ($35.88/yr)'
-                : 'per month, billed monthly ($4.99/mo)';
+                ? `per month, billed annually ($${(priceAnnual * 12).toFixed(2)}/yr)`
+                : `per month, billed monthly ($${priceMonthly.toFixed(2)}/mo)`;
         }
         if (checkoutBtn) {
-            checkoutBtn.setAttribute('href', isAnnual ? URL_ANNUAL : URL_MONTHLY);
+            checkoutBtn.setAttribute('href', isAnnual ? urlAnnual : urlMonthly);
         }
         if (userInitiated) {
             trackLandingEvent('pricing_toggle_click', {
                 cycle: isAnnual ? 'annual' : 'monthly',
-                price_per_month: isAnnual ? 2.99 : 4.99
+                price_per_month: isAnnual ? priceAnnual : priceMonthly
             });
         }
     }
@@ -879,8 +889,8 @@ function initPricing() {
     checkoutBtn?.addEventListener('click', () => {
         trackLandingEvent('pro_checkout_start', {
             cycle: isAnnual ? 'annual' : 'monthly',
-            price_billed: isAnnual ? 35.88 : 4.99,
-            checkout_url: isAnnual ? URL_ANNUAL : URL_MONTHLY
+            price_billed: isAnnual ? Number((priceAnnual * 12).toFixed(2)) : priceMonthly,
+            checkout_url: isAnnual ? urlAnnual : urlMonthly
         });
     });
 
@@ -888,10 +898,41 @@ function initPricing() {
     founderCheckoutBtn?.addEventListener('click', () => {
         trackLandingEvent('pro_checkout_start', {
             cycle: 'lifetime',
-            price_billed: 49.99,
+            price_billed: priceLifetime,
             checkout_url: founderCheckoutBtn.getAttribute('href') || ''
         });
     });
+
+    fetchGeoRidePlans()
+        .then((plans) => {
+            if (!Array.isArray(plans) || !plans.length) return;
+            const mPlan = plans.find((p) => (p.id || p.plan_id) === 'pro_monthly');
+            const yPlan = plans.find((p) => (p.id || p.plan_id) === 'pro_yearly');
+            const lPlan = plans.find((p) => (p.id || p.plan_id) === 'pro_lifetime');
+            if (mPlan) {
+                if (mPlan.checkout_url) urlMonthly = mPlan.checkout_url;
+                const mp = Number(mPlan.price ?? mPlan.price_usd);
+                if (Number.isFinite(mp) && mp > 0) priceMonthly = mp;
+            }
+            if (yPlan) {
+                if (yPlan.checkout_url) urlAnnual = yPlan.checkout_url;
+                const yp = Number(yPlan.price ?? yPlan.price_usd);
+                if (Number.isFinite(yp) && yp > 0) priceAnnual = yp;
+            }
+            if (lPlan) {
+                if (lPlan.checkout_url && founderCheckoutBtn) {
+                    founderCheckoutBtn.setAttribute('href', lPlan.checkout_url);
+                }
+                const lp = Number(lPlan.price ?? lPlan.price_usd);
+                if (Number.isFinite(lp) && lp > 0) {
+                    priceLifetime = lp;
+                    const founderPriceEl = founderCheckoutBtn?.closest('.pricing-card')?.querySelector('.price-amount');
+                    if (founderPriceEl) founderPriceEl.textContent = lp.toFixed(2);
+                }
+            }
+            applyBilling(isAnnual, false);
+        })
+        .catch(() => {});
 
     // Fire pricing_view GA4 event once when #pricing enters viewport
     const pricingSection = document.getElementById('pricing');
@@ -1081,7 +1122,7 @@ function initAdvancedLandingAnalytics() {
         connection_type: navigator.connection?.effectiveType || 'unknown',
         reduced_motion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
         referrer_type: referrerType,
-        landing_version: '1.2.2'
+        landing_version: '1.2.3'
     });
 
     // 4. Scroll Depth Milestones (25%, 50%, 75%, 90%, 100%)

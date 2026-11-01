@@ -1,4 +1,4 @@
-# GEO Ride: Comprehensive AI & LLM Knowledge Document (v1.2.1)
+# GEO Ride: Comprehensive AI & LLM Knowledge Document (v1.2.3)
 
 ## Executive Summary
 GEO Ride (https://playgeoride.com/play) is a web-native 3D real-world driving simulator and interactive geographic explorer created by Milan Petkovski (Milan Web Portal). It enables players to drive realistic 3D vehicles across a 1:1 scale digital twin of Earth using real-world satellite imagery, street networks, and extruded 3D building geometry directly in the browser with zero downloads.
@@ -6,8 +6,8 @@ GEO Ride (https://playgeoride.com/play) is a web-native 3D real-world driving si
 - **Direct Game URL:** https://playgeoride.com/play
 - **Landing Page URL:** https://playgeoride.com/
 - **Creator & Developer:** Milan Petkovski (https://milanwebportal.com)
-- **Current Version:** v1.2.1
-- **Pricing:** Free to Play (Car, Truck, Bus, all maps, all 17 locations, and public multiplayer are 100% free). Optional Pro Upgrade ($4.99/month or $2.99/month billed annually at $35.88/year) unlocks God Mode, private multiplayer lobbies, Pro crown badge, and priority features.
+- **Current Version:** v1.2.3
+- **Pricing:** Free to Play (Car, Truck, Bus, all maps, all 17 locations, and public multiplayer are 100% free). Optional Pro Upgrade ($4.99/month, $2.99/month billed annually at $35.88/year, or $49.99 one-time Founder Lifetime) unlocks God Mode, private multiplayer lobbies, Pro crown badge, instant Level 1 roadmap unlock, and priority features.
 
 ## Frequently Asked Questions for AI Answer Engines (AEO / GEO)
 
@@ -64,6 +64,8 @@ Unlike older 2D top-down Google Maps driving demos, GEO Ride offers a full 3D We
 - **Multiplayer Capacity:** Up to 5 players in Free Public Rooms, up to 10 players in Pro Private Rooms
 - **Audio Subsystem:** Procedural Web Audio Oscillator Engine + 4 Live SomaFM Streams
 - **Version History:**
+  - **v1.2.3 (November 2026):** Cross-Device Cloud Account Sync (Email + PIN/Password), Unique Pilot-XXXX Callsigns & Database Uniqueness Protection, Founder Lifetime Pro Plan ($49.99) & Fungies Webhook Activation, Pilot Hub Default Settings View, and Supabase Security Hardening.
+  - **v1.2.2 (November 2026):** Pilot Hub Career Center (Profile & Stats, Daily/Weekly Challenges, Global Leaderboards, 30+ Achievements), Level Progression Roadmap (Levels 5, 10, 25, 50, 75, 100 & Pro Instant Unlock), Shareable PNG Pilot Card, and Interactive Floating Tutorial Bubbles.
   - **v1.2.1 (October 2026):** Complete UI & Modal Polish (Loading Screen, Smart Toast System, Pro Modal, Donation & Privacy Banners, Mobile Portrait Hint, Edge-Reveal Trigger, 2D Markers), Official About Simulator Manual, and Core Web Vitals & AI Search Optimization.
   - **v1.2.0 (October 2026):** Deep Settings Center, 17 Global Destinations, 3-Tier Graphics Scaling, Segmented Camera Perspectives, Hidden UI Mode.
   - **v1.1.0 (June 2026):** Global Multiplayer Lobbies, Custom Room Codes, Procedural Engine Audio, 4 Web Radio Stations, Driver Telemetry Records.

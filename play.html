@@ -4,9 +4,9 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-        <!-- Google Tag & Consent Mode -->
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-RK7YHSC0NN"></script>
         <script src="./js/gtag-init.js" defer></script>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-C33HV1QV3S"></script>
 
         <title>GEO Ride: Play 3D Real World Driving Simulator Online Free</title>
         <meta name="title" content="GEO Ride: Play 3D Real World Driving Simulator Online Free" />
@@ -152,7 +152,7 @@
                         "mainEntityOfPage": "https://playgeoride.com/play",
                         "datePublished": "2026-05-08",
                         "dateModified": "2026-10-31",
-                        "softwareVersion": "1.2.2",
+                        "softwareVersion": "1.2.3",
                         "image": [
                             "https://playgeoride.com/images/og.jpg",
                             "https://playgeoride.com/images/wow.jpg",
@@ -1359,7 +1359,7 @@
                                 type="button"
                                 title="View Changelog"
                             >
-                                v1.2.2 &bull; CHANGELOG
+                                v1.2.3 &bull; CHANGELOG
                             </button>
                         </div>
                     </div>
@@ -1414,7 +1414,13 @@
                 <nav class="sx-tabs" role="tablist" aria-label="Settings sections">
                     <div class="sx-tab-group">
                         <span class="sx-tab-category">PILOT HUB</span>
-                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="career">
+                        <button
+                            class="sx-tab active"
+                            type="button"
+                            role="tab"
+                            aria-selected="true"
+                            data-sx-tab="career"
+                        >
                             <svg
                                 viewBox="0 0 24 24"
                                 fill="none"
@@ -1433,13 +1439,7 @@
 
                     <div class="sx-tab-group">
                         <span class="sx-tab-category">GAMEPLAY</span>
-                        <button
-                            class="sx-tab active"
-                            type="button"
-                            role="tab"
-                            aria-selected="true"
-                            data-sx-tab="general"
-                        >
+                        <button class="sx-tab" type="button" role="tab" aria-selected="false" data-sx-tab="general">
                             <svg
                                 viewBox="0 0 24 24"
                                 fill="none"
@@ -1611,7 +1611,7 @@
                 </nav>
 
                 <div class="sx-body">
-                    <div class="sx-searchbar">
+                    <div class="sx-searchbar" hidden>
                         <input
                             type="search"
                             id="settings-search"
@@ -1629,15 +1629,14 @@
 
                     <!-- PILOT HUB CAREER PANE -->
                     <section
-                        class="sx-pane sx-pane-hub sx-span-2"
+                        class="sx-pane sx-pane-hub sx-span-2 active"
                         role="tabpanel"
                         data-sx-pane="career"
-                        hidden
                         id="sx-pane-career"
                     ></section>
 
                     <!-- GENERAL -->
-                    <section class="sx-pane active" role="tabpanel" data-sx-pane="general">
+                    <section class="sx-pane" role="tabpanel" data-sx-pane="general" hidden>
                         <div class="sx-card sx-span-2">
                             <label class="sx-label" for="mobile-location-search">SEARCH LOCATION</label>
                             <div class="sx-search-row">
@@ -3223,6 +3222,15 @@
                             <span class="sx-label">RELEASE CHANGELOG &amp; VERSION HISTORY</span>
                             <div class="sx-about-changelog">
                                 <div class="sx-about-cl-row">
+                                    <span class="sx-about-cl-ver">v1.2.3 (November 2026)</span>
+                                    <span class="sx-about-cl-txt"
+                                        >Cross-Device Cloud Account Sync (Email + PIN/Password), Unique Pilot-XXXX
+                                        Callsigns &amp; Database Uniqueness Protection, Founder Lifetime Pro Plan
+                                        ($49.99) &amp; Fungies Webhook Activation, Pilot Hub Default Settings View, and
+                                        Supabase Security Hardening.</span
+                                    >
+                                </div>
+                                <div class="sx-about-cl-row">
                                     <span class="sx-about-cl-ver">v1.2.2 (November 2026)</span>
                                     <span class="sx-about-cl-txt"
                                         >Pilot Hub (Profile &amp; Stats, Daily/Weekly Challenges, Global Leaderboards,
@@ -3274,10 +3282,56 @@
                                 <article class="changelog-entry">
                                     <div class="changelog-entry-head">
                                         <div class="changelog-tags">
-                                            <span class="changelog-version">v1.2.2</span>
+                                            <span class="changelog-version">v1.2.3</span>
                                             <span class="changelog-tag-latest">LATEST</span>
                                         </div>
                                         <time class="changelog-date">Current Release</time>
+                                    </div>
+                                    <h3 class="changelog-heading">
+                                        Cross-Device Cloud Account Sync, Unique Pilot Callsigns, Founder Lifetime Pro
+                                        Plan &amp; Database Security Hardening
+                                    </h3>
+                                    <ul class="changelog-items">
+                                        <li>
+                                            <strong>Cross-Device Cloud Account Sync:</strong> Two-way cloud
+                                            synchronization linking your Pilot profile to your email and PIN/password,
+                                            automatically merging XP, personal records, unlocked vehicles, achievements,
+                                            daily/weekly challenges, Pro VIP status, and all 26 simulator settings
+                                            across PC and mobile.
+                                        </li>
+                                        <li>
+                                            <strong>Unique Pilot Callsigns (<code>Pilot-XXXX</code>):</strong> Every new
+                                            player receives a unique callsign backed by case-insensitive database
+                                            uniqueness protection that prevents duplicate names and alerts you if a
+                                            desired callsign is already taken.
+                                        </li>
+                                        <li>
+                                            <strong>Founder Lifetime Pro Plan &amp; Instant Webhook Activation:</strong>
+                                            Added the $49.99 Founder Lifetime one-time Pro tier alongside Monthly
+                                            ($4.99/mo) and Annual ($2.99/mo), with instant Fungies webhook provisioning
+                                            and real-time database verification.
+                                        </li>
+                                        <li>
+                                            <strong>Pilot Hub Default View &amp; Cloud Status Feedback:</strong>
+                                            Settings now opens directly into the Pilot Hub with inline live status
+                                            messages inside the Cloud Sync card and elevated toast notifications above
+                                            all modals.
+                                        </li>
+                                        <li>
+                                            <strong>Centralized Supabase Architecture &amp; Security Audit:</strong>
+                                            Unified 5 RLS-protected Supabase tables with brute-force PIN lockout
+                                            protection, strict server-side Pro verification, and hardened CSP security
+                                            headers.
+                                        </li>
+                                    </ul>
+                                </article>
+
+                                <article class="changelog-entry">
+                                    <div class="changelog-entry-head">
+                                        <div class="changelog-tags">
+                                            <span class="changelog-version">v1.2.2</span>
+                                        </div>
+                                        <time class="changelog-date">November 2026</time>
                                     </div>
                                     <h3 class="changelog-heading">
                                         Pilot Hub, Achievements, Daily &amp; Weekly Challenges, Global Leaderboards,
@@ -3674,7 +3728,7 @@
 
                 <div class="pro-plans-grid">
                     <a
-                        href="https://milanwebportal.app.fungies.io/subscribe/61d216ef-2508-4acd-9c8e-dc1fd437bf1c"
+                        href="https://pay.milanwebportal.com/checkout-element?id=80d22d55-432b-4780-81c9-4e6466d09c44"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="pro-plan-card"
@@ -3687,7 +3741,7 @@
                     </a>
 
                     <a
-                        href="https://milanwebportal.app.fungies.io/subscribe/578272f8-f871-45ba-8575-2ffbe8b4d4fb"
+                        href="https://pay.milanwebportal.com/checkout-element?id=057ae4b6-abef-4a0d-b770-c47a744d6328"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="pro-plan-card featured"
@@ -3701,7 +3755,7 @@
                     </a>
 
                     <a
-                        href="https://milanwebportal.app.fungies.io/subscribe/578272f8-f871-45ba-8575-2ffbe8b4d4fb?plan=founder-lifetime"
+                        href="https://pay.milanwebportal.com/checkout-element?id=fb84f0ff-c6c5-4919-97fc-b93d209c7224"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="pro-plan-card founder"

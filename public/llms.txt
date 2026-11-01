@@ -9,7 +9,7 @@ Created by Milan Petkovski (Milan Web Portal, https://milanwebportal.com), GEO R
 - [Play 3D Simulator Directly](https://playgeoride.com/play): Instant browser access to the 3D driving simulator (`play.html`).
 - [Official Website & Overview](https://playgeoride.com/): Product overview, features, FAQ, and Pro membership details.
 - [Privacy Policy](https://playgeoride.com/privacy): GDPR-compliant data privacy, local storage, and cookie consent policy.
-- [Terms of Service](https://playgeoride.com/terms): License, Free Tier vs Pro subscription terms ($4.99/mo or $2.99/mo annual), and acceptable use.
+- [Terms of Service](https://playgeoride.com/terms): License, Free Tier vs Pro subscription terms ($4.99/mo, $2.99/mo annual, or $49.99 Founder Lifetime), and acceptable use.
 - [Refund & Cancellation Policy](https://playgeoride.com/refund): One-click subscription cancellation and digital billing policy.
 - [Comprehensive AI Context (Full Docs)](https://playgeoride.com/llms-full.txt): Complete specification, controls, physics, and 17 famous destinations for AI agents.
 - [Creator Portfolio](https://milanwebportal.com): Milan Petkovski's software engineering agency and portfolio.

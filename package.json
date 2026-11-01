@@ -1,6 +1,6 @@
 {
     "name": "geo-ride",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "3D Driving Simulator using Mapbox",
     "type": "module",
     "scripts": {

@@ -8,11 +8,13 @@ import {
     currentStreak,
     ensurePeriods,
     evaluate,
+    exportCloudPayload,
     getModel,
     getScorePayload,
     getSnapshot,
     isoWeekKey,
     levelFromXp,
+    mergeCloudPayload,
     msUntilNextDay,
     msUntilNextWeek,
     onProgressEvent,
@@ -199,4 +201,45 @@ test('spots and photos are tracked, tick counts only active driving time', () =>
     assert.equal(s.playSeconds, before + 1);
     tick(false);
     assert.equal(s.playSeconds, before + 1);
+});
+
+test('cloud payload export and smart merge preserves highest stats across devices', () => {
+    freshPlayer();
+    const m = getModel();
+    m.xp = 1200;
+    m.stats.km = 45;
+    m.stats.bestDrift = 1800;
+    m.stats.spots = ['Tokyo'];
+    m.unlocked = { first_km: 1000 };
+
+    const remotePayload = {
+        xp: 3500,
+        country: 'RS',
+        stats: {
+            km: 120,
+            bestDrift: 900,
+            topSpeed: 290,
+            spots: ['Monaco', 'Belgrade'],
+            vehicleKm: { car: 80 }
+        },
+        unlocked: { speed_200: 2000 },
+        streak: { count: 4, last: '2026-11-01', freezeWeek: '' },
+        prefs: {
+            playerName: 'Milan_RS',
+            activeVehicle: 'truck',
+            unit: 'km'
+        }
+    };
+
+    const merged = mergeCloudPayload(remotePayload, '11111111-2222-4333-8444-555555555555');
+    assert.ok(merged.model.xp >= 3500);
+    assert.equal(merged.model.stats.km, 120);
+    assert.equal(merged.model.stats.bestDrift, 1800);
+    assert.equal(merged.model.stats.topSpeed, 290);
+    assert.equal(merged.model.stats.vehicleKm.car, 80);
+    assert.deepEqual(merged.model.stats.spots.sort(), ['Belgrade', 'Monaco', 'Tokyo']);
+    assert.ok(merged.model.unlocked.first_km);
+    assert.ok(merged.model.unlocked.speed_200);
+    assert.equal(merged.prefs.playerName, 'Milan_RS');
+    assert.equal(getModel().playerId, '11111111-2222-4333-8444-555555555555');
 });

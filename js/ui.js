@@ -16,7 +16,7 @@ import {
     trackSpot,
     trackPhoto
 } from './progress.js';
-import { submitProgress } from './leaderboard.js';
+import { submitProgress, cloudSync } from './leaderboard.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getThreeLayer } from './three-manager.js';
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
@@ -560,11 +560,26 @@ export function initUI(map) {
         const willBeOpen = !!open;
         if (state.isSettingsOpen !== willBeOpen) {
             trackEvent(willBeOpen ? 'settings_open' : 'settings_close');
+            if (!willBeOpen) {
+                cloudSync().catch(() => {});
+            }
         }
         state.isSettingsOpen = willBeOpen;
         if (willBeOpen) {
             state.velocity = 0;
             state.keys = {};
+            const activeTabBtn =
+                typeof settingsPanel.querySelector === 'function'
+                    ? settingsPanel.querySelector('.sx-tab.active')
+                    : null;
+            if (!activeTabBtn || activeTabBtn.dataset?.sxTab === 'career') {
+                loadProfileModule()
+                    .then((mod) => {
+                        mod.initSettingsPilotHub(settingsPanel);
+                        mod.renderSettingsCareerTab();
+                    })
+                    .catch(() => {});
+            }
         }
         settingsPanel.classList.toggle('active', willBeOpen);
         syncMapInteractions(map);
@@ -1849,6 +1864,7 @@ export function closeSettings() {
         settingsPanel.classList.remove('active');
         syncMapInteractions(activeMap);
     }
+    cloudSync().catch(() => {});
 }
 
 export function openChangelogModal() {
@@ -2442,15 +2458,17 @@ export function openProModal() {
         fetchGeoRidePlans()
             .then((plans) => {
                 if (!plans || !Array.isArray(plans)) return;
-                const monthlyPlan = plans.find((p) => p.plan_id === 'pro_monthly');
-                const yearlyPlan = plans.find((p) => p.plan_id === 'pro_yearly');
+                const monthlyPlan = plans.find((p) => (p.id || p.plan_id) === 'pro_monthly');
+                const yearlyPlan = plans.find((p) => (p.id || p.plan_id) === 'pro_yearly');
+                const lifetimePlan = plans.find((p) => (p.id || p.plan_id) === 'pro_lifetime');
 
                 const monthlyBtn = document.getElementById('pro-modal-monthly-btn');
                 if (monthlyBtn && monthlyPlan) {
                     if (monthlyPlan.checkout_url) monthlyBtn.href = monthlyPlan.checkout_url;
                     const priceEl = monthlyBtn.querySelector('.pro-plan-price');
-                    if (priceEl && monthlyPlan.price_usd) {
-                        priceEl.innerHTML = `$${monthlyPlan.price_usd.toFixed(2)} <span>/ mo</span>`;
+                    const monthlyPrice = Number(monthlyPlan.price ?? monthlyPlan.price_usd);
+                    if (priceEl && Number.isFinite(monthlyPrice) && monthlyPrice > 0) {
+                        priceEl.innerHTML = `$${monthlyPrice.toFixed(2)} <span>/ mo</span>`;
                     }
                 }
 
@@ -2458,8 +2476,19 @@ export function openProModal() {
                 if (yearlyBtn && yearlyPlan) {
                     if (yearlyPlan.checkout_url) yearlyBtn.href = yearlyPlan.checkout_url;
                     const priceEl = yearlyBtn.querySelector('.pro-plan-price');
-                    if (priceEl && yearlyPlan.price_usd) {
-                        priceEl.innerHTML = `$${yearlyPlan.price_usd.toFixed(2)} <span>/ mo</span>`;
+                    const yearlyPrice = Number(yearlyPlan.price ?? yearlyPlan.price_usd);
+                    if (priceEl && Number.isFinite(yearlyPrice) && yearlyPrice > 0) {
+                        priceEl.innerHTML = `$${yearlyPrice.toFixed(2)} <span>/ mo</span>`;
+                    }
+                }
+
+                const lifetimeBtn = document.getElementById('pro-modal-lifetime-btn');
+                if (lifetimeBtn && lifetimePlan) {
+                    if (lifetimePlan.checkout_url) lifetimeBtn.href = lifetimePlan.checkout_url;
+                    const priceEl = lifetimeBtn.querySelector('.pro-plan-price');
+                    const lifetimePrice = Number(lifetimePlan.price ?? lifetimePlan.price_usd);
+                    if (priceEl && Number.isFinite(lifetimePrice) && lifetimePrice > 0) {
+                        priceEl.innerHTML = `<span class="price-strikethrough">$79.99</span> $${lifetimePrice.toFixed(2)} <span>once</span>`;
                     }
                 }
             })
@@ -3138,6 +3167,15 @@ function initProgressUI() {
 
     const isTest = typeof process !== 'undefined' && Boolean(process.versions?.node);
     if (!isTest) {
+        cloudSync({ pullFirst: true })
+            .then((r) => {
+                if (r?.ok) {
+                    updateProfileChip();
+                    updateToggleStates();
+                    if (profileApi?.refreshSettingsPilotHubIfOpen) profileApi.refreshSettingsPilotHubIfOpen();
+                }
+            })
+            .catch(() => {});
         let seconds = 0;
         const secondTimer = setInterval(() => {
             if (typeof document === 'undefined' || !document || typeof document.getElementById !== 'function') return;
@@ -3151,6 +3189,7 @@ function initProgressUI() {
         const submitTimer = setInterval(() => {
             if (typeof document === 'undefined' || !document) return;
             submitProgress();
+            cloudSync().catch(() => {});
         }, 30000);
         if (typeof secondTimer?.unref === 'function') secondTimer.unref();
         if (typeof submitTimer?.unref === 'function') submitTimer.unref();
@@ -3161,6 +3200,7 @@ function initProgressUI() {
             if (document.hidden) {
                 saveProgress();
                 submitProgress({ force: true });
+                cloudSync().catch(() => {});
             }
         });
     }

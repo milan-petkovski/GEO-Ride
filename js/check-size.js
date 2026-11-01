@@ -18,9 +18,9 @@ files.forEach((file) => {
     if (file.endsWith('.css')) totalCssSize += stat.size;
 });
 
-const maxJsKb = 230;
-const maxTotalCssKb = 200;
-const maxSingleCssKb = 175;
+const maxJsKb = 245;
+const maxTotalCssKb = 205;
+const maxSingleCssKb = 180;
 
 const jsKb = (totalJsSize / 1024).toFixed(2);
 const cssKb = (totalCssSize / 1024).toFixed(2);

@@ -1453,6 +1453,114 @@
     margin-top: 2px;
 }
 
+/* Cloud Sync Card */
+.pf-cloud {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(0, 242, 255, 0.04);
+    border: 1px solid rgba(0, 242, 255, 0.28);
+}
+
+.pf-cloud.is-linked {
+    background: rgba(77, 255, 166, 0.05);
+    border-color: rgba(77, 255, 166, 0.35);
+}
+
+.pf-cloud-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pf-cloud-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.pf-cloud-ic {
+    width: 18px;
+    height: 18px;
+    color: var(--pf-cyan);
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.pf-cloud.is-linked .pf-cloud-ic {
+    color: #4dffa6;
+}
+
+.pf-cloud-ic svg {
+    width: 100%;
+    height: 100%;
+}
+
+.pf-cloud-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pf-cloud-inp {
+    flex: 2;
+    min-width: 170px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--pf-line);
+    background: rgba(5, 10, 20, 0.65);
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    outline: none;
+}
+
+.pf-cloud-pin {
+    flex: 1;
+    min-width: 130px;
+}
+
+.pf-cloud-inp:focus {
+    border-color: var(--pf-cyan);
+    box-shadow: 0 0 0 2px rgba(0, 242, 255, 0.18);
+}
+
+.pf-cloud-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pf-cloud-msg {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(5, 10, 20, 0.55);
+    color: var(--pf-text);
+}
+
+.pf-cloud-msg.is-error {
+    color: #ff6b81;
+    border-color: rgba(255, 107, 129, 0.4);
+    background: rgba(255, 107, 129, 0.1);
+}
+
+.pf-cloud-msg.is-ok {
+    color: #4dffa6;
+    border-color: rgba(77, 255, 166, 0.4);
+    background: rgba(77, 255, 166, 0.1);
+}
+
 body.profile-open .touch-controls,
 body.profile-open .mobile-controls {
     pointer-events: none;

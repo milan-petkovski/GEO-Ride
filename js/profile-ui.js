@@ -6,7 +6,7 @@
 import './profile.css';
 import { state, saveState } from './state.js';
 import { trackEvent } from './analytics.js';
-import { openProModal, showToast, openSettings, closeSettings } from './ui.js';
+import { openProModal, showToast, openSettings, closeSettings, updateToggleStates } from './ui.js';
 import { ACHIEVEMENT_GROUPS, COUNTRIES, evaluate, formatNumber, getSnapshot, setCountry } from './progress.js';
 import {
     BOARDS,
@@ -15,7 +15,12 @@ import {
     SCOPES,
     fetchLeaderboard,
     isLeaderboardAvailable,
-    submitProgress
+    submitProgress,
+    claimPilotUsername,
+    getCloudSession,
+    clearCloudSession,
+    cloudAuth,
+    cloudSync
 } from './leaderboard.js';
 import { shareCard } from './share-card.js';
 
@@ -197,6 +202,44 @@ function renderProfile(snap) {
         )
         .join('');
 
+    const sess = getCloudSession();
+    const savedProEmail = typeof localStorage !== 'undefined' ? localStorage.getItem('geo_ride_pro_email') || '' : '';
+    const cloudCard = sess
+        ? `<section class="pf-cloud is-linked">
+        <div class="pf-cloud-top">
+            <div class="pf-cloud-title">
+                <div class="pf-cloud-ic is-on">${icon('check')}</div>
+                <div>
+                    <strong>CLOUD SYNC ACTIVE &bull; ${esc(sess.email)}</strong>
+                    <span>Career, unlocks, settings${snap.isPro ? ' &amp; Pro VIP status' : ''} sync across all your devices.</span>
+                </div>
+            </div>
+            <span class="pf-rm-pill is-unlocked">${icon('check')}LINKED</span>
+        </div>
+        <div class="pf-cloud-actions">
+            <button type="button" class="pf-btn" data-action="cloud-sync-now">${icon('refresh')}Sync Now</button>
+            <button type="button" class="pf-btn" data-action="cloud-logout">Sign Out</button>
+        </div>
+    </section>`
+        : `<section class="pf-cloud">
+        <div class="pf-cloud-top">
+            <div class="pf-cloud-title">
+                <div class="pf-cloud-ic">${icon('user')}</div>
+                <div>
+                    <strong>CLOUD SYNC &bull; PLAY ON ANY DEVICE</strong>
+                    <span>Enter your email and a 4+ character PIN/password to save and load your progress on any device.</span>
+                </div>
+            </div>
+            <span class="pf-rm-pill is-locked">${icon('lock')}LOCAL ONLY</span>
+        </div>
+        <div class="pf-cloud-form">
+            <input id="pf-cloud-email" class="pf-cloud-inp" type="email" placeholder="Email address" autocomplete="email" value="${esc(savedProEmail)}" />
+            <input id="pf-cloud-pin" class="pf-cloud-inp pf-cloud-pin" type="password" placeholder="PIN / Password (4+)" maxlength="64" autocomplete="current-password" />
+            <button type="button" class="pf-btn pf-btn-primary" data-action="cloud-auth">${icon('check')}Sync Account</button>
+        </div>
+        <div id="pf-cloud-msg" class="pf-cloud-msg" hidden></div>
+    </section>`;
+
     return `
     <section class="pf-hero ${snap.isPro ? 'is-pro' : ''}">
         <div class="pf-ring" style="--pf-pct:${snap.level.pct}">
@@ -218,6 +261,8 @@ function renderProfile(snap) {
             </div>
         </div>
     </section>
+
+    ${cloudCard}
 
     <section class="pf-streak">
         <div class="pf-streak-flame ${snap.streak > 0 ? 'on' : ''}">${icon('flame')}</div>
@@ -661,19 +706,79 @@ function onClick(e) {
         }
         return;
     }
-    if (action === 'refresh-hub') {
-        const btn = target.closest('.pf-refresh-btn');
-        if (btn) btn.classList.add('spinning');
+    if (action === 'refresh-hub' || action === 'cloud-sync-now') {
+        const btn = target.closest('.pf-refresh-btn') || target;
+        btn?.classList?.add('spinning');
         evaluate();
-        submitProgress({ force: true }).finally(() => {
+        Promise.all([cloudSync({ pullFirst: true }), submitProgress({ force: true })]).finally(() => {
+            updateToggleStates();
             if (ui.subtab === 'ranks') loadBoard();
             const subcontent = document.getElementById('pf-subcontent');
-            if (subcontent) {
-                subcontent.innerHTML = renderSubcontent(getSnapshot());
-            }
-            setTimeout(() => btn?.classList.remove('spinning'), 500);
-            showToast('SYNCED', 'Progress, challenges and ranks refreshed.');
+            if (subcontent) subcontent.innerHTML = renderSubcontent(getSnapshot());
+            setTimeout(() => btn?.classList?.remove('spinning'), 500);
+            showToast('SYNCED', 'Progress, cloud profile and ranks refreshed.');
         });
+        return;
+    }
+    if (action === 'cloud-auth') {
+        const emailInp = document.getElementById('pf-cloud-email');
+        const pinInp = document.getElementById('pf-cloud-pin');
+        const msgBox = document.getElementById('pf-cloud-msg');
+        const setCloudMsg = (txt, kind = '') => {
+            if (!msgBox) return;
+            msgBox.hidden = !txt;
+            msgBox.className = `pf-cloud-msg ${kind ? `is-${kind}` : ''}`.trim();
+            msgBox.textContent = txt;
+        };
+        const email = (emailInp?.value || '').trim().toLowerCase();
+        const pin = (pinInp?.value || '').trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setCloudMsg('Please enter a valid email address.', 'error');
+            showToast('EMAIL REQUIRED', 'Please enter a valid email address.');
+            return;
+        }
+        if (pin.length < 4) {
+            setCloudMsg('PIN / password must be at least 4 characters.', 'error');
+            showToast('PIN TOO SHORT', 'Please enter at least 4 characters for your PIN or password.');
+            return;
+        }
+        target.disabled = true;
+        target.textContent = 'Syncing...';
+        setCloudMsg('Connecting to GEO Ride Cloud...', '');
+        cloudAuth(email, pin).then((res) => {
+            target.disabled = false;
+            if (!res?.ok) {
+                target.innerHTML = `${icon('check')}Sync Account`;
+                const msg =
+                    res?.error === 'invalid_pin'
+                        ? 'Incorrect PIN / password for this email.'
+                        : res?.error === 'too_many_attempts'
+                          ? 'Too many failed attempts. Try again in 2 minutes.'
+                          : res?.error === 'invalid_email'
+                            ? 'Invalid email address.'
+                            : 'Could not sync account. Check your connection.';
+                setCloudMsg(msg, 'error');
+                showToast('SYNC FAILED', msg);
+                return;
+            }
+            updateToggleStates();
+            submitProgress({ force: true });
+            const subcontent = document.getElementById('pf-subcontent');
+            if (subcontent) subcontent.innerHTML = renderSubcontent(getSnapshot());
+            trackEvent('cloud_sync_auth', { mode: res.mode, is_pro: !!res.is_pro });
+            showToast(
+                res.mode === 'created' ? 'CLOUD ACCOUNT LINKED' : 'CLOUD PROFILE LOADED',
+                `Synced with ${res.email}${res.is_pro ? ' (Pro VIP Active!)' : ''}.`,
+                { isPro: !!res.is_pro }
+            );
+        });
+        return;
+    }
+    if (action === 'cloud-logout') {
+        clearCloudSession();
+        const subcontent = document.getElementById('pf-subcontent');
+        if (subcontent) subcontent.innerHTML = renderSubcontent(getSnapshot());
+        showToast('SIGNED OUT', 'Cloud sync disconnected on this device.');
         return;
     }
     if (action === 'pro') {
@@ -692,27 +797,53 @@ function onChange(e) {
         setCountry(e.target.value);
         ui.boardData = null;
         submitProgress({ force: true });
+        cloudSync().catch(() => {});
         trackEvent('profile_country', { country: e.target.value || 'none' });
     } else if (e.target.id === 'pf-name') {
-        const clean =
-            e.target.value
-                .replace(/[^\p{L}\p{N} _.-]/gu, '')
-                .trim()
-                .slice(0, 16) || 'Pilot';
-        e.target.value = clean;
-        state.playerName = clean;
-        const mpInput = document.getElementById('mp-player-name');
-        if (mpInput) mpInput.value = clean;
-        saveState();
-        submitProgress({ force: true });
-        // Update avatar initial without interrupting input
-        const avatar = document.querySelector('.pf-avatar');
-        if (avatar) avatar.textContent = clean.charAt(0).toUpperCase();
+        const prevName = state.playerName || 'Pilot';
+        const clean = e.target.value
+            .replace(/[^\p{L}\p{N} _.-]/gu, '')
+            .trim()
+            .slice(0, 16);
+        if (!clean || clean === prevName) {
+            e.target.value = prevName;
+            return;
+        }
+        e.target.disabled = true;
+        claimPilotUsername(clean).then((res) => {
+            e.target.disabled = false;
+            if (!res?.ok) {
+                e.target.value = prevName;
+                if (res?.error === 'username_taken') {
+                    showToast('USERNAME TAKEN', `"${clean}" is already taken. Please choose a different pilot name.`);
+                } else if (res?.error === 'invalid_name') {
+                    showToast('INVALID USERNAME', 'Username must be 2-16 characters and cannot be "Pilot".');
+                } else {
+                    showToast('COULD NOT CHANGE NAME', 'Unable to verify username availability right now.');
+                }
+                return;
+            }
+            const confirmed = res.name || clean;
+            e.target.value = confirmed;
+            state.playerName = confirmed;
+            const mpInput = document.getElementById('mp-player-name');
+            if (mpInput) mpInput.value = confirmed;
+            saveState();
+            submitProgress({ force: true });
+            cloudSync().catch(() => {});
+            const avatar = document.querySelector('.pf-avatar');
+            if (avatar) avatar.textContent = confirmed.charAt(0).toUpperCase();
+            showToast('USERNAME UPDATED', `Your pilot name is now "${confirmed}".`);
+        });
     }
 }
 
 function onKeyDown(e) {
     if (e.target?.id === 'pf-name' && e.key === 'Enter') e.target.blur();
+    else if ((e.target?.id === 'pf-cloud-pin' || e.target?.id === 'pf-cloud-email') && e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('[data-action="cloud-auth"]')?.click();
+    }
 }
 
 function startCountdown() {

@@ -16,28 +16,26 @@ if (typeof window !== 'undefined' && typeof requestAnimationFrame === 'function'
     });
 }
 
-const GA_MEASUREMENT_ID = 'G-C33HV1QV3S';
+const GA_MEASUREMENT_ID = 'G-RK7YHSC0NN';
 let gtagScriptLoaded = false;
 
 function loadGtagScript() {
     if (gtagScriptLoaded || typeof document === 'undefined') return;
     gtagScriptLoaded = true;
 
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
-    document.head.appendChild(script);
+    if (!document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+        document.head.appendChild(script);
+    }
 
     gtag('js', new Date());
-    gtag('config', GA_MEASUREMENT_ID, {
-        anonymize_ip: true,
-        cookie_flags: 'SameSite=None;Secure'
-    });
+    gtag('config', GA_MEASUREMENT_ID);
 }
 
-// Default Google Consent Mode v2 - strict GDPR compliant default: DENIED
 const savedConsent = typeof localStorage !== 'undefined' ? localStorage.getItem('georide_cookie_consent') : null;
-const isAnalyticsGranted = savedConsent === 'granted';
+const isAnalyticsGranted = savedConsent !== 'denied';
 
 gtag('consent', 'default', {
     ad_storage: 'denied',
