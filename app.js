@@ -24,7 +24,8 @@ import {
     triggerDonationPopup,
     showToast,
     updateDriftHUD,
-    checkSpeedTrap
+    checkSpeedTrap,
+    demoteProToFree
 } from './js/ui.js';
 import { initControls, pollGamepad } from './js/controls.js';
 import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMarks } from './js/three-manager.js';
@@ -98,44 +99,71 @@ try {
         (proParam === 'success' || proParam === 'active' || orderId)
     ) {
         import('./js/supabase-georide.js')
-            .then(({ checkProStatusByEmail, isBackendConfigured }) => {
-                if (!isBackendConfigured()) return;
-                checkProStatusByEmail(customerEmail)
-                    .then((res) => {
-                        if (res && res.is_pro) {
-                            setProStatus(true);
-                            localStorage.setItem('geo_ride_pro_email', customerEmail);
-                            updateToggleStates();
-                            showToast('PRO ACTIVATED!', 'Thank you for upgrading! God Mode & VIP rooms are unlocked.', {
-                                isPro: true
-                            });
-                            trackEvent('pro_activated_redirect', { order_id: orderId || 'verified' });
-                        } else {
-                            setProStatus(false);
-                            localStorage.removeItem('geo_ride_pro_email');
-                            updateToggleStates();
-                        }
-                    })
-                    .catch(() => {});
-            })
+            .then(
+                ({
+                    activateProSession,
+                    broadcastProSessionActivation,
+                    startProSessionWatcher,
+                    isBackendConfigured
+                }) => {
+                    if (!isBackendConfigured()) return;
+                    activateProSession(customerEmail)
+                        .then((res) => {
+                            if (res && res.is_pro) {
+                                setProStatus(true);
+                                localStorage.setItem('geo_ride_pro_email', customerEmail);
+                                if (res.session_token) {
+                                    localStorage.setItem('geo_ride_pro_session_token', res.session_token);
+                                    broadcastProSessionActivation(customerEmail, res.session_token);
+                                    startProSessionWatcher(customerEmail, res.session_token, demoteProToFree);
+                                }
+                                updateToggleStates();
+                                showToast(
+                                    'PRO ACTIVATED!',
+                                    'Thank you for upgrading! God Mode & VIP rooms are unlocked.',
+                                    { isPro: true }
+                                );
+                                trackEvent('pro_activated_redirect', { order_id: orderId || 'verified' });
+                            } else {
+                                demoteProToFree('no_active_plan');
+                            }
+                        })
+                        .catch(() => {});
+                }
+            )
             .catch(() => {});
     } else if (state.isPro) {
-        // Re-verify existing localStorage Pro flag against Supabase so DevTools tampering is revoked
+        // Re-verify existing localStorage Pro flag against Supabase single active session
         const savedEmail = (localStorage.getItem('geo_ride_pro_email') || '').trim().toLowerCase();
+        const savedToken = localStorage.getItem('geo_ride_pro_session_token');
         import('./js/supabase-georide.js')
-            .then(({ checkProStatusByEmail, isBackendConfigured }) => {
+            .then(({ verifyProSession, activateProSession, startProSessionWatcher, isBackendConfigured }) => {
                 if (!isBackendConfigured()) return;
                 if (!savedEmail || !emailRegex.test(savedEmail)) {
-                    setProStatus(false);
-                    updateToggleStates();
+                    demoteProToFree('invalid');
                     return;
                 }
-                checkProStatusByEmail(savedEmail)
+                if (!savedToken) {
+                    activateProSession(savedEmail)
+                        .then((res) => {
+                            if (res && res.is_pro && res.session_token) {
+                                localStorage.setItem('geo_ride_pro_session_token', res.session_token);
+                                startProSessionWatcher(savedEmail, res.session_token, demoteProToFree);
+                            } else if (res && !res.is_pro) {
+                                demoteProToFree('expired');
+                            }
+                        })
+                        .catch(() => {});
+                    return;
+                }
+                verifyProSession(savedEmail, savedToken)
                     .then((res) => {
-                        if (res && res.status !== 'error' && !res.is_pro) {
-                            setProStatus(false);
-                            localStorage.removeItem('geo_ride_pro_email');
-                            updateToggleStates();
+                        if (res && res.status !== 'error') {
+                            if (!res.is_pro || res.reason === 'session_superseded') {
+                                demoteProToFree(res.reason === 'session_superseded' ? 'superseded' : 'expired');
+                            } else {
+                                startProSessionWatcher(savedEmail, savedToken, demoteProToFree);
+                            }
                         }
                     })
                     .catch(() => {});

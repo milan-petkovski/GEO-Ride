@@ -21,7 +21,15 @@ import { setup3DVehicleLayer, setupVehicleMarker, getThreeLayer } from './three-
 import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
 import { initMultiplayer } from './multiplayer.js';
-import { checkProStatusByEmail, fetchGeoRidePlans } from './supabase-georide.js';
+import {
+    checkProStatusByEmail,
+    fetchGeoRidePlans,
+    activateProSession,
+    verifyProSession,
+    startProSessionWatcher,
+    stopProSessionWatcher,
+    broadcastProSessionActivation
+} from './supabase-georide.js';
 import { INITIAL_CENTER, VEHICLE_CONFIG } from './config.js';
 import { setupTerrain } from './utils.js';
 import {
@@ -1867,11 +1875,16 @@ export function initUI(map) {
             showActivationStatus('Checking subscription status in database...', 'loading');
 
             try {
-                const res = await checkProStatusByEmail(val);
+                const res = await activateProSession(val);
                 if (res && res.is_pro) {
                     setProStatus(true);
                     updateToggleStates();
                     localStorage.setItem('geo_ride_pro_email', val);
+                    if (res.session_token) {
+                        localStorage.setItem('geo_ride_pro_session_token', res.session_token);
+                        broadcastProSessionActivation(val, res.session_token);
+                        startProSessionWatcher(val, res.session_token, demoteProToFree);
+                    }
                     cachedProSubInfo = { ...res, email: val };
                     renderProSubscriptionPanel(cachedProSubInfo);
                     const planTitle = res.plan_name || 'GEO Ride Pro';
@@ -2653,11 +2666,62 @@ function renderProSubscriptionPanel(info) {
     });
 }
 
+/**
+ * Automatically demotes the current device to Free when its session is superseded elsewhere.
+ * WebGL/Three.js rendering, car physics, audio, and gameplay continue uninterrupted.
+ * @param {string} [reason='superseded']
+ */
+export function demoteProToFree(reason = 'superseded') {
+    if (!state.isPro) return;
+    stopProSessionWatcher();
+    setProStatus(false);
+    if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('geo_ride_pro_active');
+        localStorage.removeItem('geo_ride_pro_session_token');
+    }
+    cachedProSubInfo = null;
+    updateToggleStates();
+
+    if (typeof document !== 'undefined') {
+        const keyInput = document.getElementById('pro-key-input');
+        if (keyInput) keyInput.value = '';
+        const proStatusEl = document.getElementById('pro-activation-status');
+        if (proStatusEl) {
+            proStatusEl.style.display = 'none';
+            proStatusEl.innerHTML = '';
+        }
+        renderProSubscriptionPanel(null);
+        const modalEl = document.querySelector('.pro-modal');
+        modalEl?.classList?.remove('is-pro-active');
+        const proModalTitle = document.getElementById('pro-modal-title');
+        if (proModalTitle) {
+            proModalTitle.innerHTML = 'Unlock <span>God Mode</span> &amp; Full Pro Pass';
+        }
+        const proModalDesc = document.getElementById('pro-modal-desc');
+        if (proModalDesc) {
+            proModalDesc.textContent =
+                'Everything included in GEO Ride Pro. Every perk below is active in the simulator today with instant unlock across all your devices.';
+        }
+        const logoutBottomBtn = document.getElementById('pro-logout-bottom-btn');
+        if (logoutBottomBtn && logoutBottomBtn.style) {
+            logoutBottomBtn.style.display = 'none';
+        }
+    }
+
+    if (reason === 'superseded') {
+        showToast('PRO SESIJA PREBAČENA', 'Nalog je aktiviran na drugom uređaju. Nastavljaš igru u Free režimu.');
+    } else {
+        showToast('PRO DEAKTIVIRAN', 'Pro pretplata više nije aktivna.');
+    }
+}
+
 export function logoutPro() {
+    stopProSessionWatcher();
     setProStatus(false);
     if (typeof localStorage !== 'undefined') {
         localStorage.removeItem('geo_ride_pro_active');
         localStorage.removeItem('geo_ride_pro_email');
+        localStorage.removeItem('geo_ride_pro_session_token');
     }
     cachedProSubInfo = null;
     if (typeof document === 'undefined') return;
@@ -2728,14 +2792,28 @@ export function openProModal() {
                 proStatusEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Pro Subscription Active${savedEmail ? ` (${savedEmail})` : ''}</span>`;
                 renderProSubscriptionPanel(cachedProSubInfo || { email: savedEmail });
                 if (savedEmail) {
-                    checkProStatusByEmail(savedEmail)
-                        .then((res) => {
-                            if (res && res.is_pro) {
-                                cachedProSubInfo = { ...res, email: savedEmail };
-                                renderProSubscriptionPanel(cachedProSubInfo);
-                            }
-                        })
-                        .catch(() => {});
+                    const savedToken = localStorage.getItem('geo_ride_pro_session_token');
+                    if (savedToken) {
+                        verifyProSession(savedEmail, savedToken)
+                            .then((res) => {
+                                if (res && res.reason === 'session_superseded') {
+                                    demoteProToFree('superseded');
+                                } else if (res && res.is_pro) {
+                                    cachedProSubInfo = { ...res, email: savedEmail };
+                                    renderProSubscriptionPanel(cachedProSubInfo);
+                                }
+                            })
+                            .catch(() => {});
+                    } else {
+                        checkProStatusByEmail(savedEmail)
+                            .then((res) => {
+                                if (res && res.is_pro) {
+                                    cachedProSubInfo = { ...res, email: savedEmail };
+                                    renderProSubscriptionPanel(cachedProSubInfo);
+                                }
+                            })
+                            .catch(() => {});
+                    }
                 }
             } else {
                 proStatusEl.style.display = 'none';

@@ -6,7 +6,8 @@ import {
     triggerDonationPopup,
     updateToggleStates,
     add3DBuildings,
-    logoutPro
+    logoutPro,
+    demoteProToFree
 } from '../js/ui.js';
 import { state } from '../js/state.js';
 
@@ -637,6 +638,7 @@ test('FAMOUS_SPOTS contains 17 spots including circuits, cities, and passes with
 test('logoutPro clears Pro state, resets localStorage, and updates UI flags', () => {
     localStorage.setItem('geo_ride_pro_active', 'true');
     localStorage.setItem('geo_ride_pro_email', 'test@example.com');
+    localStorage.setItem('geo_ride_pro_session_token', 'test-uuid-token');
     state.isPro = true;
 
     logoutPro();
@@ -644,4 +646,17 @@ test('logoutPro clears Pro state, resets localStorage, and updates UI flags', ()
     assert.strictEqual(state.isPro, false);
     assert.strictEqual(localStorage.getItem('geo_ride_pro_active'), null);
     assert.strictEqual(localStorage.getItem('geo_ride_pro_email'), null);
+    assert.strictEqual(localStorage.getItem('geo_ride_pro_session_token'), null);
+});
+
+test('demoteProToFree automatically reverts Pro to Free without crashing or interrupting gameplay', () => {
+    localStorage.setItem('geo_ride_pro_active', 'true');
+    localStorage.setItem('geo_ride_pro_session_token', 'active-token-123');
+    state.isPro = true;
+
+    demoteProToFree('superseded');
+
+    assert.strictEqual(state.isPro, false);
+    assert.strictEqual(localStorage.getItem('geo_ride_pro_active'), null);
+    assert.strictEqual(localStorage.getItem('geo_ride_pro_session_token'), null);
 });

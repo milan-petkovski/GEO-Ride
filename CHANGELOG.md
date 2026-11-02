@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Single Active Session Pro Protection (Instant Free Reversion)**: Added server-side single active session enforcement for GEO Ride Pro via atomic Supabase RPCs (`activate_georide_pro_session`, `verify_georide_pro_session`) and lightweight Realtime WebSocket synchronization. When a Pro account is activated on a new device, previous active devices are automatically and seamlessly transitioned to Free mode with an informative toast notice, keeping 60 FPS WebGL/Three.js rendering and vehicle physics completely uninterrupted with zero background interval polling.
 - **Ko-fi Creator Support Integration**: Upgraded the simulator's community donation system to Ko-fi (`https://ko-fi.com/georide`), enabling players to easily support server costs and ongoing development with one-time or monthly tips via Apple Pay, Google Pay, credit cards, or PayPal.
 - **Responsive Pricing Support Banner & Footer Links**: Integrated a responsive neon support bar on the landing page (`index.html`) below pricing tiers, offering players an alternative micro-donation route ($3 / $5) without subscription commitments, plus direct footer navigation links.
 - **In-Game Vehicle Garage Support Prompts**: Added contextual community support prompts inside `Settings > Driving` beneath vehicle class selection, inviting enthusiasts to directly fund new high-poly 3D vehicle models and real-world engine audio.
