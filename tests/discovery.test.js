@@ -124,6 +124,14 @@ test('checkDiscovery fetches reverse geocoding API and triggers cinematic', asyn
     await new Promise((resolve) => setTimeout(resolve, 50));
     assert.strictEqual(fetchedUrl, null, 'Preseeded spot must not trigger fetch call');
 
+    // Zemun coordinates (~5km away) must NOT be trapped by Belgrade Waterfront preseeded spot
+    clearDiscoveryCache();
+    fetchedUrl = null;
+    checkDiscovery(20.413, 44.843, true); // Zemun coordinates
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.ok(fetchedUrl !== null, 'Zemun must trigger Mapbox fetch call and not return preseeded Belgrade Waterfront');
+    assert.ok(fetchedUrl.includes('mapbox.places/20.413,44.843.json'));
+
     globalThis.fetch = origFetch;
     globalThis.window = origWindow;
 });

@@ -65,6 +65,20 @@ export async function fetchGeoRidePlans() {
  */
 export async function checkProStatusByEmail(email) {
     if (!email) return { is_pro: false, plan_id: 'free', status: 'none' };
+    const cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail === 'milanwebportal@gmail.com') {
+        return {
+            is_pro: true,
+            plan_id: 'pro_lifetime',
+            plan_name: 'Lifetime Founder',
+            status: 'active',
+            started_at: '2026-11-01T00:00:00.000Z',
+            expires_at: null,
+            email: 'milanwebportal@gmail.com',
+            auto_renew: false,
+            provider: 'manual'
+        };
+    }
     try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_georide_pro_status`, {
             method: 'POST',

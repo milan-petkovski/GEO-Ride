@@ -15,14 +15,13 @@ let isDiscovering = false;
 /** @type {Map<string, {cityName: string, countryName: string}>} */
 export const discoveryCache = new Map();
 
-const DISCOVERY_CACHE_KEY = 'geo_ride_discovery_cache';
+const DISCOVERY_CACHE_KEY = 'geo_ride_discovery_cache_v2';
 
 /**
  * Pre-seeded in-game locations and famous circuits to eliminate Mapbox Geocoding API usage on spawn and hot spots.
  */
 export const PRESEEDED_SPOTS = [
-    { name: 'Belgrade Waterfront', country: 'Serbia', lng: 20.449425, lat: 44.809684, radiusKm: 15 },
-    { name: 'Belgrade', country: 'Serbia', lng: 20.4633, lat: 44.8176, radiusKm: 15 },
+    { name: 'Belgrade Waterfront', country: 'Serbia', lng: 20.449425, lat: 44.809684, radiusKm: 0.8 },
     { name: 'Tokyo Shuto Expressway', country: 'Japan', lng: 139.7563, lat: 35.6329, radiusKm: 15 },
     { name: 'Monaco GP Marina Circuit', country: 'Monaco', lng: 7.4206, lat: 43.7347, radiusKm: 10 },
     { name: 'Nürburgring Nordschleife', country: 'Germany', lng: 6.9475, lat: 50.3341, radiusKm: 12 },
@@ -65,12 +64,26 @@ export function findPreseededSpot(lng, lat) {
 function loadPersistentDiscoveryCache() {
     try {
         if (typeof localStorage === 'undefined') return;
+        const legacy = localStorage.getItem('geo_ride_discovery_cache');
+        if (legacy) {
+            localStorage.removeItem('geo_ride_discovery_cache');
+        }
         const saved = localStorage.getItem(DISCOVERY_CACHE_KEY);
         if (saved) {
             const parsed = JSON.parse(saved);
             if (parsed && typeof parsed === 'object') {
                 Object.entries(parsed).forEach(([k, v]) => {
                     if (v && typeof v.cityName === 'string') {
+                        if (v.cityName === 'Belgrade Waterfront') {
+                            const [cLat, cLng] = k.split(',').map(Number);
+                            if (
+                                isNaN(cLat) ||
+                                isNaN(cLng) ||
+                                calculateDistanceKm(cLat, cLng, 44.809684, 20.449425) > 0.8
+                            ) {
+                                return;
+                            }
+                        }
                         discoveryCache.set(k, v);
                     }
                 });
