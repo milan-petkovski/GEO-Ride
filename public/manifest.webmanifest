@@ -69,6 +69,20 @@
             "description": "Launch the 3D driving simulator immediately",
             "url": "/play?source=pwa",
             "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }]
+        },
+        {
+            "name": "Multiplayer Lobbies",
+            "short_name": "Multiplayer",
+            "description": "Join live multiplayer rooms with other drivers",
+            "url": "/play?mp=1&source=pwa",
+            "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }]
+        },
+        {
+            "name": "17 Famous Tracks",
+            "short_name": "Tracks",
+            "description": "Teleport to Monaco, Nurburgring, Stelvio Pass, and more",
+            "url": "/play?places=1&source=pwa",
+            "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }]
         }
     ]
 }

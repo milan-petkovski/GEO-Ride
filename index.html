@@ -16,7 +16,7 @@
         />
         <meta
             name="keywords"
-            content="3d driving simulator, google maps driving simulator, real world driving simulator online free, drive anywhere on earth browser game, satellite map car simulator, webgl driving game no download, multiplayer car game browser, geo ride"
+            content="geo ride 3d simulator, geo ride, geo ride 3d driving simulator, georide, geo ride 3d, driving simulator map, online driving simulator, 3d driving simulator, google maps driving simulator, real world driving simulator online free, drive anywhere on earth browser game, satellite map car simulator, webgl driving game no download, multiplayer car game browser"
         />
         <meta name="author" content="Milan Petkovski" />
         <meta name="creator" content="Milan Petkovski (Milan Web Portal)" />
@@ -127,27 +127,47 @@
                         "@type": ["VideoGame", "WebApplication"],
                         "@id": "https://playgeoride.com/#simulator",
                         "name": "GEO Ride",
+                        "alternateName": [
+                            "GEO Ride 3D Simulator",
+                            "GEO Ride 3D Driving Simulator",
+                            "GEO Ride Online Free",
+                            "Google Maps 3D Driving Simulator Alternative"
+                        ],
                         "url": "https://playgeoride.com/",
                         "installUrl": "https://playgeoride.com/play",
                         "mainEntityOfPage": "https://playgeoride.com/",
                         "datePublished": "2026-05-08",
-                        "dateModified": "2026-10-31",
-                        "softwareVersion": "1.2.3",
+                        "dateModified": "2026-11-02",
+                        "softwareVersion": "1.2.4",
                         "image": [
                             "https://playgeoride.com/images/og.jpg",
                             "https://playgeoride.com/images/wow.jpg",
                             "https://playgeoride.com/images/satellite.jpg"
                         ],
                         "screenshot": "https://playgeoride.com/images/wow.jpg",
-                        "description": "3D real-world driving simulator running in your browser on Mapbox GL JS satellite maps and Three.js WebGL 2.0 physics. Drive Sports Cars, Heavy Trucks, City Buses, and Pro God Mode anywhere on Earth with live multiplayer.",
+                        "description": "3D real-world driving simulator running directly in your browser on Mapbox GL JS satellite maps and Three.js WebGL 2.0 physics. Drive Sports Cars, Heavy Trucks, City Buses, and Pro God Mode anywhere on Earth with extruded 3D buildings, drift physics, and live multiplayer.",
                         "applicationCategory": "GameApplication",
                         "applicationSubCategory": "Driving Simulator",
                         "genre": ["Simulation", "Driving", "Racing", "World Exploration"],
                         "gamePlatform": ["Web Browser", "WebGL 2.0", "Desktop", "Mobile", "Tablet"],
-                        "operatingSystem": "Windows, macOS, Linux, iOS, Android, ChromeOS",
+                        "operatingSystem": "Windows, Android, iOS, macOS, ChromeOS, Linux",
                         "browserRequirements": "Requires WebGL 2.0 and JavaScript enabled",
                         "inLanguage": "en",
                         "isAccessibleForFree": true,
+                        "featureList": [
+                            "1:1 Scale Digital Twin of Earth on Real Mapbox Satellite & Hybrid Maps",
+                            "Extruded 3D City Buildings with Collision Physics",
+                            "17 Curated Famous Destinations including Monaco GP, Nurburgring, Stelvio Pass, Tokyo Shibuya, and Belgrade",
+                            "Newtonian Drift Physics with Real-Time Smoke, Skid Marks & Combo Multiplier",
+                            "Zero-Login Live Multiplayer with Up to 10 Drivers",
+                            "4 Vehicle Classes: Sports Car, Heavy Semi Truck, City Transit Bus, and God Mode Hyper-Vehicle",
+                            "Atmospheric Dynamic Sun Lighting: Real-Time Local Sun Position, Day, Dawn, Dusk, Night",
+                            "Cross-Platform Touch Pedals, Gyroscope Tilt Steering, and PWA Offline Shell"
+                        ],
+                        "speakable": {
+                            "@type": "SpeakableSpecification",
+                            "cssSelector": [".hero-title", ".hero-subtitle", ".faq-answer-pane"]
+                        },
                         "playMode": ["SinglePlayer", "MultiPlayer"],
                         "numberOfPlayers": {
                             "@type": "QuantitativeValue",
@@ -181,6 +201,43 @@
                                 "priceCurrency": "USD",
                                 "availability": "https://schema.org/InStock",
                                 "url": "https://playgeoride.com/#pricing"
+                            },
+                            {
+                                "@type": "Offer",
+                                "name": "GEO Ride Founder Lifetime",
+                                "price": "49.99",
+                                "priceCurrency": "USD",
+                                "availability": "https://schema.org/InStock",
+                                "url": "https://playgeoride.com/#pricing"
+                            }
+                        ]
+                    },
+                    {
+                        "@type": "HowTo",
+                        "@id": "https://playgeoride.com/#howto-play",
+                        "name": "How to Play GEO Ride 3D Driving Simulator Online in Browser",
+                        "description": "Follow these simple steps to launch GEO Ride and drive on real-world 3D satellite maps anywhere on Earth without downloading anything.",
+                        "step": [
+                            {
+                                "@type": "HowToStep",
+                                "name": "Launch the Simulator",
+                                "text": "Navigate to https://playgeoride.com/play on any desktop, laptop, tablet, or smartphone browser.",
+                                "url": "https://playgeoride.com/play"
+                            },
+                            {
+                                "@type": "HowToStep",
+                                "name": "Select Your Vehicle",
+                                "text": "Choose from the agile Sports Car, the heavy Semi-Truck, the City Transit Bus, or unlock the 1,000+ km/h God Mode ghost vehicle with Pro."
+                            },
+                            {
+                                "@type": "HowToStep",
+                                "name": "Pick a Location or Search Any Street",
+                                "text": "Select one of the 17 curated racing tracks and mountain passes from the Places menu, or type any city, neighborhood, or street address on Earth into the global search bar."
+                            },
+                            {
+                                "@type": "HowToStep",
+                                "name": "Drive, Drift and Compete",
+                                "text": "Use W/A/S/D or Arrow keys on desktop, or touch pedals and tilt steering on mobile. Hold Spacebar to drift around corners, earn combo multipliers, and join multiplayer rooms with friends."
                             }
                         ]
                     },
@@ -190,7 +247,7 @@
                         "mainEntity": [
                             {
                                 "@type": "Question",
-                                "name": "Is GEO Ride free to play in my browser?",
+                                "name": "Is GEO Ride really free to play in my browser?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
                                     "text": "Yes. GEO Ride features a 100% free tier with no download or account registration required. You get instant access to Flagship WOW 3D, Satellite, Hybrid, and 2D Streets maps, extruded 3D buildings, 3 vehicle classes (Car, Truck, Bus), all 17 curated destinations, and public multiplayer rooms."
@@ -198,10 +255,18 @@
                             },
                             {
                                 "@type": "Question",
-                                "name": "Can I drive on my own real-world street or hometown?",
+                                "name": "Can I drive on my own real-world street, city, or country?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Yes. Use the built-in Mapbox global geocoder inside the simulator to search any city, neighborhood, landmark, or street address on Earth and teleport your 3D vehicle there immediately."
+                                    "text": "Yes. Use the built-in Mapbox global geocoder inside the simulator to search any city, neighborhood, landmark, or street address on Earth (e.g. Mumbai, New York, London, Tokyo, Belgrade) and teleport your 3D vehicle there immediately."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How does GEO Ride compare to Google Maps driving simulators?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Unlike flat 2D Google Maps car games, GEO Ride provides full 3D WebGL rendering, extruded 3D city buildings with collision physics, Newtonian vehicle dynamics, drift scoring with combo multipliers, 5 atmospheric lighting presets, engine sound synthesis, and real-time multiplayer."
                                 }
                             },
                             {
@@ -209,7 +274,7 @@
                                 "name": "What is included in GEO Ride Pro and God Mode?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "GEO Ride Pro ($4.99/month or $2.99/month billed annually) unlocks God Mode (1,000+ km/h hyper-speed ghost vehicle with zero building collisions), private multiplayer rooms for up to 10 players, an exclusive Pro player badge in multiplayer, settings export/import backup, and an ad-free experience."
+                                    "text": "GEO Ride Pro ($4.99/month, $2.99/month billed annually, or $49.99 one-time Founder Lifetime) unlocks God Mode (1,000+ km/h hyper-speed ghost vehicle with zero building collisions), private multiplayer rooms for up to 10 players, an exclusive Pro player badge, purple tire marks and drift smoke, settings export/import backup, and an ad-free experience."
                                 }
                             },
                             {
@@ -217,7 +282,7 @@
                                 "name": "Does GEO Ride work on mobile phones and tablets?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Yes. GEO Ride is fully responsive on iOS and Android devices with multi-touch GAS, BRAKE, DRIFT, and RESET pedals plus optional gyroscope tilt steering."
+                                    "text": "Yes. GEO Ride is fully responsive on iOS and Android devices with multi-touch GAS, BRAKE, DRIFT, and RESET pedals plus optional gyroscope tilt steering and PWA install support."
                                 }
                             },
                             {

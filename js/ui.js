@@ -854,6 +854,7 @@ export function initUI(map) {
     // Toggle Handlers
     document.querySelectorAll('.style-toggle button').forEach((btn) => {
         btn.onclick = () => {
+            if (state.mapStyle === btn.dataset.style) return;
             state.mapStyle = btn.dataset.style;
             if (state.mapStyle === 'standard') {
                 state.is3DBuildings = true;
@@ -1356,8 +1357,34 @@ export function initUI(map) {
         };
     }
 
-    // In-memory location search cache to prevent redundant Mapbox Geocoding API calls
+    // Persistent location search cache to prevent redundant Mapbox Geocoding API calls
     const locationSearchCache = new Map();
+    const SEARCH_CACHE_KEY = 'geo_ride_search_cache';
+
+    function loadSearchCache() {
+        try {
+            if (typeof localStorage === 'undefined') return;
+            const saved = localStorage.getItem(SEARCH_CACHE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && typeof parsed === 'object') {
+                    Object.entries(parsed).forEach(([k, v]) => {
+                        if (v && Array.isArray(v.coords)) locationSearchCache.set(k, v);
+                    });
+                }
+            }
+        } catch (_e) {}
+    }
+
+    function saveSearchCache() {
+        try {
+            if (typeof localStorage === 'undefined') return;
+            const entries = Array.from(locationSearchCache.entries()).slice(-150);
+            localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(Object.fromEntries(entries)));
+        } catch (_e) {}
+    }
+
+    loadSearchCache();
 
     // Search logic
     async function performSearch(inputField) {
@@ -1368,9 +1395,39 @@ export function initUI(map) {
             const cacheKey = query.toLowerCase();
             let cachedResult = locationSearchCache.get(cacheKey);
 
+            // 1. Check in-game famous spots and Belgrade Waterfront locally (0 API calls)
+            if (!cachedResult) {
+                if (cacheKey === 'belgrade' || cacheKey === 'beograd' || cacheKey.includes('waterfront')) {
+                    cachedResult = {
+                        coords: [20.449425, 44.809684],
+                        city: 'Belgrade Waterfront',
+                        country: 'Serbia'
+                    };
+                } else {
+                    const spot = FAMOUS_SPOTS.find(
+                        (s) =>
+                            s.name.toLowerCase().includes(cacheKey) ||
+                            s.id.toLowerCase() === cacheKey ||
+                            (s.country && s.country.toLowerCase() === cacheKey)
+                    );
+                    if (spot) {
+                        cachedResult = {
+                            coords: spot.coords,
+                            city: spot.name,
+                            country: spot.country || ''
+                        };
+                    }
+                }
+                if (cachedResult) {
+                    locationSearchCache.set(cacheKey, cachedResult);
+                    saveSearchCache();
+                }
+            }
+
+            // 2. Query Mapbox Geocoding Places API with limit=1 if not found locally
             if (!cachedResult) {
                 const response = await fetch(
-                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?types=place,locality,address,poi&limit=3&access_token=${mapboxgl.accessToken}`
+                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?types=place,locality,address,poi&limit=1&access_token=${mapboxgl.accessToken}`
                 );
                 const data = await response.json();
                 if (data.features && data.features.length > 0) {
@@ -1382,6 +1439,7 @@ export function initUI(map) {
                         country: countryCtx?.text || ''
                     };
                     locationSearchCache.set(cacheKey, cachedResult);
+                    saveSearchCache();
                 }
             }
 

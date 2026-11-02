@@ -4006,28 +4006,40 @@ body.hidden-ui .donation-popup {
 
 .pro-plan-card.featured .pro-plan-cta {
     background: linear-gradient(135deg, #9333ea, #c084fc);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background-origin: border-box;
+    background-repeat: no-repeat;
+    border: none;
     color: #fff;
-    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.35);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+        0 4px 16px rgba(168, 85, 247, 0.35);
 }
 
 .pro-plan-card.featured:hover .pro-plan-cta {
     filter: brightness(1.12);
     transform: translateY(-1px);
-    box-shadow: 0 6px 22px rgba(168, 85, 247, 0.5);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+        0 6px 22px rgba(168, 85, 247, 0.5);
 }
 
 .pro-plan-card.founder .pro-plan-cta {
     background: linear-gradient(135deg, #c026d3, #ec4899);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background-origin: border-box;
+    background-repeat: no-repeat;
+    border: none;
     color: #fff;
-    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+        0 4px 16px rgba(236, 72, 153, 0.35);
 }
 
 .pro-plan-card.founder:hover .pro-plan-cta {
     filter: brightness(1.12);
     transform: translateY(-1px);
-    box-shadow: 0 6px 22px rgba(236, 72, 153, 0.5);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+        0 6px 22px rgba(236, 72, 153, 0.5);
 }
 
 .pro-modal-footer-note {

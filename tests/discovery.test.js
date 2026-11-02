@@ -117,6 +117,13 @@ test('checkDiscovery fetches reverse geocoding API and triggers cinematic', asyn
     await new Promise((resolve) => setTimeout(resolve, 50));
     assert.strictEqual(fetchedUrl, null);
 
+    // Preseeded spots test: Belgrade Waterfront and Tokyo should NOT trigger fetch
+    clearDiscoveryCache();
+    fetchedUrl = null;
+    checkDiscovery(20.449425, 44.809684, true); // Belgrade Waterfront coordinates
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.strictEqual(fetchedUrl, null, 'Preseeded spot must not trigger fetch call');
+
     globalThis.fetch = origFetch;
     globalThis.window = origWindow;
 });

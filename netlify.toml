@@ -84,6 +84,18 @@
   force = true
 
 [[redirects]]
+  from = "https://georide.netlify.app/*"
+  to = "https://playgeoride.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://geo-ride.netlify.app/*"
+  to = "https://playgeoride.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/play"
   to = "/play.html"
   status = 200

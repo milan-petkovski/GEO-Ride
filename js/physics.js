@@ -104,8 +104,8 @@ export function triggerVehicleReset(isShiftReset, map) {
         state.isTeleporting = false;
         setup3DVehicleLayer(map);
         saveState();
-        import('./discovery.js').then(({ showDiscoveryCinematic }) => {
-            showDiscoveryCinematic('BELGRADE WATERFRONT', 'SERBIA', 'ARRIVED AT');
+        import('./discovery.js').then(({ checkDiscovery }) => {
+            checkDiscovery(lng, lat, true);
         });
     });
 }

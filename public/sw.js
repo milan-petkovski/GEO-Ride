@@ -1,4 +1,4 @@
-const CACHE_NAME = 'georide-v7';
+const CACHE_NAME = 'georide-v8';
 const ASSETS = ['/', '/index.html', '/play.html', '/favicon.png', '/manifest.webmanifest', '/manifest.json'];
 
 self.addEventListener('install', (e) => {

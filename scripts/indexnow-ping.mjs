@@ -8,11 +8,11 @@ const HOST = 'playgeoride.com';
 const KEY = 'georide-indexnow-key';
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
 const URL_LIST = [
-    `https://${HOST}/play`,
     `https://${HOST}/`,
-    `https://${HOST}/llms.txt`,
-    `https://${HOST}/llms-full.txt`,
-    `https://${HOST}/sitemap.xml`
+    `https://${HOST}/play`,
+    `https://${HOST}/privacy`,
+    `https://${HOST}/terms`,
+    `https://${HOST}/refund`
 ];
 
 async function pingIndexNow() {

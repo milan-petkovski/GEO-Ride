@@ -134,26 +134,50 @@ if (state.performance && state.performance.reducedMotion) {
 }
 
 // Mapbox token initialization
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.MAPBOX_TOKEN;
+const mapboxToken = (import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.MAPBOX_TOKEN || '').trim();
+if (!mapboxToken) {
+    console.warn('GEO Ride: VITE_MAPBOX_TOKEN is missing. Please check your .env configuration.');
+}
+mapboxgl.accessToken = mapboxToken;
 
-const map = new mapboxgl.Map({
-    container: 'map',
-    style: `mapbox://styles/mapbox/${state.mapStyle}`,
-    center: [state.lng, state.lat],
-    zoom: INITIAL_ZOOM,
-    pitch: 65,
-    bearing: state.bearing,
-    interactive: false,
-    attributionControl: false,
-    pixelRatio: state.performance.eliteEnd
-        ? Math.min(window.devicePixelRatio || 1, 2.0)
-        : state.performance.lowEnd
-          ? 1.0
-          : Math.min(window.devicePixelRatio || 1, 1.3),
-    antialias: !state.performance.lowEnd
-});
+// Singleton Map Reference Pattern: strictly prevents duplicate Mapbox Map Loads across re-renders/evaluations
+const mapRef = {
+    get current() {
+        return window.__geoRideMapInstance || null;
+    },
+    set current(instance) {
+        window.__geoRideMapInstance = instance;
+    }
+};
 
-map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right');
+let map = mapRef.current;
+const isReusedInstance = Boolean(map);
+
+if (!map) {
+    map = new mapboxgl.Map({
+        container: 'map',
+        style: `mapbox://styles/mapbox/${state.mapStyle}`,
+        center: [state.lng, state.lat],
+        zoom: INITIAL_ZOOM,
+        pitch: 65,
+        bearing: state.bearing,
+        interactive: false,
+        attributionControl: false,
+        maxTileCacheSize: state.performance.lowEnd ? 50 : 120,
+        fadeDuration: 100,
+        crossSourceCollisions: false,
+        collectResourceTiming: false,
+        pixelRatio: state.performance.eliteEnd
+            ? Math.min(window.devicePixelRatio || 1, 2.0)
+            : state.performance.lowEnd
+              ? 1.0
+              : Math.min(window.devicePixelRatio || 1, 1.3),
+        antialias: !state.performance.lowEnd
+    });
+
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right');
+    mapRef.current = map;
+}
 
 // Expose globally
 window.map = map;
@@ -164,28 +188,8 @@ if (window.setLoadingTarget) {
     window.setLoadingTarget(60);
 }
 
-let loadedDataCount = 0;
-map.on('data', (e) => {
-    if (e.isSourceLoaded) {
-        loadedDataCount++;
-        if (window.setLoadingTarget) {
-            window.setLoadingTarget(Math.min(95, 60 + loadedDataCount * 4));
-        }
-    }
-});
-
 let isMapFullyLoaded = false;
-map.once('idle', () => {
-    isMapFullyLoaded = true;
-    if (window.setLoadingTarget) window.setLoadingTarget(100);
-});
-// Swift fallback after 1.2s so the user never gets stuck waiting if satellite tiles are streaming
-setTimeout(() => {
-    isMapFullyLoaded = true;
-    if (window.setLoadingTarget) window.setLoadingTarget(100);
-}, 1200);
-
-// Distance milestones tracker
+let isInitialMapLoad = true;
 const reachedDistanceMilestones = new Set();
 
 /**
@@ -216,6 +220,9 @@ function finishLoading() {
         });
         requestAnimationFrame(update);
 
+        // Initial load location discovery banner (runs for both free and pro players)
+        checkDiscovery(state.lng, state.lat, true);
+
         // Show PayPal donation popup at specific milestones (2m, 10m, 30m, 1h)
         const donationMilestones = [120000, 600000, 1800000, 3600000];
         donationMilestones.forEach((delay) => {
@@ -244,42 +251,63 @@ function finishLoading() {
     }, 600); // Wait for the 0.6s css transition to finish
 }
 
-let isInitialMapLoad = true;
+// Attach map loading and style listeners strictly once per map instance
+if (!isReusedInstance) {
+    let loadedDataCount = 0;
+    map.on('data', (e) => {
+        if (e.isSourceLoaded) {
+            loadedDataCount++;
+            if (window.setLoadingTarget) {
+                window.setLoadingTarget(Math.min(95, 60 + loadedDataCount * 4));
+            }
+        }
+    });
 
-map.on('load', () => {
-    isInitialMapLoad = false;
-    if (window.setLoadingTarget) window.setLoadingTarget(85);
-    cleanMap(map);
-    setupTerrain(map);
-    add3DBuildings(map);
-    setup3DVehicleLayer(map);
-    setupVehicleMarker(map);
-    addSkidMarksLayer(map);
-    updateToggleStates();
-    if (window.setLoadingTarget) window.setLoadingTarget(95);
+    map.once('idle', () => {
+        isMapFullyLoaded = true;
+        if (window.setLoadingTarget) window.setLoadingTarget(100);
+    });
+    // Swift fallback after 1.2s so the user never gets stuck waiting if satellite tiles are streaming
+    setTimeout(() => {
+        isMapFullyLoaded = true;
+        if (window.setLoadingTarget) window.setLoadingTarget(100);
+    }, 1200);
 
-    // Apply standard preset if active on load
-    applyLightPreset(map);
+    map.on('load', () => {
+        isInitialMapLoad = false;
+        if (window.setLoadingTarget) window.setLoadingTarget(85);
+        cleanMap(map);
+        setupTerrain(map);
+        add3DBuildings(map);
+        setup3DVehicleLayer(map);
+        setupVehicleMarker(map);
+        addSkidMarksLayer(map);
+        updateToggleStates();
+        if (window.setLoadingTarget) window.setLoadingTarget(95);
 
-    finishLoading();
+        // Apply standard preset if active on load
+        applyLightPreset(map);
 
-    // Accessibility: Mapbox renders its attribution button dynamically - patch aria-label
-    const attribBtn = document.querySelector('.mapboxgl-ctrl-attrib-button');
-    if (attribBtn) attribBtn.setAttribute('aria-label', 'Toggle map attribution');
-});
+        finishLoading();
 
-map.on('style.load', () => {
-    if (isInitialMapLoad) return;
-    cleanMap(map);
-    setupTerrain(map);
-    add3DBuildings(map);
-    setup3DVehicleLayer(map);
-    setupVehicleMarker(map);
-    addSkidMarksLayer(map);
+        // Accessibility: Mapbox renders its attribution button dynamically - patch aria-label
+        const attribBtn = document.querySelector('.mapboxgl-ctrl-attrib-button');
+        if (attribBtn) attribBtn.setAttribute('aria-label', 'Toggle map attribution');
+    });
 
-    // Apply standard preset if active on style load
-    applyLightPreset(map);
-});
+    map.on('style.load', () => {
+        if (isInitialMapLoad) return;
+        cleanMap(map);
+        setupTerrain(map);
+        add3DBuildings(map);
+        setup3DVehicleLayer(map);
+        setupVehicleMarker(map);
+        addSkidMarksLayer(map);
+
+        // Apply standard preset if active on style load
+        applyLightPreset(map);
+    });
+}
 
 /**
  * Main application animation frame step updating physics, camera, multiplayer, skidmarks, and HUD stats.
@@ -372,9 +400,16 @@ function update(time) {
     requestAnimationFrame(update);
 }
 
-// Initialize components
-initUI(map);
-initControls();
+// Initialize components strictly once per session
+if (!isReusedInstance) {
+    initUI(map);
+    initControls();
 
-// Disable Right-Click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
+    // Disable Right-Click
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
+// Vite HMR protection: Keep existing map instance across hot module reloads without creating new Map Loads
+if (import.meta.hot) {
+    import.meta.hot.accept();
+}

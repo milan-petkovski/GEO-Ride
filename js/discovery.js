@@ -15,6 +15,83 @@ let isDiscovering = false;
 /** @type {Map<string, {cityName: string, countryName: string}>} */
 export const discoveryCache = new Map();
 
+const DISCOVERY_CACHE_KEY = 'geo_ride_discovery_cache';
+
+/**
+ * Pre-seeded in-game locations and famous circuits to eliminate Mapbox Geocoding API usage on spawn and hot spots.
+ */
+export const PRESEEDED_SPOTS = [
+    { name: 'Belgrade Waterfront', country: 'Serbia', lng: 20.449425, lat: 44.809684, radiusKm: 15 },
+    { name: 'Belgrade', country: 'Serbia', lng: 20.4633, lat: 44.8176, radiusKm: 15 },
+    { name: 'Tokyo Shuto Expressway', country: 'Japan', lng: 139.7563, lat: 35.6329, radiusKm: 15 },
+    { name: 'Monaco GP Marina Circuit', country: 'Monaco', lng: 7.4206, lat: 43.7347, radiusKm: 10 },
+    { name: 'Nürburgring Nordschleife', country: 'Germany', lng: 6.9475, lat: 50.3341, radiusKm: 12 },
+    { name: 'Silverstone Grand Prix Circuit', country: 'UK', lng: -1.0169, lat: 52.0786, radiusKm: 10 },
+    { name: 'Circuit de Spa-Francorchamps', country: 'Belgium', lng: 5.9714, lat: 50.4372, radiusKm: 10 },
+    { name: 'Laguna Seca Raceway', country: 'USA', lng: -121.758, lat: 36.5843, radiusKm: 10 },
+    { name: 'Stelvio Pass', country: 'Italy', lng: 10.4533, lat: 46.5286, radiusKm: 12 },
+    { name: 'Transfăgărășan Mountain Highway', country: 'Romania', lng: 24.6167, lat: 45.5992, radiusKm: 15 },
+    { name: 'Mount Haruna (Akina)', country: 'Japan', lng: 138.8833, lat: 36.4722, radiusKm: 12 },
+    { name: 'Pikes Peak Highway', country: 'USA', lng: -105.0444, lat: 38.8405, radiusKm: 15 },
+    { name: 'Route 66 Historic Highway', country: 'USA', lng: -98.9644, lat: 35.5342, radiusKm: 15 },
+    { name: 'Amalfi Coast Highway', country: 'Italy', lng: 14.6027, lat: 40.634, radiusKm: 12 },
+    { name: 'Isle of Man TT Course', country: 'Isle of Man', lng: -4.4817, lat: 54.1667, radiusKm: 15 },
+    { name: 'Circuit de la Sarthe (Le Mans)', country: 'France', lng: 0.2075, lat: 47.9542, radiusKm: 12 },
+    { name: 'Tail of the Dragon', country: 'USA', lng: -83.9208, lat: 35.5186, radiusKm: 12 },
+    { name: 'Suzuka International Circuit', country: 'Japan', lng: 136.5337, lat: 34.8431, radiusKm: 10 },
+    { name: 'Mount Fuji Skyline', country: 'Japan', lng: 138.7274, lat: 35.3606, radiusKm: 15 }
+];
+
+/**
+ * Checks if geographic coordinates match any pre-seeded track or landmark to prevent external API calls.
+ * @param {number} lng
+ * @param {number} lat
+ * @returns {{cityName: string, countryName: string}|null}
+ */
+export function findPreseededSpot(lng, lat) {
+    for (let i = 0; i < PRESEEDED_SPOTS.length; i++) {
+        const spot = PRESEEDED_SPOTS[i];
+        const dist = calculateDistanceKm(lat, lng, spot.lat, spot.lng);
+        if (dist <= spot.radiusKm) {
+            return { cityName: spot.name, countryName: spot.country };
+        }
+    }
+    return null;
+}
+
+/**
+ * Loads persistent reverse-geocoding cache from localStorage.
+ */
+function loadPersistentDiscoveryCache() {
+    try {
+        if (typeof localStorage === 'undefined') return;
+        const saved = localStorage.getItem(DISCOVERY_CACHE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed && typeof parsed === 'object') {
+                Object.entries(parsed).forEach(([k, v]) => {
+                    if (v && typeof v.cityName === 'string') {
+                        discoveryCache.set(k, v);
+                    }
+                });
+            }
+        }
+    } catch (_e) {}
+}
+
+/**
+ * Persists discovery cache to localStorage with size capping.
+ */
+function savePersistentDiscoveryCache() {
+    try {
+        if (typeof localStorage === 'undefined') return;
+        const entries = Array.from(discoveryCache.entries()).slice(-300);
+        localStorage.setItem(DISCOVERY_CACHE_KEY, JSON.stringify(Object.fromEntries(entries)));
+    } catch (_e) {}
+}
+
+loadPersistentDiscoveryCache();
+
 /**
  * Resets discovery cache and state trackers (useful for tests and resets).
  */
@@ -25,6 +102,11 @@ export function clearDiscoveryCache() {
     lastCheckedLng = null;
     lastCheckedLat = null;
     isDiscovering = false;
+    try {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem(DISCOVERY_CACHE_KEY);
+        }
+    } catch (_e) {}
 }
 
 /**
@@ -67,33 +149,39 @@ export function parseGeocodingFeature(place) {
 }
 
 /**
+ * Returns whether dynamic cruising discovery is unlocked (Level 10+ or Pro).
+ * @returns {boolean}
+ */
+export function isDiscoveryUnlocked() {
+    try {
+        const snap = getSnapshot();
+        return Boolean(snap?.isPro || (snap?.level?.level && snap.level.level >= 10));
+    } catch {
+        return false;
+    }
+}
+
+/**
  * Checks current geographic coordinates via cached Mapbox Reverse Geocoding and displays location discovery cinematic UI.
- * Enforces a minimum 5km movement threshold and 2-minute throttling window to minimize API usage.
+ * - Free users: Discovery runs ONLY on initial load, reset, and teleport (force = true). Free cruising is completely disabled.
+ * - Pro / Level 10+ users: Cruising discovery triggers INSTANTLY when entering new cities/areas with minimal throttling.
  * @param {number} lng - Current longitude coordinate.
  * @param {number} lat - Current latitude coordinate.
  * @param {boolean} [force=false] - Force check bypassing throttling interval and distance thresholds.
  * @returns {void}
  */
 export function checkDiscovery(lng, lat, force = false) {
-    // Only proceed if mapbox token is available and we aren't already checking
+    if (typeof window === 'undefined') return;
     if (!window.mapboxgl || !window.mapboxgl.accessToken || isDiscovering) return;
     if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat)) return;
 
-    // Dynamic cruising discovery is unlocked at Level 10 or with Pro.
-    // Teleport, refresh, and initial load (force = true) work for all players.
-    if (!force) {
-        try {
-            const snap = getSnapshot();
-            const canDiscoverDynamically = snap.isPro || snap.level.level >= 10;
-            if (!canDiscoverDynamically) return;
-        } catch {
-            // Safe fallback if progress is uninitialized
-        }
-    }
+    // Slobodna vožnja (force = false): strogo blokirana za free korisnike ispod nivoa 10.
+    // Za free korisnike otkrivanje radi isključivo na: početno učitavanje, reset i teleport (force = true).
+    if (!force && !isDiscoveryUnlocked()) return;
 
     const gridKey = `${lat.toFixed(2)},${lng.toFixed(2)}`;
 
-    // 1. Fast path: Check memory grid cache
+    // 1. Fast path: Check memory & persistent grid cache (instant 0ms)
     if (discoveryCache.has(gridKey)) {
         const cached = discoveryCache.get(gridKey);
         if (cached && cached.cityName && cached.cityName !== lastDiscoveredCity) {
@@ -103,15 +191,27 @@ export function checkDiscovery(lng, lat, force = false) {
         return;
     }
 
+    // 2. Pre-seeded spots check (Belgrade Waterfront & 17 famous circuits/passes) - instant bez API poziva
+    const preseeded = findPreseededSpot(lng, lat);
+    if (preseeded) {
+        discoveryCache.set(gridKey, preseeded);
+        savePersistentDiscoveryCache();
+        if (preseeded.cityName && preseeded.cityName !== lastDiscoveredCity) {
+            lastDiscoveredCity = preseeded.cityName;
+            showDiscoveryCinematic(preseeded.cityName, preseeded.countryName);
+        }
+        return;
+    }
+
     const now = Date.now();
 
-    // 2. Throttling: Enforce 2 minutes (120,000ms) between network calls unless forced
-    if (!force && now - lastCheckTime < 120000) return;
+    // 3. Za Pro/otključane korisnike: u slobodnoj vožnji radi INSTANT (minimalna pauza od 3s da se ne preklapaju fetch zahtevi)
+    if (!force && now - lastCheckTime < 3000) return;
 
-    // 3. Distance check: Only check if vehicle moved at least 5km from last checked point
+    // 4. Zahteva se kretanje od najmanje 2.5 km od prethodno proverene tačke
     if (!force && lastCheckedLng !== null && lastCheckedLat !== null) {
         const distKm = calculateDistanceKm(lastCheckedLat, lastCheckedLng, lat, lng);
-        if (distKm < 5.0) return;
+        if (distKm < 2.5) return;
     }
 
     lastCheckTime = now;
@@ -129,6 +229,7 @@ export function checkDiscovery(lng, lat, force = false) {
             if (data.features && data.features.length > 0) {
                 const { cityName, countryName } = parseGeocodingFeature(data.features[0]);
                 discoveryCache.set(gridKey, { cityName, countryName });
+                savePersistentDiscoveryCache();
 
                 // If it's a new city we haven't discovered yet during this session
                 if (cityName && cityName !== lastDiscoveredCity) {
@@ -137,6 +238,7 @@ export function checkDiscovery(lng, lat, force = false) {
                 }
             } else {
                 discoveryCache.set(gridKey, { cityName: '', countryName: '' });
+                savePersistentDiscoveryCache();
             }
         })
         .catch((err) => {
