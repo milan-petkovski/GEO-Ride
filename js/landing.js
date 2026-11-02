@@ -843,8 +843,10 @@ function initPricing() {
     const periodEl = document.getElementById('pro-period');
     const checkoutBtn = document.getElementById('pro-checkout-btn');
 
-    let urlAnnual = 'https://pay.milanwebportal.com/checkout-element?id=057ae4b6-abef-4a0d-b770-c47a744d6328';
-    let urlMonthly = 'https://pay.milanwebportal.com/checkout-element?id=80d22d55-432b-4780-81c9-4e6466d09c44';
+    let urlAnnual =
+        'https://pay.milanwebportal.com/checkout-element/72637706-37bf-49bc-912e-bc87b2a84542?fngs-hosted=1';
+    let urlMonthly =
+        'https://pay.milanwebportal.com/checkout-element/abd3b8dc-f5b2-47ef-ab39-ff56ddc5b594?fngs-hosted=1';
     let priceAnnual = 2.99;
     let priceMonthly = 4.99;
     let priceLifetime = 49.99;

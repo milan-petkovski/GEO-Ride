@@ -5,7 +5,8 @@ import {
     applyLightPreset,
     triggerDonationPopup,
     updateToggleStates,
-    add3DBuildings
+    add3DBuildings,
+    logoutPro
 } from '../js/ui.js';
 import { state } from '../js/state.js';
 
@@ -528,7 +529,7 @@ test('openSettings, closeSettings, openChangelogModal, closeChangelogModal, and 
     try {
         globalThis.document = {
             ...origDoc,
-            getElementById: (id) => mockElements[id] || { classList: getClassList(id), blur() {} },
+            getElementById: (id) => mockElements[id] || { classList: getClassList(id), style: {}, blur() {} },
             querySelector: (sel) => (origDoc?.querySelector ? origDoc.querySelector(sel) : null),
             querySelectorAll: (sel) => (origDoc?.querySelectorAll ? origDoc.querySelectorAll(sel) : []),
             body: origDoc?.body || { classList: getClassList('body') }
@@ -631,4 +632,16 @@ test('FAMOUS_SPOTS contains 17 spots including circuits, cities, and passes with
     resetUserPreferences(mockMap);
 
     globalThis.document = origDoc;
+});
+
+test('logoutPro clears Pro state, resets localStorage, and updates UI flags', () => {
+    localStorage.setItem('geo_ride_pro_active', 'true');
+    localStorage.setItem('geo_ride_pro_email', 'test@example.com');
+    state.isPro = true;
+
+    logoutPro();
+
+    assert.strictEqual(state.isPro, false);
+    assert.strictEqual(localStorage.getItem('geo_ride_pro_active'), null);
+    assert.strictEqual(localStorage.getItem('geo_ride_pro_email'), null);
 });

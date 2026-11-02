@@ -527,6 +527,10 @@ export function initUI(map) {
     applyGraphicsQuality(map);
     initHiddenUiEdgeTrigger();
     initProgressUI();
+    updateToggleStates();
+    subscribeState('isPro', () => {
+        updateToggleStates();
+    });
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('settings-panel');
@@ -566,6 +570,7 @@ export function initUI(map) {
         }
         state.isSettingsOpen = willBeOpen;
         if (willBeOpen) {
+            updateToggleStates();
             state.velocity = 0;
             state.keys = {};
             const activeTabBtn =
@@ -747,6 +752,16 @@ export function initUI(map) {
             lastSettingsTab = settingsPanel.querySelector('.sx-tab.active')?.dataset.sxTab || null;
             setSettingsOpen(false);
             openProModal();
+            if (haptics) haptics.tap();
+        });
+        document.getElementById('settings-pro-logout-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            logoutPro();
+            if (haptics) haptics.tap();
+        });
+        document.getElementById('pro-logout-bottom-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            logoutPro();
             if (haptics) haptics.tap();
         });
 
@@ -1799,6 +1814,8 @@ export function initUI(map) {
                     setProStatus(true);
                     updateToggleStates();
                     localStorage.setItem('geo_ride_pro_email', val);
+                    cachedProSubInfo = { ...res, email: val };
+                    renderProSubscriptionPanel(cachedProSubInfo);
                     const planTitle = res.plan_name || 'GEO Ride Pro';
                     showActivationStatus(`Active Plan Found: ${planTitle}! Activated.`, 'success');
                     showToast('PRO VERIFIED!', `Active plan: ${planTitle}. God Mode unlocked!`, { isPro: true });
@@ -1843,6 +1860,7 @@ export function openSettings(tabName = null) {
     state.isSettingsOpen = true;
     state.velocity = 0;
     state.keys = {};
+    updateToggleStates();
     settingsPanel.classList.add('active');
     const targetTab = tabName === 'more' ? 'about' : tabName;
     if (targetTab && typeof settingsPanel.querySelectorAll === 'function') {
@@ -1921,37 +1939,79 @@ export function updateToggleStates() {
 
     // Show/hide and style God Mode vehicle button in the vehicle-toggle group
     const vehicleGodBtn = document.getElementById('vehicle-god-btn');
-    if (vehicleGodBtn) {
+    if (vehicleGodBtn && vehicleGodBtn.style) {
         vehicleGodBtn.style.display = 'inline-flex';
         const badge =
             typeof vehicleGodBtn.querySelector === 'function' ? vehicleGodBtn.querySelector('.pro-badge-pill') : null;
-        if (badge) {
+        if (badge && badge.style) {
             badge.style.display = state.isPro ? 'none' : 'inline-flex';
         }
     }
 
+    const proLabel = state.isPro ? 'GEO Ride Pro Active' : 'Unlock GEO Ride Pro';
+    const proBtnHtml = `<span class="pro-btn-shimmer"></span><span class="pro-btn-inner"><svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path></svg><span class="pro-btn-label">${state.isPro ? 'ACTIVE' : 'GO PRO'}</span></span>`;
+
     // Reflect Pro HUD status via CSS class + structured inner HTML
     const proOpenBtn = document.getElementById('pro-open-btn');
     if (proOpenBtn) {
-        const lbl = state.isPro ? 'GEO Ride Pro Active' : 'Unlock GEO Ride Pro';
         proOpenBtn.classList?.toggle?.('is-active', !!state.isPro);
-        proOpenBtn.title = lbl;
-        proOpenBtn.setAttribute?.('aria-label', lbl);
-        proOpenBtn.innerHTML = `<span class="pro-btn-shimmer"></span><span class="pro-btn-inner"><svg class="pro-crown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path></svg><span class="pro-btn-label">${state.isPro ? 'ACTIVE' : 'GO PRO'}</span></span>`;
+        proOpenBtn.title = proLabel;
+        proOpenBtn.setAttribute?.('aria-label', proLabel);
+        proOpenBtn.innerHTML = proBtnHtml;
+    }
+
+    const headProBtn = document.getElementById('settings-head-pro-btn');
+    if (headProBtn) {
+        headProBtn.hidden = false;
+        headProBtn.classList?.toggle?.('is-active', !!state.isPro);
+        headProBtn.title = proLabel;
+        headProBtn.setAttribute?.('aria-label', proLabel);
+        headProBtn.innerHTML = proBtnHtml;
+    }
+
+    const sidebarProBtn = document.getElementById('sx-sidebar-pro-btn');
+    if (sidebarProBtn) {
+        sidebarProBtn.hidden = !!state.isPro;
+        if (sidebarProBtn.style) sidebarProBtn.style.display = state.isPro ? 'none' : '';
+    }
+
+    const aboutProCard = document.getElementById('sx-about-pro-card');
+    if (aboutProCard) {
+        aboutProCard.classList?.toggle?.('is-active', !!state.isPro);
+    }
+    const aboutProTag = document.getElementById('sx-about-pro-tag');
+    if (aboutProTag) {
+        aboutProTag.textContent = state.isPro ? 'ACTIVE' : 'PRO';
+    }
+    const settingsProBtn = document.getElementById('settings-pro-btn');
+    if (settingsProBtn) {
+        settingsProBtn.classList?.toggle?.('is-active', !!state.isPro);
+    }
+    const settingsProBtnLabel = document.getElementById('settings-pro-btn-label');
+    if (settingsProBtnLabel) {
+        settingsProBtnLabel.textContent = state.isPro ? 'PRO ACTIVE' : 'UNLOCK PRO';
+    }
+    const settingsProLogoutBtn = document.getElementById('settings-pro-logout-btn');
+    if (settingsProLogoutBtn && settingsProLogoutBtn.style) {
+        settingsProLogoutBtn.style.display = state.isPro ? 'inline-flex' : 'none';
+    }
+    const logoutBottomBtn = document.getElementById('pro-logout-bottom-btn');
+    if (logoutBottomBtn && logoutBottomBtn.style) {
+        logoutBottomBtn.style.display = state.isPro ? 'inline-flex' : 'none';
     }
 
     // Show/hide PRO badge on God Mode toggle in Settings
     const godOnBtn = document.getElementById('god-on-btn');
     if (godOnBtn) {
         const badge = typeof godOnBtn.querySelector === 'function' ? godOnBtn.querySelector('.pro-badge-pill') : null;
-        if (badge) {
+        if (badge && badge.style) {
             badge.style.display = state.isPro ? 'none' : 'inline-flex';
         }
     }
 
     // Show/hide COLLISIONS settings section on WOW map or Satellite map
     const collisionSettingsSection = document.getElementById('collision-settings-section');
-    if (collisionSettingsSection) {
+    if (collisionSettingsSection && collisionSettingsSection.style) {
         if (isStandard || state.mapStyle === 'satellite-v9') {
             collisionSettingsSection.style.display = 'none';
         } else {
@@ -2005,14 +2065,14 @@ export function updateToggleStates() {
 
     // Dynamic display of standard lighting preset section
     const lightPresetSection = document.getElementById('light-preset-section');
-    if (lightPresetSection) {
+    if (lightPresetSection && lightPresetSection.style) {
         lightPresetSection.style.display = state.mapStyle === 'standard' ? 'flex' : 'none';
     }
 
     // Toggle lighting group views & back button
     const lightMainGroup = document.getElementById('light-main-group');
     const lightManualGroup = document.getElementById('light-manual-group');
-    if (lightMainGroup && lightManualGroup) {
+    if (lightMainGroup && lightManualGroup && lightMainGroup.style && lightManualGroup.style) {
         if (isManualPresetMenuOpen) {
             lightMainGroup.style.display = 'none';
             lightManualGroup.style.display = 'flex';
@@ -2092,8 +2152,6 @@ export function updateToggleStates() {
     document
         .querySelectorAll('.hud-toggle button')
         .forEach((b) => b.classList.toggle('active', b.dataset.hud === (state.hudVisibility || 'full')));
-    const headProBtn = document.getElementById('settings-head-pro-btn');
-    if (headProBtn) headProBtn.hidden = !!state.isPro;
     document.querySelectorAll('[data-pro-lock]').forEach((el) => {
         el.hidden = !!state.isPro;
     });
@@ -2429,6 +2487,149 @@ export function triggerDonationPopup() {
     }
 }
 
+let cachedProSubInfo = null;
+
+function formatProSubDate(isoStr) {
+    if (!isoStr) return 'Never (Lifetime)';
+    const d = new Date(isoStr);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function renderProSubscriptionPanel(info) {
+    const panel = document.getElementById('pro-subscription-panel');
+    if (!panel) return;
+    if (!state.isPro) {
+        panel.hidden = true;
+        panel.innerHTML = '';
+        return;
+    }
+
+    const savedEmail = (info && info.email) || localStorage.getItem('geo_ride_pro_email') || 'Verified Account';
+    const planId = (info && info.plan_id) || 'pro_monthly';
+    const isLifetime = planId === 'pro_lifetime';
+    const isYearly = planId === 'pro_yearly';
+    const isCancelling = Boolean(info && (info.status === 'cancelling' || info.cancelled_at));
+    const planName =
+        (info && info.plan_name) || (isLifetime ? 'Lifetime Founder' : isYearly ? 'Pro Annual' : 'Pro Monthly');
+    const billingCycle = isLifetime
+        ? 'One-time payment ($49.99) • No recurring charges'
+        : isYearly
+          ? '$35.88 / year ($2.99/mo)'
+          : '$4.99 / month';
+    const startedLabel = info && info.started_at ? formatProSubDate(info.started_at) : 'Active';
+    const renewalTitle = isLifetime ? 'Access Duration' : isCancelling ? 'Access Expires On' : 'Next Renewal / Expires';
+    const renewalValue = isLifetime
+        ? 'Lifetime Forever (Never expires)'
+        : info && info.expires_at
+          ? formatProSubDate(info.expires_at)
+          : 'Active billing period';
+    const autoRenewLabel = isLifetime
+        ? 'Not needed (Lifetime unlocked)'
+        : isCancelling
+          ? `Cancelled on ${formatProSubDate(info.cancelled_at)} (Active until period end)`
+          : 'Enabled (Auto-renews via Fungies.io)';
+    const statusPillText = isLifetime
+        ? 'LIFETIME ACTIVE'
+        : isCancelling
+          ? 'CANCELLING AT PERIOD END'
+          : 'ACTIVE SUBSCRIPTION';
+
+    panel.hidden = false;
+    panel.innerHTML = `
+        <div class="pro-sub-head">
+            <div class="pro-sub-head-left">
+                <span class="pro-sub-eyebrow">SUBSCRIPTION DETAILS</span>
+                <strong class="pro-sub-plan-title">${planName}</strong>
+            </div>
+            <div class="pro-sub-head-right">
+                <span class="pro-sub-status-pill ${isCancelling ? 'is-cancelling' : 'is-active'}">${statusPillText}</span>
+                <button type="button" id="pro-sub-logout-btn" class="pro-sub-logout-pill" title="Log out on this device">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>Log Out</span>
+                </button>
+            </div>
+        </div>
+        <div class="pro-sub-grid">
+            <div class="pro-sub-cell">
+                <span class="pro-sub-label">Account Email</span>
+                <strong class="pro-sub-val">${savedEmail}</strong>
+            </div>
+            <div class="pro-sub-cell">
+                <span class="pro-sub-label">Billing &amp; Price</span>
+                <strong class="pro-sub-val">${billingCycle}</strong>
+            </div>
+            <div class="pro-sub-cell">
+                <span class="pro-sub-label">Started On</span>
+                <strong class="pro-sub-val">${startedLabel}</strong>
+            </div>
+            <div class="pro-sub-cell">
+                <span class="pro-sub-label">${renewalTitle}</span>
+                <strong class="pro-sub-val">${renewalValue}</strong>
+            </div>
+            <div class="pro-sub-cell pro-sub-cell-wide">
+                <span class="pro-sub-label">Renewal Status</span>
+                <strong class="pro-sub-val">${autoRenewLabel}</strong>
+            </div>
+        </div>
+        <div class="pro-sub-manage">
+            <div class="pro-sub-manage-text">
+                <strong>How to manage or cancel your subscription:</strong>
+                <span>Open the Fungies Customer Portal using the button below (sign in with <em>${savedEmail}</em> via magic link) or click the <em>Manage Subscription</em> link in your Fungies email receipt. You can also contact <a href="mailto:contact@milanwebportal.com">contact@milanwebportal.com</a> anytime.</span>
+            </div>
+            <div class="pro-sub-actions">
+                <a href="https://pay.milanwebportal.com/portal" target="_blank" rel="noopener noreferrer" class="pro-sub-portal-btn">
+                    Manage / Cancel on Fungies
+                </a>
+                <a href="/refund" target="_blank" rel="noopener noreferrer" class="pro-sub-link-btn">
+                    Refund &amp; Cancellation Policy
+                </a>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('pro-sub-logout-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        logoutPro();
+    });
+}
+
+export function logoutPro() {
+    setProStatus(false);
+    if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('geo_ride_pro_active');
+        localStorage.removeItem('geo_ride_pro_email');
+    }
+    cachedProSubInfo = null;
+    if (typeof document === 'undefined') return;
+    const keyInput = document.getElementById('pro-key-input');
+    if (keyInput) keyInput.value = '';
+    const proStatusEl = document.getElementById('pro-activation-status');
+    if (proStatusEl) {
+        proStatusEl.style.display = 'none';
+        proStatusEl.innerHTML = '';
+    }
+    renderProSubscriptionPanel(null);
+    updateToggleStates();
+    const modalEl = typeof document !== 'undefined' ? document.querySelector('.pro-modal') : null;
+    modalEl?.classList?.remove('is-pro-active');
+    const proModalTitle = document.getElementById('pro-modal-title');
+    if (proModalTitle) {
+        proModalTitle.innerHTML = 'Unlock <span>God Mode</span> &amp; Full Pro Pass';
+    }
+    const proModalDesc = document.getElementById('pro-modal-desc');
+    if (proModalDesc) {
+        proModalDesc.textContent =
+            'Everything included in GEO Ride Pro. Every perk below is active in the simulator today with instant unlock across all your devices.';
+    }
+    const logoutBottomBtn = document.getElementById('pro-logout-bottom-btn');
+    if (logoutBottomBtn && logoutBottomBtn.style) {
+        logoutBottomBtn.style.display = 'none';
+    }
+    showToast('LOGGED OUT', 'Pro subscription signed out on this device.');
+}
+
 export function openProModal() {
     if (typeof document === 'undefined') return;
     const backdrop = document.getElementById('pro-modal-backdrop');
@@ -2436,22 +2637,58 @@ export function openProModal() {
         backdrop.classList.add('active');
         const modalEl = typeof backdrop.querySelector === 'function' ? backdrop.querySelector('.pro-modal') : null;
         if (modalEl) modalEl.scrollTop = 0;
+        const modalBodyEl =
+            typeof backdrop.querySelector === 'function' ? backdrop.querySelector('.pro-modal-body') : null;
+        if (modalBodyEl) modalBodyEl.scrollTop = 0;
         state.isInputFocused = true;
         if (document.body && document.body.classList) {
             document.body.classList.remove('hide-cursor');
         }
         syncMapInteractions(activeMap);
         const proStatusEl = document.getElementById('pro-activation-status');
+        const proModalTitle = document.getElementById('pro-modal-title');
+        const proModalDesc = document.getElementById('pro-modal-desc');
+        if (modalEl && modalEl.classList) {
+            modalEl.classList.toggle('is-pro-active', !!state.isPro);
+        }
+        if (proModalTitle) {
+            proModalTitle.innerHTML = state.isPro
+                ? 'GEO Ride <span>Pro Active</span>'
+                : 'Unlock <span>God Mode</span> &amp; Full Pro Pass';
+        }
+        if (proModalDesc) {
+            const savedEmail = localStorage.getItem('geo_ride_pro_email');
+            proModalDesc.textContent = state.isPro
+                ? `All Pro perks below are unlocked on your account${savedEmail ? ` (${savedEmail})` : ''}.`
+                : 'Everything included in GEO Ride Pro. Every perk below is active in the simulator today with instant unlock across all your devices.';
+        }
         if (proStatusEl) {
             if (state.isPro) {
                 const savedEmail = localStorage.getItem('geo_ride_pro_email');
                 proStatusEl.style.display = 'flex';
-                proStatusEl.style.color = '#22c55e';
+                proStatusEl.style.color = '#c470f0';
                 proStatusEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Pro Subscription Active${savedEmail ? ` (${savedEmail})` : ''}</span>`;
+                renderProSubscriptionPanel(cachedProSubInfo || { email: savedEmail });
+                if (savedEmail) {
+                    checkProStatusByEmail(savedEmail)
+                        .then((res) => {
+                            if (res && res.is_pro) {
+                                cachedProSubInfo = { ...res, email: savedEmail };
+                                renderProSubscriptionPanel(cachedProSubInfo);
+                            }
+                        })
+                        .catch(() => {});
+                }
             } else {
                 proStatusEl.style.display = 'none';
                 proStatusEl.innerHTML = '';
+                renderProSubscriptionPanel(null);
             }
+        }
+
+        const logoutBottomBtn = document.getElementById('pro-logout-bottom-btn');
+        if (logoutBottomBtn && logoutBottomBtn.style) {
+            logoutBottomBtn.style.display = state.isPro ? 'inline-flex' : 'none';
         }
 
         // Dynamically fetch and sync latest plans & checkout URLs from Supabase
@@ -2468,7 +2705,7 @@ export function openProModal() {
                     const priceEl = monthlyBtn.querySelector('.pro-plan-price');
                     const monthlyPrice = Number(monthlyPlan.price ?? monthlyPlan.price_usd);
                     if (priceEl && Number.isFinite(monthlyPrice) && monthlyPrice > 0) {
-                        priceEl.innerHTML = `$${monthlyPrice.toFixed(2)} <span>/ mo</span>`;
+                        priceEl.innerHTML = `$${monthlyPrice.toFixed(2)} <span class="pro-plan-period">/ mo</span>`;
                     }
                 }
 
@@ -2478,7 +2715,7 @@ export function openProModal() {
                     const priceEl = yearlyBtn.querySelector('.pro-plan-price');
                     const yearlyPrice = Number(yearlyPlan.price ?? yearlyPlan.price_usd);
                     if (priceEl && Number.isFinite(yearlyPrice) && yearlyPrice > 0) {
-                        priceEl.innerHTML = `$${yearlyPrice.toFixed(2)} <span>/ mo</span>`;
+                        priceEl.innerHTML = `$${yearlyPrice.toFixed(2)} <span class="pro-plan-period">/ mo</span>`;
                     }
                 }
 
@@ -2488,7 +2725,7 @@ export function openProModal() {
                     const priceEl = lifetimeBtn.querySelector('.pro-plan-price');
                     const lifetimePrice = Number(lifetimePlan.price ?? lifetimePlan.price_usd);
                     if (priceEl && Number.isFinite(lifetimePrice) && lifetimePrice > 0) {
-                        priceEl.innerHTML = `<span class="price-strikethrough">$79.99</span> $${lifetimePrice.toFixed(2)} <span>once</span>`;
+                        priceEl.innerHTML = `$${lifetimePrice.toFixed(2)} <span class="pro-plan-period">once</span>`;
                     }
                 }
             })

@@ -1359,7 +1359,7 @@
                                 type="button"
                                 title="View Changelog"
                             >
-                                v1.2.3 &bull; CHANGELOG
+                                v1.2.4 &bull; CHANGELOG
                             </button>
                         </div>
                     </div>
@@ -2795,26 +2795,42 @@
                             </div>
                         </div>
 
-                        <div class="sx-card sx-pro-showcase-card">
+                        <div id="sx-about-pro-card" class="sx-card sx-pro-showcase-card">
                             <div class="sx-label sx-label-split">
                                 <span>GEO RIDE PRO</span>
-                                <span class="sx-pro-tag">PRO</span>
+                                <span id="sx-about-pro-tag" class="sx-pro-tag">PRO</span>
                             </div>
-                            <button id="settings-pro-btn" class="sx-btn sx-btn-pro" type="button">
-                                <svg
-                                    class="god-crown-icon"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    aria-hidden="true"
+                            <div class="sx-about-pro-row" style="display: flex; gap: 8px; align-items: center">
+                                <button id="settings-pro-btn" class="sx-btn sx-btn-pro" type="button" style="flex: 1">
+                                    <svg
+                                        class="god-crown-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                                    </svg>
+                                    <span id="settings-pro-btn-label">UNLOCK PRO</span>
+                                </button>
+                                <button
+                                    id="settings-pro-logout-btn"
+                                    class="sx-btn sx-btn-ghost"
+                                    type="button"
+                                    style="
+                                        display: none;
+                                        padding: 0 14px;
+                                        color: #fca5a5;
+                                        border-color: rgba(239, 68, 68, 0.4);
+                                    "
+                                    title="Log out of Pro"
                                 >
-                                    <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
-                                </svg>
-                                <span>UNLOCK PRO</span>
-                            </button>
+                                    Log Out
+                                </button>
+                            </div>
                         </div>
 
                         <div class="sx-card">
@@ -3222,6 +3238,14 @@
                             <span class="sx-label">RELEASE CHANGELOG &amp; VERSION HISTORY</span>
                             <div class="sx-about-changelog">
                                 <div class="sx-about-cl-row">
+                                    <span class="sx-about-cl-ver">v1.2.4 (November 2026)</span>
+                                    <span class="sx-about-cl-txt"
+                                        >Fungies Customer Self-Service Portal Integration (/portal), Real-time Pro UI
+                                        State Synchronization, Seamless 60 FPS Modal Scrolling, and Automated Webhook
+                                        Provisioning.</span
+                                    >
+                                </div>
+                                <div class="sx-about-cl-row">
                                     <span class="sx-about-cl-ver">v1.2.3 (November 2026)</span>
                                     <span class="sx-about-cl-txt"
                                         >Cross-Device Cloud Account Sync (Email + PIN/Password), Unique Pilot-XXXX
@@ -3282,10 +3306,51 @@
                                 <article class="changelog-entry">
                                     <div class="changelog-entry-head">
                                         <div class="changelog-tags">
-                                            <span class="changelog-version">v1.2.3</span>
+                                            <span class="changelog-version">v1.2.4</span>
                                             <span class="changelog-tag-latest">LATEST</span>
                                         </div>
                                         <time class="changelog-date">Current Release</time>
+                                    </div>
+                                    <h3 class="changelog-heading">
+                                        Fungies Customer Self-Service Portal Integration, Pro UI State Synchronization,
+                                        Seamless 60 FPS Modal Scrolling &amp; Webhook Provisioning
+                                    </h3>
+                                    <ul class="changelog-items">
+                                        <li>
+                                            <strong>Fungies Customer Self-Service Portal:</strong> Direct integration
+                                            with the Fungies customer portal at
+                                            <code>pay.milanwebportal.com/portal</code>, enabling passwordless magic link
+                                            sign-in, real-time subscription status, payment method updates, downloadable
+                                            invoices, and one-click cancellation.
+                                        </li>
+                                        <li>
+                                            <strong>Real-Time Pro UI State Synchronization:</strong> Header action
+                                            button in Settings dynamically reflects Pro status with purple neon glow and
+                                            "ACTIVE" indicator, automatically hides redundant upgrade tabs, displays
+                                            verified badges in About, and offers a one-tap Log Out control on active
+                                            devices.
+                                        </li>
+                                        <li>
+                                            <strong>Seamless 60 FPS Modal Scrolling:</strong> Decoupled modal sticky
+                                            header from the scrollable viewport container, eliminating scroll stutter
+                                            and rendering artifacts for a butter-smooth 60 FPS experience across
+                                            high-refresh-rate mobile and desktop displays.
+                                        </li>
+                                        <li>
+                                            <strong>Automated Webhook Provisioning &amp; Grace Periods:</strong>
+                                            Hardened Fungies webhook processing with HMAC SHA-256 signature
+                                            verification, idempotency duplicate prevention, and automatic grace period
+                                            calculation across all three membership tiers.
+                                        </li>
+                                    </ul>
+                                </article>
+
+                                <article class="changelog-entry">
+                                    <div class="changelog-entry-head">
+                                        <div class="changelog-tags">
+                                            <span class="changelog-version">v1.2.3</span>
+                                        </div>
+                                        <time class="changelog-date">November 2026</time>
                                     </div>
                                     <h3 class="changelog-heading">
                                         Cross-Device Cloud Account Sync, Unique Pilot Callsigns, Founder Lifetime Pro
@@ -3638,172 +3703,296 @@
                         </svg>
                     </button>
                 </div>
-                <div class="pro-hero" aria-hidden="true">
-                    <div class="pro-hero-orb">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <h2 id="pro-modal-title" class="pro-modal-title">Unlock <span>God Mode</span> &amp; More</h2>
-                <p class="pro-modal-desc">
-                    Upgrade your simulator experience with unlimited speed, zero collisions ghost mode, private
-                    multiplayer rooms, and ad-free exploration.
-                </p>
-
-                <div class="pro-modal-perks">
-                    <div class="pro-perk-item">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>God Mode Ghost Vehicle</span>
-                    </div>
-                    <div class="pro-perk-item">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Private Multiplayer Rooms</span>
-                    </div>
-                    <div class="pro-perk-item">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Pro Player Badge in MP</span>
-                    </div>
-                    <div class="pro-perk-item">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Zero Advertisements</span>
-                    </div>
-                    <div class="pro-perk-item">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Purple Tire Skidmarks &amp; Smoke</span>
-                    </div>
-                </div>
-
-                <div class="pro-plans-grid">
-                    <a
-                        href="https://pay.milanwebportal.com/checkout-element/abd3b8dc-f5b2-47ef-ab39-ff56ddc5b594?fngs-hosted=1"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="pro-plan-card"
-                        id="pro-modal-monthly-btn"
-                    >
-                        <div class="pro-plan-name">Monthly</div>
-                        <div class="pro-plan-price">$4.99 <span>/ mo</span></div>
-                        <div class="pro-plan-note">Billed monthly, cancel anytime</div>
-                        <div class="pro-plan-cta">Subscribe Monthly</div>
-                    </a>
-
-                    <a
-                        href="https://pay.milanwebportal.com/checkout-element/72637706-37bf-49bc-912e-bc87b2a84542?fngs-hosted=1"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="pro-plan-card featured"
-                        id="pro-modal-yearly-btn"
-                    >
-                        <div class="pro-plan-pill">Save 40%</div>
-                        <div class="pro-plan-name">Annual</div>
-                        <div class="pro-plan-price">$2.99 <span>/ mo</span></div>
-                        <div class="pro-plan-note">$35.88 billed yearly</div>
-                        <div class="pro-plan-cta">Subscribe Annual</div>
-                    </a>
-
-                    <a
-                        href="https://pay.milanwebportal.com/checkout-element/89bb9923-14d9-4773-aafe-275cdd957fd6?fngs-hosted=1"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="pro-plan-card founder"
-                        id="pro-modal-lifetime-btn"
-                    >
-                        <div class="pro-plan-pill founder-pill">Founder Offer</div>
-                        <div class="pro-plan-name">Lifetime</div>
-                        <div class="pro-plan-price">
-                            <span class="price-strikethrough">$79.99</span> $49.99 <span>once</span>
+                <div class="pro-modal-body" id="pro-modal-body">
+                    <div class="pro-hero" aria-hidden="true">
+                        <div class="pro-hero-orb">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M2 20h20M5 20L3 8l5 4 4-7 4 7 5-4-2 12z"></path>
+                            </svg>
                         </div>
-                        <div class="pro-plan-note">One-time payment • Lifetime access (later $79.99)</div>
-                        <div class="pro-plan-cta">Claim Founder Deal</div>
-                    </a>
-                </div>
+                    </div>
+                    <div class="pro-modal-badge">GEO RIDE PRO VIP PASS</div>
+                    <h2 id="pro-modal-title" class="pro-modal-title">
+                        Unlock <span>God Mode</span> &amp; Full Pro Pass
+                    </h2>
+                    <p id="pro-modal-desc" class="pro-modal-desc">
+                        Everything included in GEO Ride Pro. Every perk below is active in the simulator today with
+                        instant unlock across all your devices.
+                    </p>
 
-                <div class="pro-modal-footer-note">
-                    Secure checkout powered by Fungies. Instant activation. Cancel anytime.
-                </div>
+                    <div class="pro-modal-perks">
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>God Mode Ghost Vehicle</strong>
+                                <span>1,000+ km/h flight &amp; zero building collisions</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Private 10-Player Rooms</strong>
+                                <span>Host or upgrade rooms to 10 slots (vs 4 free)</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Neon Purple Skidmarks &amp; Smoke</strong>
+                                <span>Purple tire tracks &amp; drift smoke particles</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Pro Crown Badge Everywhere</strong>
+                                <span>Crown badge in multiplayer, Pilot Hub &amp; leaderboards</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Skip Level Locks from Level 1</strong>
+                                <span>Web Radio (Lv 5), City Discovery (Lv 10) &amp; 3D Terrain (Lv 25)</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>1.5x Career XP Multiplier</strong>
+                                <span>Earn 50% more XP on all driving, drifts &amp; missions</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Pro Bonus Missions &amp; Achievements</strong>
+                                <span>Unlock daily/weekly Pro bonus slots &amp; Pro achievements</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Weekly Streak Freeze Protection</strong>
+                                <span>One missed day per week is automatically forgiven</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Settings JSON Backup &amp; Restore</strong>
+                                <span>Export &amp; import your custom simulator configuration</span>
+                            </div>
+                        </div>
+                        <div class="pro-perk-item">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <div class="pro-perk-text">
+                                <strong>Full Top-100 Leaderboards &amp; Pro Share Cards</strong>
+                                <span>Expanded rankings, exact gap stats &amp; Pro share theme</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="pro-activation-head">
-                    <span class="pro-activation-title">Already subscribed or new device?</span>
-                    <span class="pro-activation-sub">Enter the email you purchased with to activate Pro here.</span>
+                    <div id="pro-subscription-panel" class="pro-sub-panel" hidden></div>
+
+                    <div class="pro-plans-grid" id="pro-plans-grid">
+                        <a
+                            href="https://pay.milanwebportal.com/checkout-element/abd3b8dc-f5b2-47ef-ab39-ff56ddc5b594?fngs-hosted=1"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="pro-plan-card"
+                            id="pro-modal-monthly-btn"
+                        >
+                            <span class="pro-plan-pill pro-plan-pill-ghost">FLEXIBLE</span>
+                            <div class="pro-plan-name">Monthly</div>
+                            <div class="pro-plan-price-wrap">
+                                <div class="pro-plan-strike-row pro-plan-strike-empty" aria-hidden="true">&nbsp;</div>
+                                <div class="pro-plan-price">$4.99 <span class="pro-plan-period">/ mo</span></div>
+                            </div>
+                            <div class="pro-plan-note">Billed monthly • Cancel anytime</div>
+                            <div class="pro-plan-cta">Subscribe Monthly</div>
+                        </a>
+
+                        <a
+                            href="https://pay.milanwebportal.com/checkout-element/72637706-37bf-49bc-912e-bc87b2a84542?fngs-hosted=1"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="pro-plan-card featured"
+                            id="pro-modal-yearly-btn"
+                        >
+                            <span class="pro-plan-pill">SAVE 40%</span>
+                            <div class="pro-plan-name">Annual Pass</div>
+                            <div class="pro-plan-price-wrap">
+                                <div class="pro-plan-strike-row">
+                                    <span class="price-strikethrough">$4.99</span>
+                                    <span class="pro-discount-tag">-40%</span>
+                                </div>
+                                <div class="pro-plan-price">$2.99 <span class="pro-plan-period">/ mo</span></div>
+                            </div>
+                            <div class="pro-plan-note">$35.88 billed yearly ($2.99/mo)</div>
+                            <div class="pro-plan-cta">Subscribe Annual</div>
+                        </a>
+
+                        <a
+                            href="https://pay.milanwebportal.com/checkout-element/89bb9923-14d9-4773-aafe-275cdd957fd6?fngs-hosted=1"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="pro-plan-card founder"
+                            id="pro-modal-lifetime-btn"
+                        >
+                            <span class="pro-plan-pill founder-pill">FOUNDER OFFER</span>
+                            <div class="pro-plan-name">Lifetime VIP</div>
+                            <div class="pro-plan-price-wrap">
+                                <div class="pro-plan-strike-row">
+                                    <span class="price-strikethrough">$79.99</span>
+                                    <span class="pro-discount-tag">SAVE $30</span>
+                                </div>
+                                <div class="pro-plan-price">$49.99 <span class="pro-plan-period">once</span></div>
+                            </div>
+                            <div class="pro-plan-note">Pay once • Lifetime access forever</div>
+                            <div class="pro-plan-cta">Claim Founder Deal</div>
+                        </a>
+                    </div>
+
+                    <div class="pro-modal-footer-note">
+                        Secure checkout powered by Fungies. Instant activation. Cancel anytime.
+                    </div>
+
+                    <div class="pro-activation-head">
+                        <span class="pro-activation-title">Already subscribed or new device?</span>
+                        <span class="pro-activation-sub">Enter the email you purchased with to activate Pro here.</span>
+                    </div>
+                    <div class="pro-activation-box">
+                        <input
+                            type="email"
+                            id="pro-key-input"
+                            class="pro-activation-input"
+                            placeholder="Order email address"
+                            autocomplete="email"
+                            inputmode="email"
+                        />
+                        <button id="pro-activate-btn" class="pro-activation-btn" type="button">Activate</button>
+                        <button
+                            id="pro-logout-bottom-btn"
+                            class="pro-activation-logout-btn"
+                            type="button"
+                            style="display: none"
+                        >
+                            Log Out
+                        </button>
+                    </div>
+                    <div
+                        id="pro-activation-status"
+                        style="
+                            min-height: 22px;
+                            font-size: 0.78rem;
+                            font-weight: 600;
+                            margin-top: 8px;
+                            transition: all 0.3s ease;
+                            display: none;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                        "
+                    ></div>
                 </div>
-                <div class="pro-activation-box">
-                    <input
-                        type="email"
-                        id="pro-key-input"
-                        class="pro-activation-input"
-                        placeholder="Order email address"
-                        autocomplete="email"
-                        inputmode="email"
-                    />
-                    <button id="pro-activate-btn" class="pro-activation-btn" type="button">Activate</button>
-                </div>
-                <div
-                    id="pro-activation-status"
-                    style="
-                        min-height: 22px;
-                        font-size: 0.78rem;
-                        font-weight: 600;
-                        margin-top: 8px;
-                        transition: all 0.3s ease;
-                        display: none;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 6px;
-                    "
-                ></div>
             </div>
         </div>
 
