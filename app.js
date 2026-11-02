@@ -58,10 +58,35 @@ trackEvent('session_start', {
 // Load initial state
 loadState();
 
+// Parse and prioritize URL parameters for direct spawning from landing page
+const urlParams = new URLSearchParams(window.location.search);
+const paramLat = parseFloat(urlParams.get('lat'));
+const paramLng = parseFloat(urlParams.get('lng'));
+const paramZoom = parseFloat(urlParams.get('zoom'));
+const paramPlace = urlParams.get('place');
+const paramVehicle = urlParams.get('vehicle');
+
+if (!isNaN(paramLat) && !isNaN(paramLng) && paramLat >= -90 && paramLat <= 90 && paramLng >= -180 && paramLng <= 180) {
+    state.lat = paramLat;
+    state.lng = paramLng;
+    state.currentHome = [paramLng, paramLat];
+    if (paramPlace) {
+        import('./js/discovery.js')
+            .then(({ discoveryCache }) => {
+                const gridKey = `${paramLat.toFixed(2)},${paramLng.toFixed(2)}`;
+                discoveryCache.set(gridKey, { cityName: paramPlace, countryName: '' });
+            })
+            .catch(() => {});
+    }
+}
+
+if (paramVehicle && ['car', 'truck', 'bus', 'god'].includes(paramVehicle)) {
+    state.activeVehicle = paramVehicle;
+}
+
 // Automatic Pro activation from Fungies redirect / URL parameters
 // Strictly verified against Supabase before granting Pro privileges
 try {
-    const urlParams = new URLSearchParams(window.location.search);
     const proParam = urlParams.get('pro');
     const orderId = urlParams.get('order_id') || urlParams.get('checkout_id');
     const customerEmail = (urlParams.get('email') || urlParams.get('customer_email') || '').trim().toLowerCase();
@@ -158,7 +183,7 @@ if (!map) {
         container: 'map',
         style: `mapbox://styles/mapbox/${state.mapStyle}`,
         center: [state.lng, state.lat],
-        zoom: INITIAL_ZOOM,
+        zoom: !isNaN(paramZoom) && paramZoom >= 1 && paramZoom <= 22 ? paramZoom : INITIAL_ZOOM,
         pitch: 65,
         bearing: state.bearing,
         interactive: false,
