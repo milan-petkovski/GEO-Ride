@@ -256,7 +256,7 @@ Hi! I am Milan, a 20-year-old web developer and student from Serbia. I built **G
 
 If you enjoy driving across the globe in GEO Ride and want to support my late-night coding sessions, you can buy me a coffee!
 
-💖 [Support my work via PayPal](https://paypal.me/milanwebportal)
+💖 [Support my work via Ko-fi](https://ko-fi.com/georide)
 
 Every donation means a lot and directly supports Mapbox API quota, high-speed tile CDN costs, and continuous physics updates. Thank you!
 
@@ -269,7 +269,7 @@ Created by **Milan Petkovski** &bull; Web Developer from Serbia.
 - **Play GEO Ride**: [playgeoride.com](https://playgeoride.com)
 - **Portfolio & Projects**: [milanwebportal.com](https://milanwebportal.com)
 - **Contact**: [contact@milanwebportal.com](mailto:contact@milanwebportal.com)
-- **Support the Project**: [Support via PayPal](https://paypal.me/milanwebportal)
+- **Support the Project**: [Support via Ko-fi](https://ko-fi.com/georide)
 
 _GEO Ride is 100% free and open-source under the MIT License._
 

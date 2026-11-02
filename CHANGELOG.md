@@ -5,6 +5,32 @@ All notable changes to **GEO Ride** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] (2026-11-02)
+
+### Added
+
+- **Ko-fi Creator Support Integration**: Upgraded the simulator's community donation system to Ko-fi (`https://ko-fi.com/georide`), enabling players to easily support server costs and ongoing development with one-time or monthly tips via Apple Pay, Google Pay, credit cards, or PayPal.
+- **Responsive Pricing Support Banner & Footer Links**: Integrated a responsive neon support bar on the landing page (`index.html`) below pricing tiers, offering players an alternative micro-donation route ($3 / $5) without subscription commitments, plus direct footer navigation links.
+- **In-Game Vehicle Garage Support Prompts**: Added contextual community support prompts inside `Settings > Driving` beneath vehicle class selection, inviting enthusiasts to directly fund new high-poly 3D vehicle models and real-world engine audio.
+- **GitHub Sponsors Configuration**: Added `.github/FUNDING.yml` to enable the native GitHub Sponsor button directly on the open-source repository.
+
+### Changed & Fixed
+
+- **WebGL & Promise Cleanup**: Resolved unhandled promise rejection warnings during fast map style switching and improved WebGL resource disposal on mobile devices.
+- **Documentation & Links**: Replaced all legacy PayPal.me endpoints across the simulator, modals, and `README.md` with the official Ko-fi integration.
+
+## [1.2.4] (2026-11-02)
+
+### Added
+
+- **Fungies Customer Self-Service Portal**: Direct integration with the Fungies customer portal at `pay.milanwebportal.com/portal`, enabling passwordless magic link sign-in, real-time subscription status, payment method updates, downloadable invoices, and one-click cancellation.
+- **Automated Webhook Provisioning & Grace Periods**: Hardened Fungies webhook processing with HMAC SHA-256 signature verification, idempotency duplicate prevention, and automatic grace period calculation across all three membership tiers.
+
+### Changed & Fixed
+
+- **Real-Time Pro UI State Synchronization**: Header action button in Settings dynamically reflects Pro status with purple neon glow and "ACTIVE" indicator, automatically hides redundant upgrade tabs, displays verified badges in About, and offers a one-tap Log Out control on active devices.
+- **Seamless 60 FPS Modal Scrolling**: Decoupled modal sticky header from the scrollable viewport container, eliminating scroll stutter and rendering artifacts for a butter-smooth 60 FPS experience across high-refresh-rate mobile and desktop displays.
+
 ## [1.2.3] (2026-11-01)
 
 ### Added

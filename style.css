@@ -10211,3 +10211,129 @@ body.photo-mode-active #fps-counter {
         font-size: 11px;
     }
 }
+
+/* Driving Settings Support Banner */
+.sx-driving-support-card {
+    background: linear-gradient(135deg, rgba(0, 242, 255, 0.08) 0%, rgba(8, 12, 26, 0.95) 100%) !important;
+    border: 1px solid rgba(0, 242, 255, 0.32) !important;
+    border-radius: 18px !important;
+    padding: 16px 20px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    margin-top: 6px !important;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.35),
+        inset 0 0 16px rgba(0, 242, 255, 0.04) !important;
+}
+
+.sx-driving-support-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.sx-driving-support-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 12px;
+    background: rgba(0, 242, 255, 0.12);
+    border: 1px solid rgba(0, 242, 255, 0.4);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 14px rgba(0, 242, 255, 0.2);
+}
+
+.sx-driving-support-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.sx-driving-support-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.sx-driving-support-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sx-driving-support-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+.sx-driving-support-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.sx-driving-support-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: auto !important;
+    min-height: unset !important;
+    padding: 10px 18px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #00f2ff 0%, #0088ff 100%) !important;
+    color: #040610 !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    border: 1px solid #00f2ff !important;
+    box-shadow: 0 0 18px rgba(0, 242, 255, 0.35) !important;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    cursor: pointer !important;
+}
+
+.sx-driving-support-btn:hover {
+    transform: translateY(-2px) !important;
+    filter: brightness(1.1) !important;
+    box-shadow: 0 0 26px rgba(0, 242, 255, 0.6) !important;
+}
+
+.sx-driving-support-btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+@media (max-width: 680px) {
+    .sx-driving-support-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 16px !important;
+        gap: 14px !important;
+    }
+    .sx-driving-support-left {
+        align-items: flex-start;
+    }
+    .sx-driving-support-btn {
+        width: 100% !important;
+    }
+}
