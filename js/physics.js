@@ -11,6 +11,9 @@ import { trackEvent } from './analytics.js';
 import { haptics } from './haptics.js';
 import { trackFrame } from './progress.js';
 
+/** Minimum earned points for a drift to be banked (anything lower shatters). */
+const DRIFT_BANK_MIN_POINTS = 300;
+
 let lastCollisionTrackTime = 0;
 
 // Off-thread Web Worker initialization for physics trajectory pre-computation
@@ -391,15 +394,15 @@ export function updatePhysics(dtFinal, map) {
     // Drift finish & banking (1.5s combo chaining grace period)
     if (state.isDrifting && Date.now() - (state.lastDriftTime || 0) > 1500) {
         const earned = Math.floor((state.currentDriftPoints || 0) * (state.driftMultiplier || 1));
-        if (earned >= 1000) {
+        if (earned >= DRIFT_BANK_MIN_POINTS) {
             state.driftScore = (state.driftScore || 0) + earned;
             if (typeof window !== 'undefined' && typeof window.onDriftComplete === 'function') {
                 window.onDriftComplete(earned, state.driftMultiplier || 1);
             }
         } else if (earned > 0) {
-            // Under 1,000 points: shatters and disappears, not remembered/saved at all
+            // Under the banking threshold: shatters and disappears, not remembered/saved at all
             if (typeof window !== 'undefined' && typeof window.onDriftFail === 'function') {
-                window.onDriftFail(earned, state.driftMultiplier || 1, 'under_1000');
+                window.onDriftFail(earned, state.driftMultiplier || 1, 'under_threshold');
             }
         }
         state.isDrifting = false;

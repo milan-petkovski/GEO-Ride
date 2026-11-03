@@ -4199,7 +4199,7 @@ body.hidden-ui .donation-popup {
 }
 
 .toast-msg.toast-pulse {
-    animation: toastPulse 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: toastPulse 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .toast-msg.hide {
@@ -4491,12 +4491,15 @@ body.hidden-ui .donation-popup {
 
 @keyframes toastPulse {
     0% {
+        opacity: 1;
         transform: scale(1);
     }
     50% {
+        opacity: 1;
         transform: scale(1.03);
     }
     100% {
+        opacity: 1;
         transform: scale(1);
     }
 }
@@ -10335,5 +10338,224 @@ body.photo-mode-active #fps-counter {
     }
     .sx-driving-support-btn {
         width: 100% !important;
+    }
+}
+
+/* ==========================================================================
+   TUTORIAL V2: icon tiles, live pulse, faster transitions, phone layout
+   ========================================================================== */
+.tutorial-modal {
+    overflow: hidden;
+}
+
+.tutorial-modal::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00f2ff, #22c55e, transparent);
+    background-size: 200% 100%;
+    animation: tutShimmer 2.2s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes tutShimmer {
+    from {
+        background-position: 200% 0;
+    }
+    to {
+        background-position: -200% 0;
+    }
+}
+
+.tut-icon {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+    background: radial-gradient(circle at 30% 25%, rgba(0, 242, 255, 0.28), rgba(0, 242, 255, 0.06));
+    border: 1px solid rgba(0, 242, 255, 0.45);
+    box-shadow: 0 0 16px rgba(0, 242, 255, 0.25);
+    animation: tutIconFloat 2.4s ease-in-out infinite;
+}
+
+.tut-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+@keyframes tutIconFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+.tutorial-slide.active {
+    animation: tutBubblePop 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tut-bubble-row {
+    justify-content: flex-start;
+}
+
+.tut-bubble-keys {
+    justify-content: center;
+}
+
+.tut-key-btn {
+    position: relative;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tut-key-btn.is-target:not(.is-done)::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 17px;
+    border: 2px solid rgba(0, 242, 255, 0.55);
+    animation: tutPing 1.3s ease-out infinite;
+    pointer-events: none;
+}
+
+@keyframes tutPing {
+    0% {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.14);
+    }
+}
+
+.tut-key-btn:active {
+    transform: scale(0.94);
+}
+
+.tut-key-btn.is-done {
+    animation: tutKeyDone 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tutKeyDone {
+    0% {
+        transform: scale(0.92);
+    }
+    60% {
+        transform: scale(1.08);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.tut-progress-fill {
+    transition: width 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tutorial-modal::before,
+    .tut-icon,
+    .tut-key-btn.is-target:not(.is-done)::after {
+        animation: none;
+    }
+}
+
+/* Phone / touch layout: compact sheet under the header, big tap targets */
+@media (max-width: 768px), (pointer: coarse) {
+    .tutorial-modal-backdrop {
+        top: calc(env(safe-area-inset-top, 0px) + 64px);
+        width: calc(100vw - 16px);
+        max-width: 460px;
+    }
+
+    .tutorial-modal {
+        border-radius: 20px;
+        padding: 11px 12px 12px;
+        gap: 9px;
+    }
+
+    .tutorial-modal::after {
+        display: none;
+    }
+
+    .tutorial-badge {
+        font-size: 0.6rem;
+        padding: 3px 8px;
+    }
+
+    .tutorial-dots {
+        display: none;
+    }
+
+    .tutorial-skip-pill {
+        min-height: 30px;
+        padding: 4px 12px;
+    }
+
+    .tutorial-close-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .tut-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    .tutorial-title {
+        font-size: 1.08rem;
+    }
+
+    .tutorial-lead {
+        font-size: 0.74rem;
+        line-height: 1.35;
+    }
+
+    .tut-bubble-keys {
+        width: 100%;
+        gap: 10px;
+    }
+
+    .tut-key-btn {
+        flex: 1 1 0;
+        min-height: 60px;
+        padding: 8px 10px;
+    }
+
+    .tut-key-btn kbd,
+    .tut-key-wide kbd,
+    .tut-key-start kbd {
+        min-width: 0;
+        width: 100%;
+        height: 38px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+    .tutorial-modal-backdrop {
+        top: 8px;
+        width: min(420px, 52vw);
+    }
+
+    .tutorial-lead {
+        display: none;
+    }
+
+    .tut-key-btn {
+        min-height: 48px;
+    }
+
+    .tut-key-btn kbd {
+        height: 30px;
     }
 }

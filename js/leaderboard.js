@@ -264,7 +264,7 @@ export async function submitProgress({ force = false } = {}) {
                 saveState();
             }
             if (result.is_pro && !state.isPro) {
-                setProStatus(true);
+                setProStatus(true, { fromCloud: true });
             }
             lastSubmitSignature = signature;
             cache.clear();
@@ -391,7 +391,7 @@ export async function cloudAuth(email, pin) {
             localStorage.setItem(CLOUD_AUTH_KEY, JSON.stringify(session));
             if (res.is_pro) localStorage.setItem('geo_ride_pro_email', res.email);
         }
-        if (res.is_pro) setProStatus(true);
+        if (res.is_pro) setProStatus(true, { fromCloud: true });
         if (res.progress) mergeCloudPayload(res.progress, res.player_id);
         if (res.player_name && res.player_name !== state.playerName) {
             setStateKey('playerName', res.player_name);
@@ -421,7 +421,7 @@ export async function cloudSync({ pullFirst = false } = {}) {
                     saveState();
                 }
                 if (pulled.is_pro) {
-                    setProStatus(true);
+                    setProStatus(true, { fromCloud: true });
                     if (typeof localStorage !== 'undefined') localStorage.setItem('geo_ride_pro_email', session.email);
                 }
             } else if (pulled?.error === 'unauthorized') {
@@ -442,7 +442,7 @@ export async function cloudSync({ pullFirst = false } = {}) {
                 saveState();
             }
             if (pushed.is_pro) {
-                setProStatus(true);
+                setProStatus(true, { fromCloud: true });
                 if (typeof localStorage !== 'undefined') localStorage.setItem('geo_ride_pro_email', session.email);
             }
         }

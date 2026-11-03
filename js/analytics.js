@@ -24,32 +24,86 @@ export const initConsentMode = () => {
     });
 };
 
-// Error Tracking
-export const trackError = (message, source, lineno, colno, _error) => {
-    trackEvent('exception', {
-        description: `${message} at ${source}:${lineno}:${colno}`,
-        fatal: false
+/**
+ * Coarse device class used as a parameter on every event so desktop and mobile can be compared.
+ * @returns {'mobile'|'tablet'|'desktop'}
+ */
+export const getDeviceType = () => {
+    if (typeof window === 'undefined') return 'desktop';
+    try {
+        const coarse =
+            !!window.matchMedia?.('(pointer: coarse)').matches &&
+            !window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+        const shortSide = Math.min(
+            window.screen?.width || window.innerWidth,
+            window.screen?.height || window.innerHeight
+        );
+        const ua = navigator.userAgent || '';
+        if (/iPad|Tablet/i.test(ua) || (coarse && shortSide >= 700)) return 'tablet';
+        if (coarse || /Mobi|Android|iPhone/i.test(ua) || window.innerWidth < 768) return 'mobile';
+    } catch (_e) {}
+    return 'desktop';
+};
+
+// Error Tracking: identical errors are reported once per session and the total is capped,
+// so a single broken loop can never flood the property.
+const reportedErrors = new Set();
+const MAX_ERROR_EVENTS_PER_SESSION = 15;
+
+export const trackErrorOnce = (eventName, description, extra = {}) => {
+    const text = String(description || 'unknown').slice(0, 300);
+    const key = `${eventName}|${text}`;
+    if (reportedErrors.has(key) || reportedErrors.size >= MAX_ERROR_EVENTS_PER_SESSION) return;
+    reportedErrors.add(key);
+    trackEvent(eventName, {
+        description: text,
+        page: typeof window !== 'undefined' ? window.location?.pathname || '' : '',
+        fatal: false,
+        ...extra
     });
 };
 
-// Core Web Vitals Tracking (Lighthouse / Search Console Optimization)
-export const trackWebVitals = () => {
-    if (typeof window !== 'undefined' && 'performance' in window && 'getEntriesByType' in performance) {
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const paint = performance.getEntriesByType('paint');
-                paint.forEach((entry) => {
-                    trackEvent('web_vitals', {
-                        metric_name: entry.name,
-                        metric_value: Math.round(entry.startTime),
-                        metric_id: entry.entryType
-                    });
-                });
-            }, 3000);
-        });
-    }
+export const trackError = (message, source, lineno, colno, _error) => {
+    trackErrorOnce('exception', `${message} at ${source}:${lineno}:${colno}`);
 };
 
+// Core Web Vitals Tracking: ONE event per page load carrying every metric.
+let webVitalsStarted = false;
+export const trackWebVitals = () => {
+    if (webVitalsStarted) return;
+    if (typeof window === 'undefined' || !('performance' in window)) return;
+    webVitalsStarted = true;
+
+    let lcp = 0;
+    let cls = 0;
+    try {
+        new PerformanceObserver((list) => {
+            const entries = list.getEntries();
+            if (entries.length) lcp = Math.round(entries[entries.length - 1].startTime);
+        }).observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch (_e) {}
+    try {
+        new PerformanceObserver((list) => {
+            list.getEntries().forEach((entry) => {
+                if (!entry.hadRecentInput) cls += entry.value;
+            });
+        }).observe({ type: 'layout-shift', buffered: true });
+    } catch (_e) {}
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const paint = performance.getEntriesByType?.('paint') || [];
+            const fp = paint.find((x) => x.name === 'first-paint');
+            const fcp = paint.find((x) => x.name === 'first-contentful-paint');
+            trackEvent('web_vitals', {
+                fp_ms: fp ? Math.round(fp.startTime) : undefined,
+                fcp_ms: fcp ? Math.round(fcp.startTime) : undefined,
+                lcp_ms: lcp || undefined,
+                cls_x1000: Math.round(cls * 1000)
+            });
+        }, 3000);
+    });
+};
 const AI_REFERRAL_DOMAINS = [
     { match: 'chatgpt.com', engine: 'chatgpt' },
     { match: 'chat.openai.com', engine: 'chatgpt' },
@@ -111,7 +165,8 @@ export const trackEvent = (eventName, params = {}) => {
     const eventParams = {
         ...params,
         page_location: sanitizedLocation,
-        page_path: window.location?.pathname || ''
+        page_path: window.location?.pathname || '',
+        device_type: getDeviceType()
     };
 
     if (typeof window.gtag === 'function') {
@@ -131,9 +186,31 @@ export const trackEvent = (eventName, params = {}) => {
 if (typeof window !== 'undefined') {
     window.onerror = trackError;
     window.onunhandledrejection = (event) => {
-        trackEvent('exception', {
-            description: `Unhandled Rejection: ${event.reason}`,
-            fatal: false
+        trackErrorOnce('exception', `Unhandled Rejection: ${event.reason}`);
+    };
+
+    // Engaged time: counts only while the tab is visible and reports increments when it is hidden or closed,
+    // so desktop and mobile session length can be compared through the device_type parameter.
+    let engagedSince = document.visibilityState === 'visible' ? Date.now() : 0;
+    let engagedTotalMs = 0;
+    let engagedSentMs = 0;
+    const flushEngagement = () => {
+        if (engagedSince) {
+            engagedTotalMs += Date.now() - engagedSince;
+            engagedSince = 0;
+        }
+        const deltaMs = engagedTotalMs - engagedSentMs;
+        if (deltaMs < 1000) return;
+        engagedSentMs = engagedTotalMs;
+        trackEvent('session_engagement', {
+            engaged_seconds: Math.round(deltaMs / 1000),
+            total_engaged_seconds: Math.round(engagedTotalMs / 1000),
+            transport_type: 'beacon'
         });
     };
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushEngagement();
+        else if (!engagedSince) engagedSince = Date.now();
+    });
+    window.addEventListener('pagehide', flushEngagement);
 }

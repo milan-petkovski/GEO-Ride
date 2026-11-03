@@ -3,7 +3,7 @@
  * @description HUD UI manager for GEO Ride, controlling settings panels, vehicle selector tabs, map styles, speedometer display, and user interaction synchronization.
  */
 
-import { state, saveState, loadState, setProStatus, subscribeState } from './state.js';
+import { state, saveState, loadState, setProStatus, setProSuperseded, subscribeState } from './state.js';
 import {
     loadProgress,
     saveProgress,
@@ -30,7 +30,7 @@ import {
     stopProSessionWatcher,
     broadcastProSessionActivation
 } from './supabase-georide.js';
-import { INITIAL_CENTER, VEHICLE_CONFIG } from './config.js';
+import { INITIAL_CENTER } from './config.js';
 import { setupTerrain } from './utils.js';
 import {
     toggleRadio,
@@ -298,99 +298,72 @@ export function updateDriftHUD() {
     }
 }
 
-let speedRunPeak = 0;
-let speedRunStartTime = 0;
-let speedRunStableFrames = 0;
-let lastSpeedTrapAlertTime = 0;
-let lastAlertedSpeed = 0;
+/**
+ * Speed record tracker. Replaces the old random "speed radar".
+ * It only speaks up when you genuinely beat your personal best: the run is judged once you lift
+ * off the throttle (or hold your peak for a moment), so there is never a toast mid-acceleration.
+ */
+const SPEED_RECORD_MIN_KMH = 120;
+const SPEED_RECORD_MIN_GAIN_KMH = 5;
+const SPEED_RECORD_HOLD_MS = 3000;
+const SPEED_RECORD_COOLDOWN_MS = 20000;
 
-export function checkSpeedTrap(speedVal) {
-    if (typeof document === 'undefined') return;
-    const unit = state.unit === 'mi' ? 'MPH' : 'KM/H';
-    const minTriggerSpeed = state.unit === 'mi' ? 75 : 120;
-    const now = Date.now();
+let knownRecordKmh = null;
+let runPeakKmh = 0;
+let runPeakSince = 0;
+let lastRecordToastAt = 0;
 
-    // If driving below high-speed threshold, reset the active speed burst tracker
-    if (speedVal < minTriggerSpeed) {
-        speedRunPeak = 0;
-        speedRunStableFrames = 0;
-        speedRunStartTime = 0;
-        return;
-    }
-
-    // Vehicle top speed calculation
-    const rawMaxSpeed = VEHICLE_CONFIG[state.activeVehicle]?.maxSpeed || 0.4167;
-    let maxVehicleSpeed = Math.floor(rawMaxSpeed * 600);
-    if (state.unit === 'mi') maxVehicleSpeed = Math.floor(maxVehicleSpeed * 0.621371);
-    const isAtTopSpeed = speedVal >= maxVehicleSpeed - 1;
-
-    // Track peak speed of current high-speed run
-    if (speedVal > speedRunPeak) {
-        speedRunPeak = speedVal;
-        speedRunStableFrames = 0;
-        if (!speedRunStartTime) speedRunStartTime = now;
-    } else if (speedVal === speedRunPeak) {
-        speedRunStableFrames++;
-    }
-
-    // If an active SPEED RADAR toast is already visible on screen,
-    // and the player accelerates even faster, update the toast immediately in real time!
-    const existingRadarToast = document.querySelector('#toast-container .toast-msg.toast-radar:not(.hide)');
-    if (existingRadarToast && speedVal > lastAlertedSpeed) {
-        lastAlertedSpeed = speedVal;
-        let radarMsg = `${speedVal} ${unit}`;
-        if (isAtTopSpeed) {
-            radarMsg += ' • MAX SPEED';
-        } else if (speedVal >= (state.topSpeedRecord || 0)) {
-            radarMsg += ' • NEW RECORD';
-        }
-        showToast('SPEED RADAR', radarMsg, { duration: 2500 });
-        return;
-    }
-
-    // Cooldown check (15 seconds between separate speed radar triggers unless beating current top speed)
-    if (now - lastSpeedTrapAlertTime < 15000 && speedVal <= lastAlertedSpeed) {
-        return;
-    }
-
-    // Trigger conditions:
-    // 1. Car reaches max vehicle speed (e.g. 250 KM/H) and holds for 8+ frames (~130ms)
-    // 2. High speed stabilized for 30+ frames (~500ms)
-    // 3. Player peaked and started decelerating (dropped 4+ below peak)
-    const reachedMax = isAtTopSpeed && speedRunStableFrames >= 8;
-    const stabilized = speedRunStableFrames >= 30;
-    const deceleratingFromPeak = speedRunPeak >= minTriggerSpeed + 15 && speedVal <= speedRunPeak - 4;
-
-    if (reachedMax || stabilized || deceleratingFromPeak) {
-        const clockedSpeed = reachedMax ? speedVal : speedRunPeak;
-
-        // Prevent duplicate alerts for the exact same clocked speed in quick succession
-        if (clockedSpeed <= lastAlertedSpeed && now - lastSpeedTrapAlertTime < 20000) {
-            return;
-        }
-
-        lastAlertedSpeed = clockedSpeed;
-        lastSpeedTrapAlertTime = now;
-        speedRunPeak = speedVal;
-        speedRunStableFrames = 0;
-
-        let radarMsg = `${clockedSpeed} ${unit}`;
-        if (clockedSpeed >= maxVehicleSpeed - 1) {
-            radarMsg += ' • MAX SPEED';
-        } else if (clockedSpeed >= (state.topSpeedRecord || 0)) {
-            radarMsg += ' • NEW RECORD';
-        }
-
-        showToast('SPEED RADAR', radarMsg, { duration: 2500 });
-        trackEvent('speed_radar_clocked', {
-            speed: clockedSpeed,
-            unit,
-            vehicle: state.activeVehicle
-        });
-        if (haptics) haptics.impact('medium');
-    }
+function announceSpeedRecord(peakKmh, previousKmh) {
+    const isMi = state.unit === 'mi';
+    const conv = (k) => (isMi ? Math.floor(k * 0.621371) : k);
+    const unit = isMi ? 'MPH' : 'KM/H';
+    const gain = previousKmh > 0 ? ` \u2022 +${conv(peakKmh) - conv(previousKmh)}` : '';
+    showToast('SPEED RECORD', `${conv(peakKmh)} ${unit}${gain}`, { duration: 3500 });
+    trackEvent('speed_record', { speed_kmh: peakKmh, previous_kmh: previousKmh, vehicle: state.activeVehicle });
+    if (haptics) haptics.impact('medium');
 }
 
+function judgeSpeedRun(now) {
+    if (
+        runPeakKmh >= knownRecordKmh + SPEED_RECORD_MIN_GAIN_KMH &&
+        now - lastRecordToastAt > SPEED_RECORD_COOLDOWN_MS
+    ) {
+        announceSpeedRecord(runPeakKmh, knownRecordKmh);
+        lastRecordToastAt = now;
+    }
+    if (runPeakKmh > knownRecordKmh) knownRecordKmh = runPeakKmh;
+}
+
+export function checkSpeedTrap() {
+    if (typeof document === 'undefined') return;
+    const now = Date.now();
+    const kmh = Math.floor(Math.abs(state.velocity) * 600);
+
+    if (knownRecordKmh === null) knownRecordKmh = Math.max(0, state.topSpeedRecord || 0);
+
+    // God mode has no meaningful top speed
+    if (state.activeVehicle === 'god') {
+        runPeakKmh = 0;
+        return;
+    }
+
+    if (kmh >= SPEED_RECORD_MIN_KMH && kmh > runPeakKmh) {
+        runPeakKmh = kmh;
+        runPeakSince = now;
+    }
+    if (runPeakKmh === 0) return;
+
+    const liftedOff = kmh <= runPeakKmh - 12 || kmh < 60;
+    const heldPeak = kmh >= runPeakKmh - 1 && now - runPeakSince > SPEED_RECORD_HOLD_MS;
+
+    if (heldPeak) {
+        judgeSpeedRun(now);
+        runPeakSince = now + 1e9; // do not re-judge this plateau
+    } else if (liftedOff) {
+        judgeSpeedRun(now);
+        runPeakKmh = 0;
+    }
+}
 if (typeof window !== 'undefined') {
     window.onDriftComplete = (banked, multiplier) => {
         playDriftBankSound(state.masterVolume);
@@ -571,7 +544,17 @@ export function initUI(map) {
         if (!settingsPanel) return;
         const willBeOpen = !!open;
         if (state.isSettingsOpen !== willBeOpen) {
-            trackEvent(willBeOpen ? 'settings_open' : 'settings_close');
+            if (willBeOpen) {
+                settingsOpenedAt = Date.now();
+            } else {
+                trackEvent('settings_session', {
+                    duration_s: settingsOpenedAt ? Math.round((Date.now() - settingsOpenedAt) / 1000) : 0,
+                    tabs: Array.from(settingsTabsViewed).join(',') || 'none',
+                    tab_count: settingsTabsViewed.size
+                });
+                settingsTabsViewed.clear();
+                settingsOpenedAt = 0;
+            }
             if (!willBeOpen) {
                 cloudSync().catch(() => {});
             }
@@ -670,7 +653,7 @@ export function initUI(map) {
             const body = settingsPanel.querySelector('.sx-body');
             if (body) body.scrollTop = 0;
             if (name) {
-                trackEvent('settings_tab_view', { tab: name });
+                settingsTabsViewed.add(name);
             }
         };
         tabButtons.forEach((btn, idx) => {
@@ -1501,7 +1484,6 @@ export function initUI(map) {
                         );
                     });
                 }, 600); // 600ms delay to see the vehicle shrink and ball grow
-                trackEvent('search_location', { query: query });
                 inputField.value = '';
                 inputField.blur();
                 searchBox.classList.remove('expanded');
@@ -2675,6 +2657,7 @@ export function demoteProToFree(reason = 'superseded') {
     if (!state.isPro) return;
     stopProSessionWatcher();
     setProStatus(false);
+    if (reason === 'superseded') setProSuperseded(true);
     if (typeof localStorage !== 'undefined') {
         localStorage.removeItem('geo_ride_pro_active');
         localStorage.removeItem('geo_ride_pro_session_token');
@@ -2709,9 +2692,9 @@ export function demoteProToFree(reason = 'superseded') {
     }
 
     if (reason === 'superseded') {
-        showToast('PRO SESIJA PREBAČENA', 'Nalog je aktiviran na drugom uređaju. Nastavljaš igru u Free režimu.');
+        showToast('PRO SESSION MOVED', 'Your account was activated on another device. Continuing in Free mode.');
     } else {
-        showToast('PRO DEAKTIVIRAN', 'Pro pretplata više nije aktivna.');
+        showToast('PRO DEACTIVATED', 'Your Pro subscription is no longer active.');
     }
 }
 
@@ -2886,7 +2869,51 @@ export function closeProModal() {
     }
 }
 
-let activeToastTimeout = null;
+const TOAST_MAX_VISIBLE = 3;
+const TOAST_EXIT_MS = 260;
+const TOAST_EPHEMERAL_TYPES = new Set(['camera', 'radar', 'drift', 'check']);
+const toastPending = [];
+
+function isToastLive(el) {
+    return !!el && el.parentElement && !el.classList.contains('hide');
+}
+
+function dismissToast(toast) {
+    if (!toast || toast.dataset.toastClosing === '1') return;
+    toast.dataset.toastClosing = '1';
+    if (toast._toastTimer) {
+        clearTimeout(toast._toastTimer);
+        toast._toastTimer = null;
+    }
+    toast.classList.add('hide');
+    setTimeout(() => {
+        toast.remove();
+        flushToastQueue();
+    }, TOAST_EXIT_MS);
+}
+
+function armToastTimer(toast, duration) {
+    if (toast._toastTimer) clearTimeout(toast._toastTimer);
+    toast._toastTimer = setTimeout(() => dismissToast(toast), duration);
+}
+
+function getLiveToasts(container) {
+    return Array.from(container.querySelectorAll('.toast-msg')).filter(isToastLive);
+}
+
+function flushToastQueue() {
+    const container = typeof document !== 'undefined' ? document.getElementById('toast-container') : null;
+    if (!container) return;
+    while (toastPending.length) {
+        const live = getLiveToasts(container);
+        const closing = container.querySelectorAll('.toast-msg.hide').length;
+        if (live.length + closing >= TOAST_MAX_VISIBLE) return;
+        const next = toastPending.shift();
+        // Transient info (camera, radar...) is useless if it waited too long, skip it.
+        if (next.ephemeral && Date.now() - next.queuedAt > 3000) continue;
+        showToast(next.title, next.message, next.options);
+    }
+}
 
 export function showToast(title, message, options = {}) {
     if (typeof document === 'undefined') return;
@@ -2926,33 +2953,43 @@ export function showToast(title, message, options = {}) {
         variantClass = 'toast-alert';
     }
 
-    // Fast-path: If an active toast with the same title exists (e.g. rapid camera cycling),
-    // update its message in-place with a subtle pulse and refresh timer!
-    const existing = container.querySelector('.toast-msg:not(.hide)');
-    if (existing && existing.dataset.toastTitle === title) {
+    const defaultDuration =
+        iconType === 'trophy' ? 10000 : iconType === 'camera' ? 2000 : iconType === 'alert' ? 5000 : 2500;
+    const duration = options.duration || defaultDuration;
+    const isEphemeral = TOAST_EPHEMERAL_TYPES.has(iconType);
+
+    // Same title already visible (rapid camera cycling, live speed radar): update in place.
+    const live = getLiveToasts(container);
+    const existing = isEphemeral ? live.find((t) => t.dataset.toastTitle === title) : null;
+    if (existing) {
         const textEl = existing.querySelector('.toast-text');
         if (textEl) textEl.textContent = message || '';
         existing.classList.remove('toast-pulse');
-        void existing.offsetWidth; // trigger reflow
+        void existing.offsetWidth;
         existing.classList.add('toast-pulse');
-
-        if (activeToastTimeout) clearTimeout(activeToastTimeout);
-        const duration = options.duration || (iconType === 'camera' ? 2000 : iconType === 'alert' ? 5000 : 2500);
-        activeToastTimeout = setTimeout(() => {
-            if (existing && existing.parentElement) {
-                existing.classList.add('hide');
-                setTimeout(() => existing.remove(), 260);
-            }
-        }, duration);
+        armToastTimer(existing, duration);
         return;
     }
 
-    // Single active toast limit: dismiss older toasts gracefully so the screen stays clean
-    const oldToasts = container.querySelectorAll('.toast-msg:not(.hide)');
-    oldToasts.forEach((t) => {
-        t.classList.add('hide');
-        setTimeout(() => t.remove(), 260);
-    });
+    // Stack limit: make room by dropping the oldest short-lived toast first.
+    const closing = container.querySelectorAll('.toast-msg.hide').length;
+    if (live.length + closing >= TOAST_MAX_VISIBLE) {
+        const victim = live.find((t) => t.dataset.toastEphemeral === '1');
+        if (victim) {
+            dismissToast(victim);
+        } else {
+            // No free slot and nothing disposable: queue it, it shows as soon as a slot frees up.
+            // Same-title entries in the queue are merged so live updates (radar) never flood it.
+            const dup = isEphemeral ? toastPending.find((q) => q.title === title) : null;
+            if (dup) {
+                dup.message = message;
+                dup.options = options;
+            } else if (toastPending.length < 100) {
+                toastPending.push({ title, message, options, queuedAt: Date.now(), ephemeral: isEphemeral });
+            }
+            return;
+        }
+    }
 
     const toastPaths = {
         trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
@@ -2968,11 +3005,12 @@ export function showToast(title, message, options = {}) {
     const toast = document.createElement('div');
     toast.className = `toast-msg ${variantClass}`.trim();
     toast.dataset.toastTitle = title;
+    toast.dataset.toastEphemeral = isEphemeral ? '1' : '0';
     toast.innerHTML = `
         <div class="toast-icon">${iconSvg}</div>
         <div class="toast-body">
             <span class="toast-title">${title}</span>
-            ${message ? `<span class="toast-sep">•</span><span class="toast-text">${message}</span>` : ''}
+            ${message ? `<span class="toast-sep">\u2022</span><span class="toast-text">${message}</span>` : ''}
         </div>
         ${options.actionText ? `<button class="toast-action-btn">${options.actionText}</button>` : ''}
         <button class="toast-close-btn" aria-label="Close">
@@ -2981,14 +3019,10 @@ export function showToast(title, message, options = {}) {
     `;
 
     const closeBtn = toast.querySelector('.toast-close-btn');
-    const dismiss = () => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 260);
-    };
     if (closeBtn) {
         closeBtn.onclick = (e) => {
             e.stopPropagation();
-            dismiss();
+            dismissToast(toast);
         };
     }
 
@@ -2998,21 +3032,13 @@ export function showToast(title, message, options = {}) {
             actionBtn.onclick = (e) => {
                 e.stopPropagation();
                 options.onAction();
-                dismiss();
+                dismissToast(toast);
             };
         }
     }
 
     container.appendChild(toast);
-
-    const defaultDuration =
-        iconType === 'trophy' ? 10000 : iconType === 'camera' ? 2000 : iconType === 'alert' ? 5000 : 2500;
-    const duration = options.duration || defaultDuration;
-
-    if (activeToastTimeout) clearTimeout(activeToastTimeout);
-    activeToastTimeout = setTimeout(() => {
-        if (toast.parentElement) dismiss();
-    }, duration);
+    armToastTimer(toast, duration);
 }
 
 let notificationsInitialized = false;
@@ -3234,13 +3260,50 @@ let currentTutorialStep = 1;
 const TOTAL_TUTORIAL_STEPS = 5;
 const tutKeysDone = new Set();
 let tutAdvanceTimer = null;
+let tutCompleted = false;
+let settingsOpenedAt = 0;
+const settingsTabsViewed = new Set();
 const TUT_TAGS = [
     'WELCOME BRIEFING',
-    'STEP 1/4 • THROTTLE',
-    'STEP 2/4 • STEERING',
-    'STEP 3/4 • DRIFT',
-    'STEP 4/4 • SYSTEMS'
+    'STEP 1/4 \u2022 THROTTLE',
+    'STEP 2/4 \u2022 STEERING',
+    'STEP 3/4 \u2022 DRIFT',
+    'STEP 4/4 \u2022 SYSTEMS'
 ];
+const TUT_ADVANCE_MS = 220;
+const TUT_IDLE_MSG = {
+    kb: [
+        'PRESS [W] OR CLICK START',
+        'WAITING FOR [W] THROTTLE...',
+        'PRESS [A] OR [D]',
+        'WAITING FOR [SPACEBAR]...',
+        'PRESS [C] OR [R] TO FINISH'
+    ],
+    tc: ['TAP START', 'HOLD GAS', 'TAP LEFT OR RIGHT', 'TAP DRIFT', 'TAP CAM OR RESET']
+};
+let tutTouchMode = false;
+
+function detectTutTouchMode() {
+    try {
+        return (
+            typeof window !== 'undefined' &&
+            (window.matchMedia?.('(pointer: coarse)').matches || navigator.maxTouchPoints > 0) &&
+            !window.matchMedia?.('(hover: hover) and (pointer: fine)').matches
+        );
+    } catch {
+        return false;
+    }
+}
+
+function applyTutMode() {
+    tutTouchMode = detectTutTouchMode();
+    const backdrop = document.getElementById('tutorial-modal-backdrop');
+    if (backdrop) backdrop.classList.toggle('tut-touch', tutTouchMode);
+    const attr = tutTouchMode ? 'tc' : 'kb';
+    document.querySelectorAll('#tutorial-modal-backdrop [data-kb]').forEach((el) => {
+        el.innerHTML = el.dataset[attr] || '';
+    });
+}
 
 function setTutProgress(step, pct, msg, done = false) {
     const bar = document.querySelector(`[data-tut-bar="${step}"]`);
@@ -3258,6 +3321,10 @@ export function setTutorialStep(step) {
         tutAdvanceTimer = null;
     }
     currentTutorialStep = Math.max(1, Math.min(TOTAL_TUTORIAL_STEPS, step));
+    const tutBackdrop = document.getElementById('tutorial-modal-backdrop');
+    if (tutBackdrop?.classList.contains('active')) {
+        trackEvent('tutorial_step', { step: currentTutorialStep, touch_mode: tutTouchMode });
+    }
     document.querySelectorAll('.tutorial-slide').forEach((slide) => {
         slide.classList.toggle('active', Number(slide.dataset.step) === currentTutorialStep);
     });
@@ -3291,25 +3358,22 @@ function handleTutorialInput(rawKey) {
         if (haptics) haptics.success();
         tutAdvanceTimer = setTimeout(() => {
             tutAdvanceTimer = null;
-            if (next > TOTAL_TUTORIAL_STEPS) closeTutorialModal();
-            else setTutorialStep(next);
-        }, 520);
+            if (next > TOTAL_TUTORIAL_STEPS) {
+                tutCompleted = true;
+                closeTutorialModal();
+            } else setTutorialStep(next);
+        }, TUT_ADVANCE_MS);
     };
 
     if (currentTutorialStep === 1 && k === 'start') {
-        setTutProgress(1, 100, 'STARTING LIVE TRAINING...', true);
+        setTutProgress(1, 100, "LET'S GO!", true);
         advance(2);
     } else if (currentTutorialStep === 2 && k === 'w') {
         setTutProgress(2, 100, 'THROTTLE ENGAGED!', true);
         advance(3);
     } else if (currentTutorialStep === 3 && (k === 'a' || k === 'd')) {
-        tutKeysDone.add(k);
-        if (tutKeysDone.has('a') && tutKeysDone.has('d')) {
-            setTutProgress(3, 100, 'STEERING CALIBRATED!', true);
-            advance(4);
-        } else {
-            setTutProgress(3, 50, k === 'a' ? 'LEFT OK - NOW PRESS [D]' : 'RIGHT OK - NOW PRESS [A]');
-        }
+        setTutProgress(3, 100, 'STEERING CALIBRATED!', true);
+        advance(4);
     } else if (currentTutorialStep === 4 && k === 'space') {
         playDriftBankSound?.(1);
         setTutProgress(4, 100, 'DRIFT SYSTEM READY!', true);
@@ -3325,12 +3389,12 @@ export function openTutorialModal() {
     const backdrop = document.getElementById('tutorial-modal-backdrop');
     if (backdrop) {
         tutKeysDone.clear();
+        tutCompleted = false;
         document.querySelectorAll('.tut-key-btn').forEach((b) => b.classList?.remove?.('is-done'));
-        setTutProgress(1, 0, 'PRESS [W] OR CLICK START');
-        setTutProgress(2, 0, 'WAITING FOR [W] THROTTLE...');
-        setTutProgress(3, 0, 'PRESS [A] AND [D]');
-        setTutProgress(4, 0, 'WAITING FOR [SPACEBAR]...');
-        setTutProgress(5, 0, 'PRESS [C] OR [R] TO FINISH');
+        applyTutMode();
+        const idle = TUT_IDLE_MSG[tutTouchMode ? 'tc' : 'kb'];
+        idle.forEach((msg, i) => setTutProgress(i + 1, 0, msg));
+        document.querySelectorAll('.tut-task-label').forEach((l) => l.classList.remove('is-done'));
         backdrop.classList.add('active');
         setTutorialStep(1);
         trackEvent('tutorial_opened');
@@ -3344,13 +3408,18 @@ export function closeTutorialModal() {
         tutAdvanceTimer = null;
     }
     const backdrop = document.getElementById('tutorial-modal-backdrop');
-    if (backdrop) {
+    // closeAllPanels calls this on every panel change: ignore it unless the tutorial is actually open
+    if (backdrop && backdrop.classList.contains('active')) {
         backdrop.classList.remove('active');
         const dontShow = document.getElementById('tutorial-dont-show-cb');
         if (!dontShow || dontShow.checked) {
             localStorage.setItem('geo_ride_tutorial_seen', 'true');
         }
-        trackEvent('tutorial_closed');
+        trackEvent('tutorial_closed', { step: currentTutorialStep, completed: tutCompleted });
+        trackEvent(tutCompleted ? 'tutorial_completed' : 'tutorial_skipped', {
+            step: currentTutorialStep,
+            touch_mode: tutTouchMode
+        });
     }
 }
 
@@ -3378,6 +3447,7 @@ export function initTutorialModal() {
     if (nextBtn) {
         nextBtn.onclick = () => {
             if (currentTutorialStep === TOTAL_TUTORIAL_STEPS) {
+                tutCompleted = true;
                 closeTutorialModal();
                 if (haptics) haptics.success();
             } else {

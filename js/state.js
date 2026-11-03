@@ -321,12 +321,35 @@ export function loadState() {
     }
 }
 
+const PRO_SUPERSEDED_KEY = 'geo_ride_pro_superseded';
+
 /**
- * Updates Pro subscription status and persists to localStorage.
- * @param {boolean} active - Pro status flag.
+ * Marks (or clears) this device as demoted because Pro was activated on another device.
+ * While set, background cloud syncs are not allowed to silently re-enable Pro.
+ * @param {boolean} flag
  * @returns {void}
  */
-export function setProStatus(active) {
+export function setProSuperseded(flag) {
+    if (typeof localStorage === 'undefined') return;
+    if (flag) localStorage.setItem(PRO_SUPERSEDED_KEY, '1');
+    else localStorage.removeItem(PRO_SUPERSEDED_KEY);
+}
+
+/**
+ * Updates Pro subscription status and persists to localStorage.
+ * Background cloud syncs pass { fromCloud: true } and cannot re-enable Pro on a superseded device;
+ * only an explicit activation on this device clears the superseded flag.
+ * @param {boolean} active - Pro status flag.
+ * @param {{fromCloud?: boolean}} [opts]
+ * @returns {void}
+ */
+export function setProStatus(active, opts = {}) {
+    if (active) {
+        if (opts.fromCloud && typeof localStorage !== 'undefined' && localStorage.getItem(PRO_SUPERSEDED_KEY)) {
+            return;
+        }
+        if (!opts.fromCloud) setProSuperseded(false);
+    }
     state.isPro = !!active;
     if (typeof localStorage !== 'undefined') {
         localStorage.setItem('geo_ride_pro_active', state.isPro ? 'true' : 'false');

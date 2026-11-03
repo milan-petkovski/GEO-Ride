@@ -4309,117 +4309,196 @@
                     </div>
                 </div>
 
-                <!-- Bubble 1: Welcome to GEO Ride -->
                 <div class="tutorial-slide active" data-step="1">
                     <div class="tut-bubble-row">
+                        <div class="tut-icon" aria-hidden="true">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z" />
+                            </svg>
+                        </div>
                         <div class="tut-bubble-copy">
-                            <h2 id="tutorial-modal-title" class="tutorial-title">Welcome to <span>GEO Ride</span></h2>
-                            <p class="tutorial-lead">
-                                Drive 3D vehicles anywhere on Earth. Ready for a quick live controls check?
-                            </p>
-                            <span class="tut-task-label" data-tut-status="1">PRESS [W] OR CLICK START</span>
+                            <h2
+                                class="tutorial-title"
+                                id="tutorial-modal-title"
+                                data-kb="Welcome to <span>GEO Ride</span>"
+                                data-tc="Welcome to <span>GEO Ride</span>"
+                            ></h2>
+                            <p
+                                class="tutorial-lead"
+                                data-kb="Drive 3D vehicles anywhere on Earth. Quick 15 second controls check?"
+                                data-tc="Drive 3D vehicles anywhere on Earth. Quick 15 second touch controls check?"
+                            ></p>
+                            <span class="tut-task-label" data-tut-status="1"></span>
                         </div>
-                        <div class="tut-bubble-keys">
-                            <button type="button" class="tut-key-btn tut-key-start is-target" data-tut-key="start">
-                                <kbd>START</kbd>
-                                <span class="tut-key-caption">BEGIN</span>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="tut-bubble-keys">
+                        <button type="button" class="tut-key-btn tut-key-start is-target" data-tut-key="start">
+                            <kbd data-kb="START" data-tc="START"></kbd><span class="tut-key-caption">BEGIN</span>
+                        </button>
                     </div>
                     <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="1"></div></div>
                 </div>
-
-                <!-- Bubble 2: Throttle (W) -->
                 <div class="tutorial-slide" data-step="2">
                     <div class="tut-bubble-row">
+                        <div class="tut-icon" aria-hidden="true">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 12l4-3" />
+                                <circle cx="12" cy="12" r="1.5" />
+                            </svg>
+                        </div>
                         <div class="tut-bubble-copy">
-                            <h2 class="tutorial-title">Press <span>W</span> to Accelerate</h2>
-                            <p class="tutorial-lead">
-                                Hold <strong>W</strong> or <strong>Up Arrow</strong> to drive your vehicle forward on
-                                the map.
-                            </p>
-                            <span class="tut-task-label" data-tut-status="2">WAITING FOR [W] THROTTLE...</span>
+                            <h2
+                                class="tutorial-title"
+                                data-kb="Press <span>W</span> to Accelerate"
+                                data-tc="Tap <span>GAS</span> to Accelerate"
+                            ></h2>
+                            <p
+                                class="tutorial-lead"
+                                data-kb="Hold <strong>W</strong> or <strong>Up Arrow</strong> to drive forward."
+                                data-tc="Hold the <strong>GAS</strong> pedal on the right to drive forward."
+                            ></p>
+                            <span class="tut-task-label" data-tut-status="2"></span>
                         </div>
-                        <div class="tut-bubble-keys">
-                            <button type="button" class="tut-key-btn is-target" data-tut-key="w">
-                                <kbd>W</kbd>
-                                <span class="tut-key-caption">GAS</span>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="tut-bubble-keys">
+                        <button type="button" class="tut-key-btn is-target" data-tut-key="w">
+                            <kbd data-kb="W" data-tc="GAS"></kbd><span class="tut-key-caption">GAS</span>
+                        </button>
                     </div>
                     <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="2"></div></div>
                 </div>
-
-                <!-- Bubble 3: Steering (A & D) -->
                 <div class="tutorial-slide" data-step="3">
                     <div class="tut-bubble-row">
+                        <div class="tut-icon" aria-hidden="true">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M3 12h6M15 12h6M12 15v6" />
+                            </svg>
+                        </div>
                         <div class="tut-bubble-copy">
-                            <h2 class="tutorial-title">Steer with <span>A &amp; D</span></h2>
-                            <p class="tutorial-lead">
-                                Press both <strong>A</strong> (left) and <strong>D</strong> (right) while driving to
-                                test steering.
-                            </p>
-                            <span class="tut-task-label" data-tut-status="3">PRESS [A] AND [D]</span>
+                            <h2
+                                class="tutorial-title"
+                                data-kb="Steer with <span>A &amp; D</span>"
+                                data-tc="Steer <span>Left &amp; Right</span>"
+                            ></h2>
+                            <p
+                                class="tutorial-lead"
+                                data-kb="Press <strong>A</strong> (left) or <strong>D</strong> (right) to steer."
+                                data-tc="Tilt your phone or use the on-screen steering to turn."
+                            ></p>
+                            <span class="tut-task-label" data-tut-status="3"></span>
                         </div>
-                        <div class="tut-bubble-keys">
-                            <button type="button" class="tut-key-btn is-target" data-tut-key="a">
-                                <kbd>A</kbd>
-                                <span class="tut-key-caption">LEFT</span>
-                            </button>
-                            <button type="button" class="tut-key-btn is-target" data-tut-key="d">
-                                <kbd>D</kbd>
-                                <span class="tut-key-caption">RIGHT</span>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="tut-bubble-keys">
+                        <button type="button" class="tut-key-btn is-target" data-tut-key="a">
+                            <kbd data-kb="A" data-tc="&larr;"></kbd><span class="tut-key-caption">LEFT</span>
+                        </button>
+                        <button type="button" class="tut-key-btn is-target" data-tut-key="d">
+                            <kbd data-kb="D" data-tc="&rarr;"></kbd><span class="tut-key-caption">RIGHT</span>
+                        </button>
                     </div>
                     <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="3"></div></div>
                 </div>
-
-                <!-- Bubble 4: Handbrake Drift (SPACE) -->
                 <div class="tutorial-slide" data-step="4">
                     <div class="tut-bubble-row">
+                        <div class="tut-icon" aria-hidden="true">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+                                />
+                            </svg>
+                        </div>
                         <div class="tut-bubble-copy">
-                            <h2 class="tutorial-title">Pull <span>SPACE</span> to Drift</h2>
-                            <p class="tutorial-lead">
-                                Tap or hold <strong>SPACEBAR</strong> while turning to slide and build drift combos.
-                            </p>
-                            <span class="tut-task-label" data-tut-status="4">WAITING FOR [SPACEBAR]...</span>
+                            <h2
+                                class="tutorial-title"
+                                data-kb="Pull <span>SPACE</span> to Drift"
+                                data-tc="Hit <span>DRIFT</span> to Slide"
+                            ></h2>
+                            <p
+                                class="tutorial-lead"
+                                data-kb="Hold <strong>SPACEBAR</strong> while turning to slide and build combos."
+                                data-tc="Hold the <strong>DRIFT</strong> pedal while turning to build combos."
+                            ></p>
+                            <span class="tut-task-label" data-tut-status="4"></span>
                         </div>
-                        <div class="tut-bubble-keys">
-                            <button type="button" class="tut-key-btn tut-key-wide is-target" data-tut-key="space">
-                                <kbd>SPACE</kbd>
-                                <span class="tut-key-caption">DRIFT</span>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="tut-bubble-keys">
+                        <button type="button" class="tut-key-btn tut-key-wide is-target" data-tut-key="space">
+                            <kbd data-kb="SPACE" data-tc="DRIFT"></kbd><span class="tut-key-caption">DRIFT</span>
+                        </button>
                     </div>
                     <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="4"></div></div>
                 </div>
-
-                <!-- Bubble 5: Camera & Reset (C / R) -->
                 <div class="tutorial-slide" data-step="5">
                     <div class="tut-bubble-row">
+                        <div class="tut-icon" aria-hidden="true">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"
+                                />
+                                <circle cx="12" cy="13" r="3" />
+                            </svg>
+                        </div>
                         <div class="tut-bubble-copy">
-                            <h2 class="tutorial-title">Camera <span>&amp; Reset</span></h2>
-                            <p class="tutorial-lead">
-                                Press <strong>C</strong> to switch camera view or <strong>R</strong> to reset your car
-                                upright.
-                            </p>
-                            <span class="tut-task-label" data-tut-status="5">PRESS [C] OR [R] TO FINISH</span>
+                            <h2
+                                class="tutorial-title"
+                                data-kb="Camera <span>&amp; Reset</span>"
+                                data-tc="Camera <span>&amp; Reset</span>"
+                            ></h2>
+                            <p
+                                class="tutorial-lead"
+                                data-kb="Press <strong>C</strong> to switch camera or <strong>R</strong> to reset your car."
+                                data-tc="Use <strong>RESET</strong> to flip your car upright anytime."
+                            ></p>
+                            <span class="tut-task-label" data-tut-status="5"></span>
                         </div>
-                        <div class="tut-bubble-keys">
-                            <button type="button" class="tut-key-btn is-target" data-tut-key="c">
-                                <kbd>C</kbd>
-                                <span class="tut-key-caption">CAM</span>
-                            </button>
-                            <button type="button" class="tut-key-btn is-target" data-tut-key="r">
-                                <kbd>R</kbd>
-                                <span class="tut-key-caption">RESET</span>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="tut-bubble-keys">
+                        <button type="button" class="tut-key-btn is-target" data-tut-key="c">
+                            <kbd data-kb="C" data-tc="CAM"></kbd><span class="tut-key-caption">CAM</span>
+                        </button>
+                        <button type="button" class="tut-key-btn is-target" data-tut-key="r">
+                            <kbd data-kb="R" data-tc="RST"></kbd><span class="tut-key-caption">RESET</span>
+                        </button>
                     </div>
                     <div class="tut-progress-track"><div class="tut-progress-fill" data-tut-bar="5"></div></div>
                 </div>
-
                 <input type="checkbox" id="tutorial-dont-show-cb" checked hidden />
             </div>
         </div>

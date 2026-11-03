@@ -1041,6 +1041,14 @@ function initNavigationAndTracking() {
         if (trackTarget) {
             const eventType = trackTarget.getAttribute('data-track');
             if (eventType) {
+                const ctaLocation = trackTarget.getAttribute('data-track-location');
+                if (ctaLocation) {
+                    trackLandingEvent('landing_cta_click', {
+                        cta_location: ctaLocation,
+                        cta_type: eventType,
+                        href: trackTarget.getAttribute('href') || undefined
+                    });
+                }
                 trackLandingEvent(eventType, {
                     cta_location: trackTarget.getAttribute('data-track-location') || undefined,
                     spawn_destination: trackTarget.getAttribute('data-spawn') || undefined,

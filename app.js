@@ -32,19 +32,25 @@ import { setup3DVehicleLayer, setupVehicleMarker, getVehicleMarker, updateSkidMa
 import { updateOtherPlayers } from './js/multiplayer.js';
 import { updatePhysics, updateCamera } from './js/physics.js';
 import { cleanMap, addSkidMarksLayer, setupTerrain } from './js/utils.js';
-import { trackEvent, trackWebVitals, trackAIReferral } from './js/analytics.js';
+import { trackEvent, trackWebVitals, trackAIReferral, trackErrorOnce } from './js/analytics.js';
 import { checkDiscovery } from './js/discovery.js';
 import { updateAudio } from './js/audio.js';
+
+// Once-per-session analytics guards
+let playClickAt = 0;
+let firstDriveTracked = false;
+let playtimeScheduled = false;
+const firedPlaytime = new Set();
 
 // Global Production Error Boundary Handler
 window.addEventListener('error', (event) => {
     console.error('GEO Ride Global Error:', event.error || event.message);
-    trackEvent('app_error', { message: event.message, filename: event.filename, lineno: event.lineno });
+    trackErrorOnce('app_error', ` at ${event.filename}:${event.lineno}`);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
     console.error('GEO Ride Unhandled Promise Rejection:', event.reason);
-    trackEvent('app_unhandled_rejection', { reason: String(event.reason) });
+    trackErrorOnce('app_unhandled_rejection', String(event.reason));
 });
 
 // Initialize Analytics & Performance Monitoring
@@ -266,6 +272,7 @@ function finishLoading() {
         if (overlayEl) overlayEl.style.display = 'none';
         state.lastTime = performance.now();
         state.loopStarted = true;
+        playClickAt = performance.now();
         trackEvent('play_click', {
             vehicle: state.activeVehicle,
             map_style: state.mapStyle,
@@ -290,9 +297,12 @@ function finishLoading() {
             { min: 30, delay: 1800000 },
             { min: 60, delay: 3600000 }
         ];
+        if (playtimeScheduled) return;
+        playtimeScheduled = true;
         PLAYTIME_MILESTONES.forEach(({ min, delay }) => {
             setTimeout(() => {
-                if (state.loopStarted) {
+                if (state.loopStarted && !document.hidden && !firedPlaytime.has(min)) {
+                    firedPlaytime.add(min);
                     trackEvent('playtime_milestone', {
                         minutes: min,
                         vehicle: state.activeVehicle,
@@ -448,6 +458,14 @@ function update(time) {
             state.lastHUDUpdateSpeed = speedVal;
         }
         checkSpeedTrap(speedVal);
+        if (!firstDriveTracked && speedVal >= 3) {
+            firstDriveTracked = true;
+            trackEvent('first_drive', {
+                seconds_since_load: Math.round(performance.now() / 1000),
+                seconds_since_play: playClickAt ? Math.round((performance.now() - playClickAt) / 1000) : undefined,
+                vehicle: state.activeVehicle
+            });
+        }
     }
 
     requestAnimationFrame(update);
