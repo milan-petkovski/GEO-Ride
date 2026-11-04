@@ -1,19 +1,12 @@
+# Release Please disabled
 name: Release Please
 
 on:
-    push:
-        branches:
-            - main
-            - master
-
-permissions:
-    contents: write
-    pull-requests: write
+  workflow_dispatch:
 
 jobs:
-    release-please:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: googleapis/release-please-action@v5
-              with:
-                  release-type: node
+  disabled:
+    runs-on: ubuntu-latest
+    if: false
+    steps:
+      - run: echo "Release Please is disabled"
