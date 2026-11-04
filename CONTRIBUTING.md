@@ -181,3 +181,19 @@ Before opening a pull request, ensure that:
 - [ ] No inline emojis have been introduced.
 - [ ] Appropriate tests have been added or updated for any new functionality.
 - [ ] Relevant documentation or `CHANGELOG.md` notes have been included.
+
+---
+
+## ☕ The Story & Support
+
+If you enjoy driving across the globe in GEO Ride and want to support my late-night coding sessions, you can buy me a coffee!
+
+💖 [Support my work via PayPal](https://paypal.me/milanwebportal) &bull; [Support on Ko-fi](https://ko-fi.com/georide)
+
+---
+
+_Thank you for maintaining and elevating the GEO Ride simulator!_
+
+---
+
+<p align="center">Made with ❤️ by <b>Milan Web Portal</b></p>

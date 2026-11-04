@@ -14,9 +14,6 @@
   </p>
 
   <p>
-    <a href="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml">
-      <img src="https://github.com/milan-petkovski/GEO-Ride/actions/workflows/ci.yml/badge.svg?style=flat-square" alt="CI Status" />
-    </a>
     <a href="https://playgeoride.com">
       <img src="https://img.shields.io/badge/Website-playgeoride.com-00f2ff?style=flat-square" alt="Website" />
     </a>
@@ -256,7 +253,7 @@ Hi! I am Milan, a 20-year-old web developer and student from Serbia. I built **G
 
 If you enjoy driving across the globe in GEO Ride and want to support my late-night coding sessions, you can buy me a coffee!
 
-💖 [Support my work via Ko-fi](https://ko-fi.com/georide)
+💖 [Support my work via PayPal](https://paypal.me/milanwebportal) &bull; [Support on Ko-fi](https://ko-fi.com/georide)
 
 Every donation means a lot and directly supports Mapbox API quota, high-speed tile CDN costs, and continuous physics updates. Thank you!
 
@@ -269,7 +266,7 @@ Created by **Milan Petkovski** &bull; Web Developer from Serbia.
 - **Play GEO Ride**: [playgeoride.com](https://playgeoride.com)
 - **Portfolio & Projects**: [milanwebportal.com](https://milanwebportal.com)
 - **Contact**: [contact@milanwebportal.com](mailto:contact@milanwebportal.com)
-- **Support the Project**: [Support via Ko-fi](https://ko-fi.com/georide)
+- **Support**: 💖 [Support via PayPal](https://paypal.me/milanwebportal) &bull; [Support via Ko-fi](https://ko-fi.com/georide)
 
 _GEO Ride is 100% free and open-source under the MIT License._
 

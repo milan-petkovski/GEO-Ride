@@ -37,5 +37,8 @@
     },
     "dependencies": {
         "ws": "^8.22.1"
+    },
+    "overrides": {
+        "compression": "^1.8.2"
     }
 }
