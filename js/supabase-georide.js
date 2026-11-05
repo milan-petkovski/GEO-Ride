@@ -30,15 +30,29 @@ export function isBackendConfigured() {
  * @param {Object} body - JSON arguments.
  * @returns {Promise<any>}
  */
-export async function georideRpc(fn, body) {
+export async function georideRpc(fn, body, { retries = 1 } = {}) {
     if (!isBackendConfigured()) throw new Error('backend_not_configured');
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify(body)
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+                method: 'POST',
+                headers: HEADERS,
+                body: JSON.stringify(body)
+            });
+            if (res.ok) return await res.json();
+            if (attempt < retries && (res.status === 502 || res.status === 503 || res.status === 504)) {
+                await new Promise((r) => setTimeout(r, 600));
+                continue;
+            }
+            throw new Error(`HTTP ${res.status}`);
+        } catch (err) {
+            if (attempt < retries && err.name !== 'AbortError') {
+                await new Promise((r) => setTimeout(r, 600));
+                continue;
+            }
+            throw err;
+        }
+    }
 }
 
 /**
