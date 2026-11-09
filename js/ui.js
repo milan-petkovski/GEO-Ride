@@ -1648,12 +1648,17 @@ export function initUI(map) {
     }
 
     document.getElementById('pro-modal-monthly-btn')?.addEventListener('click', () => {
-        trackEvent('pro_checkout_click', { plan: 'monthly', price: 4.99 });
+        trackEvent('pro_checkout_click', { plan: 'monthly', price: 2.99 });
         if (haptics) haptics.success();
     });
 
     document.getElementById('pro-modal-yearly-btn')?.addEventListener('click', () => {
-        trackEvent('pro_checkout_click', { plan: 'yearly', price: 2.99 });
+        trackEvent('pro_checkout_click', { plan: 'yearly', price: 1.24 });
+        if (haptics) haptics.success();
+    });
+
+    document.getElementById('pro-modal-lifetime-btn')?.addEventListener('click', () => {
+        trackEvent('pro_checkout_click', { plan: 'lifetime', price: 29.99 });
         if (haptics) haptics.success();
     });
 
@@ -2566,10 +2571,10 @@ function renderProSubscriptionPanel(info) {
     const planName =
         (info && info.plan_name) || (isLifetime ? 'Lifetime Founder' : isYearly ? 'Pro Annual' : 'Pro Monthly');
     const billingCycle = isLifetime
-        ? 'One-time payment ($49.99) • No recurring charges'
+        ? 'One-time payment ($29.99) • No recurring charges'
         : isYearly
-          ? '$35.88 / year ($2.99/mo)'
-          : '$4.99 / month';
+          ? '$14.88 / year ($1.24/mo)'
+          : '$2.99 / month';
     const startedLabel = info && info.started_at ? formatProSubDate(info.started_at) : 'Active';
     const renewalTitle = isLifetime ? 'Access Duration' : isCancelling ? 'Access Expires On' : 'Next Renewal / Expires';
     const renewalValue = isLifetime
@@ -2832,9 +2837,18 @@ export function openProModal() {
                 if (yearlyBtn && yearlyPlan) {
                     if (yearlyPlan.checkout_url) yearlyBtn.href = yearlyPlan.checkout_url;
                     const priceEl = yearlyBtn.querySelector('.pro-plan-price');
+                    const noteEl = yearlyBtn.querySelector('.pro-plan-note');
+                    const strikeEl = yearlyBtn.querySelector('.price-strikethrough');
                     const yearlyPrice = Number(yearlyPlan.price ?? yearlyPlan.price_usd);
+                    const monthlyPrice = Number(monthlyPlan?.price ?? monthlyPlan?.price_usd);
                     if (priceEl && Number.isFinite(yearlyPrice) && yearlyPrice > 0) {
                         priceEl.innerHTML = `$${yearlyPrice.toFixed(2)} <span class="pro-plan-period">/ mo</span>`;
+                        if (noteEl) {
+                            noteEl.textContent = `$${(yearlyPrice * 12).toFixed(2)} billed yearly ($${yearlyPrice.toFixed(2)}/mo)`;
+                        }
+                    }
+                    if (strikeEl && Number.isFinite(monthlyPrice) && monthlyPrice > 0) {
+                        strikeEl.textContent = `$${monthlyPrice.toFixed(2)}`;
                     }
                 }
 

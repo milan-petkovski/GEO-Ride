@@ -847,9 +847,9 @@ function initPricing() {
         'https://pay.milanwebportal.com/checkout-element/72637706-37bf-49bc-912e-bc87b2a84542?fngs-hosted=1';
     let urlMonthly =
         'https://pay.milanwebportal.com/checkout-element/abd3b8dc-f5b2-47ef-ab39-ff56ddc5b594?fngs-hosted=1';
-    let priceAnnual = 2.99;
-    let priceMonthly = 4.99;
-    let priceLifetime = 49.99;
+    let priceAnnual = 1.24;
+    let priceMonthly = 2.99;
+    let priceLifetime = 29.99;
 
     let isAnnual = true;
 
