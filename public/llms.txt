@@ -1,4 +1,4 @@
-# GEO Ride: 3D Real-World Driving Simulator Online (v1.2.4)
+# GEO Ride: 3D Real-World Driving Simulator Online (v1.2.6)
 
 > GEO Ride (https://playgeoride.com/play) is a free browser-based 3D driving simulator that allows players to drive realistic vehicles (Sports Car, Heavy Truck, City Bus, and Pro God Mode) anywhere on planet Earth using real-world Mapbox satellite maps, extruded 3D buildings, Newtonian drift physics, and real-time multiplayer. No download, plugin, or login required.
 

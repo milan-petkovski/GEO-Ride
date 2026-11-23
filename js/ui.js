@@ -2586,7 +2586,7 @@ function renderProSubscriptionPanel(info) {
         ? 'Not needed (Lifetime unlocked)'
         : isCancelling
           ? `Cancelled on ${formatProSubDate(info.cancelled_at)} (Active until period end)`
-          : 'Enabled (Auto-renews via Fungies.io)';
+          : 'Active Pass (Managed via Ko-fi)';
     const statusPillText = isLifetime
         ? 'LIFETIME ACTIVE'
         : isCancelling
@@ -2632,12 +2632,12 @@ function renderProSubscriptionPanel(info) {
         </div>
         <div class="pro-sub-manage">
             <div class="pro-sub-manage-text">
-                <strong>How to manage or cancel your subscription:</strong>
-                <span>Open the Fungies Customer Portal using the button below (sign in with <em>${savedEmail}</em> via magic link) or click the <em>Manage Subscription</em> link in your Fungies email receipt. You can also contact <a href="mailto:contact@milanwebportal.com">contact@milanwebportal.com</a> anytime.</span>
+                <strong>How to manage or renew your Pro pass:</strong>
+                <span>Manage your orders or memberships directly on Ko-fi (signed in with <em>${savedEmail}</em>) or extend your pass anytime from our Ko-fi Shop. You can also contact <a href="mailto:contact@milanwebportal.com">contact@milanwebportal.com</a> anytime.</span>
             </div>
             <div class="pro-sub-actions">
-                <a href="https://pay.milanwebportal.com/portal" target="_blank" rel="noopener noreferrer" class="pro-sub-portal-btn">
-                    Manage / Cancel on Fungies
+                <a href="https://ko-fi.com/georide/shop" target="_blank" rel="noopener noreferrer" class="pro-sub-portal-btn">
+                    Open GEO Ride on Ko-fi
                 </a>
                 <a href="/refund" target="_blank" rel="noopener noreferrer" class="pro-sub-link-btn">
                     Refund &amp; Cancellation Policy

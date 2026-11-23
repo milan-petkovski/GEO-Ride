@@ -843,10 +843,8 @@ function initPricing() {
     const periodEl = document.getElementById('pro-period');
     const checkoutBtn = document.getElementById('pro-checkout-btn');
 
-    let urlAnnual =
-        'https://pay.milanwebportal.com/checkout-element/72637706-37bf-49bc-912e-bc87b2a84542?fngs-hosted=1';
-    let urlMonthly =
-        'https://pay.milanwebportal.com/checkout-element/abd3b8dc-f5b2-47ef-ab39-ff56ddc5b594?fngs-hosted=1';
+    let urlAnnual = 'https://ko-fi.com/s/8c0b7d249a';
+    let urlMonthly = 'https://ko-fi.com/s/0cbca3ba0c';
     let priceAnnual = 1.24;
     let priceMonthly = 2.99;
     let priceLifetime = 29.99;
